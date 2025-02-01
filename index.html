@@ -143,19 +143,19 @@ function createGame() {
            // ✅ Update remaining time dynamically
     document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft || "N/A";
 
-    // ✅ First, hide the judge panel by default for all players
-    document.getElementById("judgePanel").classList.add("hidden");
+    // ✅ First, hide the thinker panel by default for all players
+    document.getElementById("thinkerPanel").classList.add("hidden");
 
     // ✅ Show content depending on the player's role
-    if (gameData.roles[playerName] === "Correct Definition") {
+    if (gameData.roles[playerName] === "REALUPPER") {
         document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
         document.getElementById("correctDefinitionBox").classList.remove("hidden");
-    } else if (gameData.roles[playerName] === "Fake Definition") {
+    } else if (gameData.roles[playerName] === "9UPPER") {
         document.getElementById("definitionInputBox").classList.remove("hidden");
     }
 
-    // ✅ Now ensure only the Judge sees the judge panel
-    displayJudgeOptions(gameData);
+    // ✅ Now ensure only the thinker sees the thinker panel
+    displaythinkerOptions(gameData);
 }
 
     });
@@ -179,26 +179,26 @@ function startCountdown(timeLeft) {
 }
 
         
-function displayJudgeOptions(gameData) {
-    var judge = Object.keys(gameData.players).find(p => gameData.roles[p] === "Judge");
+function displaythinkerOptions(gameData) {
+    var thinker = Object.keys(gameData.players).find(p => gameData.roles[p] === "thinker");
     var playerRole = gameData.roles[playerName];
 
-    if (playerRole === "Judge") {
-        // ✅ Show judge panel only if the player is the judge
-        document.getElementById("judgePanel").classList.remove("hidden");
+    if (playerRole === "thinker") {
+        // ✅ Show thinker panel only if the player is the thinker
+        document.getElementById("thinkerPanel").classList.remove("hidden");
 
-        var selectablePlayers = Object.keys(gameData.players).filter(p => p !== judge);
+        var selectablePlayers = Object.keys(gameData.players).filter(p => p !== thinker);
 
         var buttonsHTML = selectablePlayers.map(player =>
-            `<button onclick="judgeSelectPlayer('${player}')">${player}</button>`
+            `<button onclick="thinkerSelectPlayer('${player}')">${player}</button>`
         ).join(" ");
 
-        document.getElementById("judgeOptions").innerHTML = buttonsHTML;
+        document.getElementById("thinkerOptions").innerHTML = buttonsHTML;
     } 
-    else if (playerRole === "Correct Definition" || playerRole === "Fake Definition") {
-        // ✅ Explicitly hide panel for Correct Definition & Fake Definition players
-        document.getElementById("judgePanel").classList.add("hidden");
-        document.getElementById("judgeOptions").innerHTML = ""; // Clear buttons
+    else if (playerRole === "REALUPPER" || playerRole === "9UPPER") {
+        // ✅ Explicitly hide panel for REALUPPER & 9UPPER players
+        document.getElementById("thinkerPanel").classList.add("hidden");
+        document.getElementById("thinkerOptions").innerHTML = ""; // Clear buttons
     }
 }
 
@@ -208,9 +208,9 @@ function displayJudgeOptions(gameData) {
 
 
 
-// ✅ Judge selects a player
+// ✅ thinker selects a player
 
-function judgeSelectPlayer(selectedPlayer) {
+function thinkerSelectPlayer(selectedPlayer) {
     // Stop the timer immediately
     clearInterval(roundTimer);
 
@@ -219,7 +219,7 @@ function judgeSelectPlayer(selectedPlayer) {
         timeLeft: 0
     });
 
-    alert(`Judge selected ${selectedPlayer} as the correct definition!`);
+    alert(`thinker selected ${selectedPlayer} as the REALUPPER!`);
 
     // Fetch current round number
     db.ref("games/" + gameCode + "/currentRound").once("value", snapshot => {
@@ -271,13 +271,13 @@ function startGame() {
                         return;
                     }
 
-                    var judge = players[Math.floor(Math.random() * players.length)];
-                    var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
+                    var thinker = players[Math.floor(Math.random() * players.length)];
+                    var correctPlayer = players.filter(p => p !== thinker)[Math.floor(Math.random() * (players.length - 1))];
 
                     var roles = {};
-                    players.forEach(p => roles[p] = "Fake Definition");
-                    roles[judge] = "Judge";
-                    roles[correctPlayer] = "Correct Definition";
+                    players.forEach(p => roles[p] = "9UPPER");
+                    roles[thinker] = "thinker";
+                    roles[correctPlayer] = "REALUPPER";
 
                     var randomIndex = Math.floor(Math.random() * terms.length);
                     var randomTerm = terms[randomIndex].term;
@@ -306,13 +306,13 @@ function startNewRound(terms, round, totalRounds, roundTime) {
         var players = Object.keys(snapshot.val());
         if (players.length < 3) return;
 
-        var judge = players[Math.floor(Math.random() * players.length)];
-        var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
+        var thinker = players[Math.floor(Math.random() * players.length)];
+        var correctPlayer = players.filter(p => p !== thinker)[Math.floor(Math.random() * (players.length - 1))];
 
         var roles = {};
-        players.forEach(p => roles[p] = "Fake Definition");
-        roles[judge] = "Judge";
-        roles[correctPlayer] = "Correct Definition";
+        players.forEach(p => roles[p] = "9UPPER");
+        roles[thinker] = "thinker";
+        roles[correctPlayer] = "REALUPPER";
 
         var randomIndex = Math.floor(Math.random() * terms.length);
         var randomTerm = terms[randomIndex].term;
@@ -346,7 +346,7 @@ function startRoundTimer(roundTime, round, totalRounds) {
 
             var timeLeft = gameData.timeLeft;
 
-            if (timeLeft <= 0 || gameData.winner) {  // ✅ Stop if time runs out OR if judge picked a player
+            if (timeLeft <= 0 || gameData.winner) {  // ✅ Stop if time runs out OR if thinker picked a player
                 clearInterval(roundTimer);
                 endRound(round, totalRounds);
             } else {
@@ -436,17 +436,17 @@ function updateTime() {
 
 <div id="gameScreen" class="hidden">
     <h3>Round <span id="currentRoundDisplay"></span> / <span id="totalRoundsDisplay"></span></h3>
-    <h3>Time Remaining: <span id="timeLeftDisplay">--</span> seconds</h3>
+    <h3>Time Remaining: <span id="timeLeftDisplay">--</span></h3>
     <h3>Term: <span id="gameTerm"></span></h3>
     <h3>Your Role: <span id="playerRole"></span></h3>
 
     <div id="correctDefinitionBox" class="hidden">
-        <h3>Correct Definition: <span id="correctDefinition"></span></h3>
+        <h3>REALUPPER: <span id="correctDefinition"></span></h3>
     </div>
 
-    <div id="judgePanel" class="hidden">
-        <h3>Judge: Pick the correct player</h3>
-        <div id="judgeOptions"></div>
+    <div id="thinkerPanel" class="hidden">
+        <h3>thinker: Pick the correct player</h3>
+        <div id="thinkerOptions"></div>
     </div>
 </div>
 
