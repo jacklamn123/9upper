@@ -151,25 +151,25 @@ function createGame() {
 }
 
 function displayJudgeOptions(gameData) {
-    var players = Object.keys(gameData.players);
-    var judge = players.find(p => gameData.roles[p] === "Judge");
+    var judge = Object.keys(gameData.players).find(p => gameData.roles[p] === "Judge");
 
-    // ✅ Explicitly check if the player is NOT the Judge
-    if (gameData.roles[playerName] !== "Judge") {
-        document.getElementById("judgePanel").classList.add("hidden"); // Hide for non-Judges
-        return;
+    if (playerName === judge) {
+        // ✅ If the player is the Judge, show the panel
+        document.getElementById("judgePanel").classList.remove("hidden");
+
+        var selectablePlayers = Object.keys(gameData.players).filter(p => p !== judge);
+
+        var buttonsHTML = selectablePlayers.map(player =>
+            `<button onclick="judgeSelectPlayer('${player}')">${player}</button>`
+        ).join(" ");
+
+        document.getElementById("judgeOptions").innerHTML = buttonsHTML;
+    } else {
+        // ✅ Ensure it's hidden for everyone else
+        document.getElementById("judgePanel").classList.add("hidden");
     }
-
-    // ✅ If the player is the Judge, display the panel
-    var selectablePlayers = players.filter(p => p !== judge);
-
-    var buttonsHTML = selectablePlayers.map(player =>
-        `<button onclick="judgeSelectPlayer('${player}')">${player}</button>`
-    ).join(" ");
-
-    document.getElementById("judgeOptions").innerHTML = buttonsHTML;
-    document.getElementById("judgePanel").classList.remove("hidden"); // ✅ Show only for Judge
 }
+
 
 
 
