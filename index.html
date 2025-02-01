@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>9upper Online</title>
 
-    <!-- ✅ Use Firebase CDN Scripts (DO NOT USE 'import' Statements) -->
+    <!-- ✅ Correct Firebase CDN Scripts (No import statements) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
@@ -53,11 +53,7 @@
 
     <!-- ✅ Ensure Firebase is Initialized Before Using It -->
     <script>
-        let gameCode = ""; 
-        let playerName = "Player" + Math.floor(Math.random() * 1000);
-        const terms = ["Gobbledegook", "Zzyzx", "Faff", "Dullsville", "Nowheresville", "Flibbertigibbet", "Peculiar Knob", "Curmudgeon", "Why, Arizona", "Chinwag", "Bumfuzzle", "Snollygoster", "Wagga Wagga", "Lollygag", "Llanfairpwllgwyngyll", "Discombobulate", "Bonkers", "Taradiddle", "Absquatulate", "Gadzooks"];
-
-        // ✅ Correct Firebase Configuration
+        // ✅ Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBlPPLZl8380-xEpyVX3z8ya9eRji2H-uk",
             authDomain: "upper-2c864.firebaseapp.com",
@@ -69,9 +65,13 @@
             measurementId: "G-F348XKS47Q"
         };
 
-        // ✅ Ensure Firebase is initialized before usage
+        // ✅ Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();  // ✅ Firebase Now Defined
+
+        let gameCode = ""; 
+        let playerName = "Player" + Math.floor(Math.random() * 1000);
+        const terms = ["Gobbledegook", "Zzyzx", "Faff", "Dullsville", "Nowheresville", "Flibbertigibbet", "Peculiar Knob", "Curmudgeon", "Why, Arizona", "Chinwag", "Bumfuzzle", "Snollygoster", "Wagga Wagga", "Lollygag", "Llanfairpwllgwyngyll", "Discombobulate", "Bonkers", "Taradiddle", "Absquatulate", "Gadzooks"];
 
         function createGame() {
             gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
