@@ -137,6 +137,9 @@ function createGame() {
     document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
     document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
+           // ✅ Update remaining time dynamically
+    document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft || "N/A";
+
     // ✅ First, hide the judge panel by default for all players
     document.getElementById("judgePanel").classList.add("hidden");
 
@@ -412,6 +415,7 @@ function updateTime() {
 
 <div id="gameScreen" class="hidden">
     <h3>Round <span id="currentRoundDisplay"></span> / <span id="totalRoundsDisplay"></span></h3>
+    <h3>Time Remaining: <span id="timeLeftDisplay">--</span> seconds</h3>
     <h3>Term: <span id="gameTerm"></span></h3>
     <h3>Your Role: <span id="playerRole"></span></h3>
 
@@ -424,6 +428,7 @@ function updateTime() {
         <div id="judgeOptions"></div>
     </div>
 </div>
+
 
 
 
