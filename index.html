@@ -146,6 +146,8 @@ function createGame() {
                 document.getElementById("judgePanel").classList.remove("hidden");
                 displayJudgeOptions(gameData);
             }
+             // ✅ Ensure judge panel updates dynamically
+    displayJudgeOptions(gameData);
         }
     });
 }
@@ -153,8 +155,8 @@ function createGame() {
 function displayJudgeOptions(gameData) {
     var judge = Object.keys(gameData.players).find(p => gameData.roles[p] === "Judge");
 
-    if (playerName === judge) {
-        // ✅ If the player is the Judge, show the panel
+    if (gameData.roles[playerName] === "Judge") {
+        // ✅ Show judge panel only if the player is the judge
         document.getElementById("judgePanel").classList.remove("hidden");
 
         var selectablePlayers = Object.keys(gameData.players).filter(p => p !== judge);
@@ -165,10 +167,12 @@ function displayJudgeOptions(gameData) {
 
         document.getElementById("judgeOptions").innerHTML = buttonsHTML;
     } else {
-        // ✅ Ensure it's hidden for everyone else
+        // ✅ Hide for everyone else, ensuring it's re-hidden if role changes
         document.getElementById("judgePanel").classList.add("hidden");
+        document.getElementById("judgeOptions").innerHTML = ""; // Clear buttons
     }
 }
+
 
 
 
