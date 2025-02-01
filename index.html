@@ -155,36 +155,32 @@
             });
         }
 
-        function listenForUpdates() {
-            db.ref("games/" + gameCode).on("value", function(snapshot) {
-                var gameData = snapshot.val();
-                if (!gameData) return;
-
-                if (gameData.players) {
-                    var playerList = Object.keys(gameData.players).map(name => `<li>${name}</li>`).join("");
-                    document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
-
-                    if (gameData.host === playerName) {
-                        document.getElementById("startGameButton").classList.remove("hidden");
-                    }
+        function startGame() {
+            db.ref("games/" + gameCode + "/players").once("value", function(snapshot) {
+                var players = Object.keys(snapshot.val());
+                if (players.length < 3) {
+                    alert("At least 3 players are needed to start the game!");
+                    return;
                 }
 
-                if (gameData.status === "playing") {
-                    document.getElementById("waitingRoom").classList.add("hidden");
-                    document.getElementById("gameContent").classList.remove("hidden");
-                    document.getElementById("roundInfo").innerText = "Round " + gameData.round;
-                    document.getElementById("termDisplay").innerHTML = `<h3>Term: ${gameData.term}</h3>`;
-                    document.getElementById("playerRole").innerText = gameData.roles[playerName];
+                // ✅ Randomly assign roles
+                var judge = players[Math.floor(Math.random() * players.length)];
+                var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
 
-                    if (gameData.roles[playerName] === "Judge") {
-                        document.getElementById("judgeDecision").classList.remove("hidden");
-                    } else if (gameData.roles[playerName] === "Fake Definition") {
-                        document.getElementById("definitionForm").classList.remove("hidden");
-                    } else if (gameData.roles[playerName] === "Correct Definition") {
-                        document.getElementById("correctDefinition").classList.remove("hidden");
-                        document.getElementById("realDefinitionText").innerText = gameData.correctDefinition;
-                    }
-                }
+                var roles = {};
+                players.forEach(p => roles[p] = "Fake Definition");
+                roles[judge] = "Judge";
+                roles[correctPlayer] = "Correct Definition";
+
+                var randomTerm = termKeys[Math.floor(Math.random() * termKeys.length)];
+                var correctDefinition = terms[randomTerm];
+
+                db.ref("games/" + gameCode).update({
+                    status: "playing",
+                    term: randomTerm,
+                    correctDefinition: correctDefinition,
+                    roles: roles
+                });
             });
         }
     </script>
