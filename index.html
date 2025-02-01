@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>9upper Online</title>
 
-    <!-- ✅ Use Only Firebase CDN Scripts -->
+    <!-- ✅ Use Only Firebase CDN Scripts (NO import statements) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
@@ -31,7 +31,7 @@
     
     <div id="setupArea">
         <button onclick="createGame()">Create Game</button>
-        <input type="text" id="gameCode" placeholder="Enter Game Code">
+        <input type="text" id="gameCodeInput" placeholder="Enter Game Code">
         <button onclick="joinGame()">Join Game</button>
     </div>
     
@@ -90,7 +90,7 @@
         }
 
         function joinGame() {
-            gameCode = document.getElementById("gameCode").value.toUpperCase();
+            gameCode = document.getElementById("gameCodeInput").value.toUpperCase();
             if (!gameCode) {
                 alert("Please enter a valid game code!");
                 return;
