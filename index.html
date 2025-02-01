@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -98,53 +99,38 @@
         var gameData = snapshot.val();
         if (!gameData) return;
 
-        // ✅ Update player list
         if (gameData.players) {
             var playerList = Object.keys(gameData.players)
                 .map(name => `<li>${name}</li>`).join("");
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
 
-            // ✅ Show settings only if the player is the host
             if (gameData.host === playerName) {
-                document.getElementById("gameSettings").classList.remove("hidden");
                 document.getElementById("startGameButton").classList.remove("hidden");
             }
         }
 
-        // ✅ Update chat messages
         if (gameData.chat) {
             var messages = Object.values(gameData.chat)
                 .map(msg => `<p>${msg}</p>`).join("");
             document.getElementById("chatMessages").innerHTML = messages;
         }
 
-        // ✅ If game is in progress
         if (gameData.status === "playing") {
             document.getElementById("waitingRoom").classList.add("hidden");
             document.getElementById("gameScreen").classList.remove("hidden");
 
-            // ✅ Display current round & total rounds
-            document.getElementById("currentRound").innerText = gameData.currentRound;
-            document.getElementById("totalRounds").innerText = gameData.totalRounds;
-
-            // ✅ Display round timer countdown
-            document.getElementById("roundTimer").innerText = gameData.timeLeft + "s";
-
-            // ✅ Display term & role
             document.getElementById("gameTerm").innerText = gameData.term;
             document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
-            // ✅ Show correct definition (if applicable)
             if (gameData.roles[playerName] === "Correct Definition") {
                 document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
                 document.getElementById("correctDefinitionBox").classList.remove("hidden");
             } 
-            // ✅ Show fake definition input (if applicable)
             else if (gameData.roles[playerName] === "Fake Definition") {
                 document.getElementById("definitionInputBox").classList.remove("hidden");
             }
 
-            // ✅ If Player is Judge, Show the Panel
+            // ✅ NEW: If Player is Judge, Show the Panel
             if (gameData.roles[playerName] === "Judge") {
                 document.getElementById("judgePanel").classList.remove("hidden");
                 displayJudgeOptions(gameData);
@@ -243,21 +229,6 @@ function judgeSelectPlayer(selectedPlayer) {
         <div id="waitingRoom">
             <h2>Players in Room</h2>
             <div id="playerList"></div>
-            <!-- Game Settings for Host -->
-<div id="gameSettings" class="hidden">
-    <h3>Game Settings (Only Host Can Set)</h3>
-    
-    <label>Number of Rounds: <span id="roundsDisplay">5</span></label>
-    <input type="range" id="roundsSlider" min="5" max="20" value="5" step="5" 
-           oninput="document.getElementById('roundsDisplay').innerText = this.value">
-    
-    <br><br>
-    
-    <label>Time Per Round (mins): <span id="timeDisplay">1</span></label>
-    <input type="range" id="timeSlider" min="1" max="10" value="1" step="1" 
-           oninput="document.getElementById('timeDisplay').innerText = this.value">
-</div>
-
             <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
         </div>
 
