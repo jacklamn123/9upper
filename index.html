@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>9upper Online</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin: 20px;
         }
-        #gameArea {
+        .hidden {
             display: none;
         }
         .definition-box {
@@ -20,27 +21,25 @@
             cursor: pointer;
             background-color: #f0f0f0;
         }
-        .hidden {
-            display: none;
-        }
     </style>
 </head>
 <body>
-    <h1>9upper Online</h1>
+    <h1>9upper Online Multiplayer</h1>
+    
     <div id="setupArea">
-        <label>Enter number of players:</label>
-        <input type="number" id="playerCount" min="3" max="10" value="3">
-        <button onclick="startGame()">Start Game</button>
+        <button onclick="createGame()">Create Game</button>
+        <input type="text" id="gameCode" placeholder="Enter Game Code">
+        <button onclick="joinGame()">Join Game</button>
     </div>
-
-    <div id="gameArea">
-        <h2 id="roundInfo"></h2>
+    
+    <div id="gameArea" class="hidden">
+        <h2>Game Code: <span id="gameCodeDisplay"></span></h2>
+        <h3 id="roundInfo"></h3>
         <div id="termDisplay"></div>
         <div id="definitionForm" class="hidden">
             <textarea id="playerDefinition" placeholder="Enter your definition..."></textarea>
             <button onclick="submitDefinition()">Submit</button>
         </div>
-        <div id="definitionChoices" class="hidden"></div>
         <div id="judgeDecision" class="hidden">
             <h3>Pick the correct definition:</h3>
             <div id="judgeOptions"></div>
@@ -48,83 +47,84 @@
         <div id="results" class="hidden"></div>
         <button id="nextRound" class="hidden" onclick="nextRound()">Next Round</button>
     </div>
-
+    
     <script>
-        let terms = [];
-        let currentTerm = {};
-        let players = [];
-        let judgeIndex = 0;
-        let genuineIndex = 0;
-        let definitions = [];
-        let submittedDefinitions = [];
-        let round = 0;
-
-        async function startGame() {
-            const response = await fetch("9upper_terms.json");
-            terms = await response.json();
-
-            const playerCount = parseInt(document.getElementById("playerCount").value);
-            if (playerCount < 3) {
-                alert("At least 3 players required.");
-                return;
-            }
-
-            players = Array.from({length: playerCount}, (_, i) => `Player ${i+1}`);
-            document.getElementById("setupArea").style.display = "none";
-            document.getElementById("gameArea").style.display = "block";
-            
-            nextRound();
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        
+        let gameCode = "";
+        let playerName = "Player" + Math.floor(Math.random() * 1000);
+        const terms = ["Gobbledegook", "Zzyzx", "Faff", "Dullsville", "Nowheresville", "Flibbertigibbet", "Peculiar Knob", "Curmudgeon", "Why, Arizona", "Chinwag", "Bumfuzzle", "Snollygoster", "Wagga Wagga", "Lollygag", "Llanfairpwllgwyngyll", "Discombobulate", "Bonkers", "Taradiddle", "Absquatulate", "Gadzooks"];
+        
+        function createGame() {
+            gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+            const randomTerm = terms[Math.floor(Math.random() * terms.length)];
+            db.ref("games/" + gameCode).set({
+                round: 1,
+                term: randomTerm,
+                definitions: {},
+                judge: "",
+                status: "waiting"
+            });
+            document.getElementById("gameCodeDisplay").innerText = gameCode;
+            document.getElementById("setupArea").classList.add("hidden");
+            document.getElementById("gameArea").classList.remove("hidden");
         }
-
-        function nextRound() {
-            round++;
-            definitions = [];
-            submittedDefinitions = [];
-            document.getElementById("definitionChoices").innerHTML = "";
-            document.getElementById("judgeOptions").innerHTML = "";
-            document.getElementById("results").innerHTML = "";
-            
-            currentTerm = terms[Math.floor(Math.random() * terms.length)];
-            judgeIndex = round % players.length;
-            genuineIndex = (judgeIndex + 1) % players.length;
-
-            document.getElementById("roundInfo").innerText = `Round ${round} - ${players[judgeIndex]} is the Judge`;
-            document.getElementById("termDisplay").innerHTML = `<h3>Term: ${currentTerm.term}</h3>`;
-            document.getElementById("definitionForm").classList.remove("hidden");
+        
+        function joinGame() {
+            gameCode = document.getElementById("gameCode").value.toUpperCase();
+            db.ref("games/" + gameCode).get().then(snapshot => {
+                if (snapshot.exists()) {
+                    document.getElementById("gameCodeDisplay").innerText = gameCode;
+                    document.getElementById("setupArea").classList.add("hidden");
+                    document.getElementById("gameArea").classList.remove("hidden");
+                    listenForUpdates();
+                } else {
+                    alert("Game not found!");
+                }
+            });
         }
-
+        
         function submitDefinition() {
-            const input = document.getElementById("playerDefinition").value.trim();
-            if (!input) {
-                alert("Please enter a definition.");
-                return;
-            }
-
-            submittedDefinitions.push(input);
-            document.getElementById("playerDefinition").value = "";
-
-            if (submittedDefinitions.length === players.length - 1) {
-                showDefinitions();
-            }
+            let definition = document.getElementById("playerDefinition").value;
+            db.ref("games/" + gameCode + "/definitions/").push({ player: playerName, definition: definition });
         }
-
-        function showDefinitions() {
-            document.getElementById("definitionForm").classList.add("hidden");
-            submittedDefinitions.push(currentTerm.definition);
-            submittedDefinitions.sort(() => Math.random() - 0.5);
-
-            document.getElementById("definitionChoices").classList.remove("hidden");
-            document.getElementById("judgeOptions").innerHTML = submittedDefinitions.map((def, index) => 
-                `<div class="definition-box" onclick="judgePick(${index})">${def}</div>`).join("");
-            document.getElementById("judgeDecision").classList.remove("hidden");
+        
+        function listenForUpdates() {
+            db.ref("games/" + gameCode + "/definitions").on("value", snapshot => {
+                const definitions = snapshot.val();
+                if (definitions) {
+                    document.getElementById("judgeOptions").innerHTML = Object.values(definitions).map(def => `<div class='definition-box' onclick='judgePick("${def.definition}")'>${def.definition}</div>`).join("");
+                    document.getElementById("judgeDecision").classList.remove("hidden");
+                }
+            });
         }
-
-        function judgePick(index) {
-            let resultText = (submittedDefinitions[index] === currentTerm.definition) ? "Correct! The judge found the real definition." : "Wrong! The judge picked a fake definition.";
-            document.getElementById("results").innerHTML = `<h3>${resultText}</h3><p>The real definition was: ${currentTerm.definition}</p>`;
+        
+        function judgePick(selectedDefinition) {
+            document.getElementById("results").innerHTML = `<h3>Judge selected: ${selectedDefinition}</h3>`;
             document.getElementById("judgeDecision").classList.add("hidden");
             document.getElementById("results").classList.remove("hidden");
             document.getElementById("nextRound").classList.remove("hidden");
+        }
+        
+        function nextRound() {
+            const randomTerm = terms[Math.floor(Math.random() * terms.length)];
+            db.ref("games/" + gameCode).update({
+                round: firebase.database.ServerValue.increment(1),
+                term: randomTerm,
+                definitions: {},
+                status: "playing"
+            });
         }
     </script>
 </body>
