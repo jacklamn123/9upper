@@ -137,6 +137,9 @@ function createGame() {
     document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
     document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
+             // ✅ Start the countdown for each round
+            startCountdown(gameData.timeLeft);
+           
            // ✅ Update remaining time dynamically
     document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft || "N/A";
 
@@ -158,6 +161,24 @@ function createGame() {
     });
 }
 
+        var roundTimer; // ✅ Global timer variable
+
+function startCountdown(timeLeft) {
+    // ✅ Ensure any existing timer is cleared before starting a new one
+    clearInterval(roundTimer);
+
+    roundTimer = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(roundTimer); // ✅ Stop the timer when it reaches zero
+            document.getElementById("timeLeftDisplay").innerText = "Time's up!";
+        } else {
+            document.getElementById("timeLeftDisplay").innerText = timeLeft + " seconds";
+            timeLeft--; // ✅ Decrement time left
+        }
+    }, 1000); // ✅ Update every second
+}
+
+        
 function displayJudgeOptions(gameData) {
     var judge = Object.keys(gameData.players).find(p => gameData.roles[p] === "Judge");
     var playerRole = gameData.roles[playerName];
@@ -428,6 +449,7 @@ function updateTime() {
         <div id="judgeOptions"></div>
     </div>
 </div>
+
 
 
 
