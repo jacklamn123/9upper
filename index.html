@@ -228,19 +228,30 @@ function judgeSelectPlayer(selectedPlayer) {
             <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
         </div>
 
-        <div id="gameScreen" class="hidden">
-            <h3>Round 1</h3>
-            <h3>Term: <span id="gameTerm"></span></h3>
-            <h3>Your Role: <span id="playerRole"></span></h3>
-            <div id="correctDefinitionBox" class="hidden">
-                <h3>Correct Definition: <span id="correctDefinition"></span></h3>
-<div id="judgePanel" class="hidden">
-    <h3>Judge: Pick the correct player</h3>
-    <div id="judgeOptions"></div>
+  <div id="gameScreen" class="hidden">
+    <h3>Round 1</h3>
+    <h3>Term: <span id="gameTerm"></span></h3>
+    <h3>Your Role: <span id="playerRole"></span></h3>
+
+    <!-- ✅ Display Correct Definition if Role is "Correct Definition" -->
+    <div id="correctDefinitionBox" class="hidden">
+        <h3>Correct Definition: <span id="correctDefinition"></span></h3>
+    </div>
+
+    <!-- ✅ Display Judge Panel if Role is "Judge" -->
+    <div id="judgePanel" class="hidden">
+        <h3>Judge: Pick the correct player</h3>
+        <div id="judgeOptions"></div>
+    </div>
+
+    <!-- ✅ Chatbox (Keep Below Judge Panel) -->
+    <div class="chatbox">
+        <div id="chatMessages"></div>
+    </div>
+    <input type="text" id="chatInput" placeholder="Type a message">
+    <button onclick="sendChatMessage()">Send</button>
 </div>
 
-            </div>
-        </div>
 
         <!-- ✅ Chatbox Added -->
         <div class="chatbox">
