@@ -67,6 +67,24 @@
             <div id="playerList"></div>
             <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
         </div>
+
+        <!-- ✅ Game Screen -->
+        <div id="gameScreen" class="hidden">
+            <h3>Round 1</h3>
+            <h3>Term: <span id="gameTerm"></span></h3>
+            <h3>Your Role: <span id="playerRole"></span></h3>
+            <div id="correctDefinitionBox" class="hidden">
+                <h3>Correct Definition: <span id="correctDefinition"></span></h3>
+            </div>
+            <div id="definitionInputBox" class="hidden">
+                <textarea id="fakeDefinitionInput" placeholder="Enter your fake definition..."></textarea>
+                <button onclick="submitFakeDefinition()">Submit</button>
+            </div>
+            <div id="judgeSelectionBox" class="hidden">
+                <h3>Pick the correct definition:</h3>
+                <div id="definitionOptions"></div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -132,6 +150,20 @@
                         document.getElementById("startGameButton").classList.remove("hidden");
                     }
                 }
+
+                // ✅ If game has started, show roles
+                if (gameData.status === "playing") {
+                    document.getElementById("waitingRoom").classList.add("hidden");
+                    document.getElementById("gameScreen").classList.remove("hidden");
+
+                    document.getElementById("gameTerm").innerText = gameData.term;
+                    document.getElementById("playerRole").innerText = gameData.roles[playerName];
+
+                    if (gameData.roles[playerName] === "Correct Definition") {
+                        document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
+                        document.getElementById("correctDefinitionBox").classList.remove("hidden");
+                    }
+                }
             });
         }
 
@@ -143,7 +175,6 @@
                     return;
                 }
 
-                // ✅ Assign roles
                 var judge = players[Math.floor(Math.random() * players.length)];
                 var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
 
@@ -152,8 +183,15 @@
                 roles[judge] = "Judge";
                 roles[correctPlayer] = "Correct Definition";
 
+                var terms = { "Bonkers": "Crazy or absurd behavior." };
+                var termKeys = Object.keys(terms);
+                var randomTerm = termKeys[Math.floor(Math.random() * termKeys.length)];
+                var correctDefinition = terms[randomTerm];
+
                 db.ref("games/" + gameCode).update({
                     status: "playing",
+                    term: randomTerm,
+                    correctDefinition: correctDefinition,
                     roles: roles
                 });
             });
