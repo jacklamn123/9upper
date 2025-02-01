@@ -122,7 +122,7 @@ function createGame() {
 
         if (gameData.chat) {
             var messages = Object.values(gameData.chat)
-                .map(msg => <p>${msg}</p>).join("");
+                .map(msg => `<p>${msg}</p>`).join("");
             document.getElementById("chatMessages").innerHTML = messages;
         }
 
