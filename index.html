@@ -73,14 +73,23 @@
             <div id="termDisplay"></div>
             <h3>Your Role: <span id="playerRole"></span></h3>
             
+            <!-- ✅ Correct Definition Display -->
+            <div id="correctDefinition" class="hidden">
+                <h3>Real Definition: <span id="realDefinitionText"></span></h3>
+            </div>
+
+            <!-- ✅ Players submit fake definitions -->
             <div id="definitionForm" class="hidden">
                 <textarea id="playerDefinition" placeholder="Enter your definition..."></textarea>
                 <button onclick="submitDefinition()">Submit</button>
             </div>
+
+            <!-- ✅ Judge selects the best definition -->
             <div id="judgeDecision" class="hidden">
                 <h3>Pick the correct definition:</h3>
                 <div id="judgeOptions"></div>
             </div>
+
             <div id="results" class="hidden"></div>
             <button id="nextRound" class="hidden" onclick="nextRound()">Next Round</button>
         </div>
@@ -89,7 +98,14 @@
     <script>
         var gameCode = ""; 
         var playerName = "";
-        var terms = ["Gobbledegook", "Zzyzx", "Faff", "Dullsville", "Nowheresville", "Flibbertigibbet", "Peculiar Knob", "Curmudgeon", "Why, Arizona", "Chinwag", "Bumfuzzle", "Snollygoster", "Wagga Wagga", "Lollygag", "Llanfairpwllgwyngyll", "Discombobulate", "Bonkers", "Taradiddle", "Absquatulate", "Gadzooks"];
+        var terms = {
+            "Bonkers": "Crazy or absurd behavior.",
+            "Gobbledegook": "Nonsense or jargon.",
+            "Snollygoster": "A shrewd but dishonest person.",
+            "Absquatulate": "To leave abruptly.",
+            "Gadzooks": "An exclamation of surprise."
+        };
+        var termKeys = Object.keys(terms);
 
         function confirmName() {
             playerName = document.getElementById("playerNameInput").value.trim();
@@ -164,28 +180,11 @@
                         document.getElementById("judgeDecision").classList.remove("hidden");
                     } else if (gameData.roles[playerName] === "Fake Definition") {
                         document.getElementById("definitionForm").classList.remove("hidden");
+                    } else if (gameData.roles[playerName] === "Correct Definition") {
+                        document.getElementById("correctDefinition").classList.remove("hidden");
+                        document.getElementById("realDefinitionText").innerText = gameData.correctDefinition;
                     }
                 }
-            });
-        }
-
-        function startGame() {
-            var players = [];
-            db.ref("games/" + gameCode + "/players").once("value", function(snapshot) {
-                players = Object.keys(snapshot.val());
-                var judge = players[Math.floor(Math.random() * players.length)];
-                var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
-
-                var roles = {};
-                players.forEach(p => roles[p] = "Fake Definition");
-                roles[judge] = "Judge";
-                roles[correctPlayer] = "Correct Definition";
-
-                db.ref("games/" + gameCode).update({
-                    status: "playing",
-                    term: terms[Math.floor(Math.random() * terms.length)],
-                    roles: roles
-                });
             });
         }
     </script>
