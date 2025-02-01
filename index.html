@@ -27,6 +27,15 @@
             padding: 5px;
             background-color: #f0f0f0;
         }
+        .player-button {
+            display: block;
+            margin: 5px auto;
+            padding: 10px;
+            background-color: #ddd;
+            cursor: pointer;
+            border: none;
+            width: 150px;
+        }
     </style>
 
     <script>
@@ -100,9 +109,9 @@
 
                 if (gameData.players) {
                     var playerList = Object.keys(gameData.players).map(name => 
-                        `<button onclick="judgePick('${name}')">${name}</button>`
+                        `<button class='player-button' onclick="judgePick('${name}')">${name}</button>`
                     ).join(" ");
-                    document.getElementById("playerList").innerHTML = playerList;
+                    document.getElementById("judgeOptions").innerHTML = playerList;
 
                     if (gameData.host === playerName) {
                         document.getElementById("startGameButton").classList.remove("hidden");
@@ -122,7 +131,7 @@
                     document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
                     if (gameData.roles[playerName] === "Correct Definition") {
-                        document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
+                        document.getElementById("correctDefinition").innerText = "Correct Definition: " + gameData.correctDefinition;
                         document.getElementById("correctDefinitionBox").classList.remove("hidden");
                     } else if (gameData.roles[playerName] === "Judge") {
                         document.getElementById("judgePanel").classList.remove("hidden");
@@ -197,25 +206,15 @@
 
         <div id="waitingRoom">
             <h2>Players in Room</h2>
-            <div id="playerList"></div>
+            <div id="judgeOptions"></div>
             <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
         </div>
 
         <div id="gameScreen" class="hidden">
-            <h3>Round 1</h3>
             <h3>Term: <span id="gameTerm"></span></h3>
             <h3>Your Role: <span id="playerRole"></span></h3>
-            <div id="judgePanel" class="hidden">
-                <h3>Judge: Pick the correct player</h3>
-                <div id="playerList"></div>
-            </div>
+            <div id="correctDefinitionBox" class="hidden"><span id="correctDefinition"></span></div>
         </div>
-
-        <div class="chatbox">
-            <div id="chatMessages"></div>
-        </div>
-        <input type="text" id="chatInput" placeholder="Type a message">
-        <button onclick="sendChatMessage()">Send</button>
     </div>
 </body>
 </html>
