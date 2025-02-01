@@ -90,13 +90,16 @@
                 definitions: {},
                 judge: "",
                 status: "waiting",
-                players: { [playerName]: true }  // ✅ Add the host player
+                players: {}  // ✅ Initialize players as an empty object
             }).then(function() {
                 console.log("Game created:", gameCode);
                 document.getElementById("gameCodeDisplay").innerText = gameCode;
                 document.getElementById("setupArea").classList.add("hidden");
                 document.getElementById("gameArea").classList.remove("hidden");
 
+                // ✅ Add the first player (host)
+                db.ref("games/" + gameCode + "/players/" + playerName).set(true);
+                
                 listenForUpdates();
             }).catch(function(error) {
                 console.error("Database Error:", error);
@@ -116,7 +119,7 @@
                     document.getElementById("setupArea").classList.add("hidden");
                     document.getElementById("gameArea").classList.remove("hidden");
 
-                    // ✅ Add the player to the game
+                    // ✅ Add the new player to Firebase
                     db.ref("games/" + gameCode + "/players/" + playerName).set(true);
 
                     listenForUpdates();
@@ -144,8 +147,11 @@
 
                 // ✅ Show the player list
                 if (gameData.players) {
+                    console.log("Players:", gameData.players);  // ✅ Debugging
                     var playerList = Object.keys(gameData.players).map(name => `<li>${name}</li>`).join("");
                     document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
+                } else {
+                    console.warn("No players found in the game.");
                 }
 
                 // Show definition form if game is waiting
