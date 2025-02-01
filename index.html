@@ -51,13 +51,13 @@
         <button id="nextRound" class="hidden" onclick="nextRound()">Next Round</button>
     </div>
 
-    <!-- ✅ Move Firebase Initialization to Ensure It Loads Before Usage -->
+    <!-- ✅ Firebase Initialization -->
     <script>
         let gameCode = ""; 
         let playerName = "Player" + Math.floor(Math.random() * 1000);
         const terms = ["Gobbledegook", "Zzyzx", "Faff", "Dullsville", "Nowheresville", "Flibbertigibbet", "Peculiar Knob", "Curmudgeon", "Why, Arizona", "Chinwag", "Bumfuzzle", "Snollygoster", "Wagga Wagga", "Lollygag", "Llanfairpwllgwyngyll", "Discombobulate", "Bonkers", "Taradiddle", "Absquatulate", "Gadzooks"];
 
-        // ✅ Correct Firebase Configuration (DO NOT CHANGE THESE SCRIPT TAGS)
+        // ✅ Correct Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBlPPLZl8380-xEpyVX3z8ya9eRji2H-uk",
             authDomain: "upper-2c864.firebaseapp.com",
@@ -69,9 +69,9 @@
             measurementId: "G-F348XKS47Q"
         };
 
-        // ✅ Initialize Firebase
+        // ✅ Ensure Firebase is initialized before usage
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();  // ✅ Now Firebase is Defined
+        const db = firebase.database();  // ✅ Firebase Now Defined
 
         function createGame() {
             gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
