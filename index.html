@@ -133,6 +133,10 @@ function createGame() {
     document.getElementById("gameTerm").innerText = gameData.term;
     document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
+            // ✅ Update round number dynamically
+    document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
+    document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
+
     // ✅ First, hide the judge panel by default for all players
     document.getElementById("judgePanel").classList.add("hidden");
 
