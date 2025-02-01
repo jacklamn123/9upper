@@ -46,7 +46,13 @@
 <body>
     <h1>9upper Online Multiplayer</h1>
 
-    <div id="setupArea">
+    <!-- ✅ Name Input Before Creating/Joining -->
+    <div id="nameInput">
+        <input type="text" id="playerNameInput" placeholder="Enter Your Name">
+        <button onclick="confirmName()">Continue</button>
+    </div>
+
+    <div id="setupArea" class="hidden">
         <button onclick="createGame()">Create Game</button>
         <input type="text" id="gameCodeInput" placeholder="Enter Game Code">
         <button onclick="joinGame()">Join Game</button>
@@ -54,55 +60,61 @@
 
     <div id="gameArea" class="hidden">
         <h2>Game Code: <span id="gameCodeDisplay"></span></h2>
-        <h3 id="roundInfo"></h3>
-        <div id="termDisplay"></div>
 
         <!-- ✅ Waiting Room: Display Players -->
         <div id="waitingRoom">
             <h2>Players in Room</h2>
             <div id="playerList"></div>
+            <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
         </div>
 
-        <div id="definitionForm" class="hidden">
-            <textarea id="playerDefinition" placeholder="Enter your definition..."></textarea>
-            <button onclick="submitDefinition()">Submit</button>
+        <div id="gameContent" class="hidden">
+            <h3 id="roundInfo"></h3>
+            <div id="termDisplay"></div>
+            <div id="definitionForm" class="hidden">
+                <textarea id="playerDefinition" placeholder="Enter your definition..."></textarea>
+                <button onclick="submitDefinition()">Submit</button>
+            </div>
+            <div id="judgeDecision" class="hidden">
+                <h3>Pick the correct definition:</h3>
+                <div id="judgeOptions"></div>
+            </div>
+            <div id="results" class="hidden"></div>
+            <button id="nextRound" class="hidden" onclick="nextRound()">Next Round</button>
         </div>
-        <div id="judgeDecision" class="hidden">
-            <h3>Pick the correct definition:</h3>
-            <div id="judgeOptions"></div>
-        </div>
-        <div id="results" class="hidden"></div>
-        <button id="nextRound" class="hidden" onclick="nextRound()">Next Round</button>
     </div>
 
     <script>
         var gameCode = ""; 
-        var playerName = "Player" + Math.floor(Math.random() * 1000);
+        var playerName = "";
         var terms = ["Gobbledegook", "Zzyzx", "Faff", "Dullsville", "Nowheresville", "Flibbertigibbet", "Peculiar Knob", "Curmudgeon", "Why, Arizona", "Chinwag", "Bumfuzzle", "Snollygoster", "Wagga Wagga", "Lollygag", "Llanfairpwllgwyngyll", "Discombobulate", "Bonkers", "Taradiddle", "Absquatulate", "Gadzooks"];
+
+        function confirmName() {
+            playerName = document.getElementById("playerNameInput").value.trim();
+            if (playerName === "") {
+                alert("Please enter a valid name!");
+                return;
+            }
+            document.getElementById("nameInput").classList.add("hidden");
+            document.getElementById("setupArea").classList.remove("hidden");
+        }
 
         function createGame() {
             gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
-            var randomTerm = terms[Math.floor(Math.random() * terms.length)];
-
             db.ref("games/" + gameCode).set({
                 round: 1,
-                term: randomTerm,
+                term: "",
                 definitions: {},
                 judge: "",
                 status: "waiting",
-                players: {}  // ✅ Initialize players as an empty object
+                players: {},
+                host: playerName
             }).then(function() {
-                console.log("Game created:", gameCode);
                 document.getElementById("gameCodeDisplay").innerText = gameCode;
                 document.getElementById("setupArea").classList.add("hidden");
                 document.getElementById("gameArea").classList.remove("hidden");
-
-                // ✅ Add the first player (host)
                 db.ref("games/" + gameCode + "/players/" + playerName).set(true);
-                
                 listenForUpdates();
-            }).catch(function(error) {
-                console.error("Database Error:", error);
             });
         }
 
@@ -112,65 +124,54 @@
                 alert("Please enter a valid game code!");
                 return;
             }
-
             db.ref("games/" + gameCode).get().then(function(snapshot) {
                 if (snapshot.exists()) {
                     document.getElementById("gameCodeDisplay").innerText = gameCode;
                     document.getElementById("setupArea").classList.add("hidden");
                     document.getElementById("gameArea").classList.remove("hidden");
-
-                    // ✅ Add the new player to Firebase
                     db.ref("games/" + gameCode + "/players/" + playerName).set(true);
-
                     listenForUpdates();
                 } else {
                     alert("Game not found!");
                 }
-            }).catch(function(error) {
-                console.error("Firebase Error:", error);
             });
         }
 
         function listenForUpdates() {
             db.ref("games/" + gameCode).on("value", function(snapshot) {
                 var gameData = snapshot.val();
-                
-                if (!gameData) {
-                    console.error("Game data not found!");
-                    return;
-                }
+                if (!gameData) return;
 
-                console.log("Game data received:", gameData);
-
-                document.getElementById("roundInfo").innerText = "Round " + gameData.round;
-                document.getElementById("termDisplay").innerHTML = `<h3>Term: ${gameData.term}</h3>`;
-
-                // ✅ Show the player list
                 if (gameData.players) {
-                    console.log("Players:", gameData.players);  // ✅ Debugging
                     var playerList = Object.keys(gameData.players).map(name => `<li>${name}</li>`).join("");
                     document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
-                } else {
-                    console.warn("No players found in the game.");
+
+                    // ✅ Only the host sees the "Start Game" button
+                    if (gameData.host === playerName) {
+                        document.getElementById("startGameButton").classList.remove("hidden");
+                    }
                 }
 
-                // Show definition form if game is waiting
-                if (gameData.status === "waiting") {
-                    document.getElementById("definitionForm").classList.remove("hidden");
+                if (gameData.status === "playing") {
+                    document.getElementById("waitingRoom").classList.add("hidden");
+                    document.getElementById("gameContent").classList.remove("hidden");
+                    document.getElementById("roundInfo").innerText = "Round " + gameData.round;
+                    document.getElementById("termDisplay").innerHTML = `<h3>Term: ${gameData.term}</h3>`;
                 }
+            });
+        }
+
+        function startGame() {
+            var randomTerm = terms[Math.floor(Math.random() * terms.length)];
+            db.ref("games/" + gameCode).update({
+                status: "playing",
+                term: randomTerm
             });
         }
 
         function submitDefinition() {
             var definition = document.getElementById("playerDefinition").value;
             db.ref("games/" + gameCode + "/definitions/").push({ player: playerName, definition: definition });
-        }
-
-        function judgePick(selectedDefinition) {
-            document.getElementById("results").innerHTML = `<h3>Judge selected: ${selectedDefinition}</h3>`;
-            document.getElementById("judgeDecision").classList.add("hidden");
-            document.getElementById("results").classList.remove("hidden");
-            document.getElementById("nextRound").classList.remove("hidden");
         }
 
         function nextRound() {
