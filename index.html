@@ -99,7 +99,8 @@
         if (!gameData) return;
 
         if (gameData.players) {
-            var playerList = Object.keys(gameData.players).map(name => `<li>${name}</li>`).join("");
+            var playerList = Object.keys(gameData.players)
+                .map(name => `<li>${name}</li>`).join("");
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
 
             if (gameData.host === playerName) {
@@ -108,7 +109,8 @@
         }
 
         if (gameData.chat) {
-            var messages = Object.values(gameData.chat).map(msg => `<p>${msg}</p>`).join("");
+            var messages = Object.values(gameData.chat)
+                .map(msg => `<p>${msg}</p>`).join("");
             document.getElementById("chatMessages").innerHTML = messages;
         }
 
@@ -122,36 +124,36 @@
             if (gameData.roles[playerName] === "Correct Definition") {
                 document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
                 document.getElementById("correctDefinitionBox").classList.remove("hidden");
-            } else if (gameData.roles[playerName] === "Fake Definition") {
+            } 
+            else if (gameData.roles[playerName] === "Fake Definition") {
                 document.getElementById("definitionInputBox").classList.remove("hidden");
             }
 
-            // ✅ NEW: Show judge panel when the player is a judge
+            // ✅ NEW: If Player is Judge, Show the Panel
             if (gameData.roles[playerName] === "Judge") {
                 document.getElementById("judgePanel").classList.remove("hidden");
-                displayDefinitionsForJudge();
+                displayJudgeOptions(gameData);
             }
         }
     });
 }
 
-function displayDefinitionsForJudge() {
-    db.ref("games/" + gameCode + "/players").once("value", snapshot => {
-        var players = Object.keys(snapshot.val());
-        var judge = players.find(p => gameData.roles[p] === "Judge");
+function displayJudgeOptions(gameData) {
+    var players = Object.keys(gameData.players);
+    var judge = players.find(p => gameData.roles[p] === "Judge");
 
-        // ✅ Filter out the Judge from the selection
-        var selectablePlayers = players.filter(p => p !== judge);
-        
-        // ✅ Create buttons for each player
-        var buttonsHTML = selectablePlayers.map(player =>
-            `<button onclick="judgeSelectPlayer('${player}')">${player}</button>`
-        ).join(" ");
+    // ✅ Filter out the Judge from the selection
+    var selectablePlayers = players.filter(p => p !== judge);
 
-        document.getElementById("judgeOptions").innerHTML = buttonsHTML;
-        document.getElementById("judgePanel").classList.remove("hidden");
-    });
+    // ✅ Create buttons for each player
+    var buttonsHTML = selectablePlayers.map(player =>
+        `<button onclick="judgeSelectPlayer('${player}')">${player}</button>`
+    ).join(" ");
+
+    document.getElementById("judgeOptions").innerHTML = buttonsHTML;
+    document.getElementById("judgePanel").classList.remove("hidden");
 }
+
 
 // ✅ Judge selects a player
 function judgeSelectPlayer(selectedPlayer) {
@@ -159,8 +161,9 @@ function judgeSelectPlayer(selectedPlayer) {
         winner: selectedPlayer
     });
 
-    alert(`${selectedPlayer} has been selected as the correct definition!`);
+    alert(`Judge selected ${selectedPlayer} as the correct definition!`);
 }
+
 
 
         function startGame() {
