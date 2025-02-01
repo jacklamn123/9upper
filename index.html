@@ -73,7 +73,8 @@
                 status: "waiting",
                 players: {},
                 host: playerName,
-                chat: {}
+                chat: {},
+                definitions: {}
             }).then(() => {
                 document.getElementById("gameCodeDisplay").innerText = gameCode;
                 document.getElementById("setupArea").classList.add("hidden");
@@ -108,10 +109,8 @@
                 if (!gameData) return;
 
                 if (gameData.players) {
-                    var playerList = Object.keys(gameData.players).map(name => 
-                        `<button class='player-button' onclick="judgePick('${name}')">${name}</button>`
-                    ).join(" ");
-                    document.getElementById("judgeOptions").innerHTML = playerList;
+                    var playerList = Object.keys(gameData.players).map(name => `<li>${name}</li>`).join("");
+                    document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
 
                     if (gameData.host === playerName) {
                         document.getElementById("startGameButton").classList.remove("hidden");
@@ -131,10 +130,11 @@
                     document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
                     if (gameData.roles[playerName] === "Correct Definition") {
-                        document.getElementById("correctDefinition").innerText = "Correct Definition: " + gameData.correctDefinition;
+                        document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
                         document.getElementById("correctDefinitionBox").classList.remove("hidden");
                     } else if (gameData.roles[playerName] === "Judge") {
                         document.getElementById("judgePanel").classList.remove("hidden");
+                        displayDefinitionsForJudge(gameData.definitions);
                     }
                 }
             });
@@ -174,6 +174,14 @@
                 .catch(error => console.error("Error loading terms:", error));
         }
 
+        function displayDefinitionsForJudge(definitions) {
+            if (!definitions) return;
+            var judgeOptions = Object.entries(definitions).map(([player, definition]) =>
+                `<button class='player-button' onclick="judgePick('${player}')">${player}: ${definition}</button>`
+            ).join("");
+            document.getElementById("judgeOptions").innerHTML = judgeOptions;
+        }
+
         function judgePick(selectedPlayer) {
             db.ref("games/" + gameCode).update({ selectedCorrectPlayer: selectedPlayer });
             alert("Judge picked: " + selectedPlayer);
@@ -203,17 +211,9 @@
 
     <div id="gameArea" class="hidden">
         <h2>Game Code: <span id="gameCodeDisplay"></span></h2>
-
-        <div id="waitingRoom">
-            <h2>Players in Room</h2>
+        <div id="judgePanel" class="hidden">
+            <h3>Judge: Pick the correct player</h3>
             <div id="judgeOptions"></div>
-            <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
-        </div>
-
-        <div id="gameScreen" class="hidden">
-            <h3>Term: <span id="gameTerm"></span></h3>
-            <h3>Your Role: <span id="playerRole"></span></h3>
-            <div id="correctDefinitionBox" class="hidden"><span id="correctDefinition"></span></div>
         </div>
     </div>
 </body>
