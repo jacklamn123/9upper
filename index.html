@@ -154,13 +154,13 @@ function displayJudgeOptions(gameData) {
     var players = Object.keys(gameData.players);
     var judge = players.find(p => gameData.roles[p] === "Judge");
 
-    if (playerName !== judge) {
-        // ✅ Hide judge panel for non-judges
-        document.getElementById("judgePanel").classList.add("hidden");
+    // ✅ Explicitly check if the player is NOT the Judge
+    if (gameData.roles[playerName] !== "Judge") {
+        document.getElementById("judgePanel").classList.add("hidden"); // Hide for non-Judges
         return;
     }
 
-    // ✅ If the player is the judge, display the panel
+    // ✅ If the player is the Judge, display the panel
     var selectablePlayers = players.filter(p => p !== judge);
 
     var buttonsHTML = selectablePlayers.map(player =>
@@ -170,6 +170,7 @@ function displayJudgeOptions(gameData) {
     document.getElementById("judgeOptions").innerHTML = buttonsHTML;
     document.getElementById("judgePanel").classList.remove("hidden"); // ✅ Show only for Judge
 }
+
 
 
 
