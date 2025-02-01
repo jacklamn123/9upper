@@ -182,23 +182,35 @@
                     }
                 }
             });
+        }
 
-            db.ref("games/" + gameCode + "/chat").on("child_added", function(snapshot) {
-                document.getElementById("chatMessages").innerHTML += `<p>${snapshot.val()}</p>`;
+        function startGame() {
+            db.ref("games/" + gameCode + "/players").once("value", function(snapshot) {
+                var players = Object.keys(snapshot.val());
+                if (players.length < 3) {
+                    alert("At least 3 players are needed to start the game!");
+                    return;
+                }
+
+                var judge = players[Math.floor(Math.random() * players.length)];
+                var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
+
+                var roles = {};
+                players.forEach(p => roles[p] = "Fake Definition");
+                roles[judge] = "Judge";
+                roles[correctPlayer] = "Correct Definition";
+
+                var terms = { "Bonkers": "Crazy or absurd behavior." };
+                var randomTerm = Object.keys(terms)[Math.floor(Math.random() * Object.keys(terms).length)];
+                var correctDefinition = terms[randomTerm];
+
+                db.ref("games/" + gameCode).update({
+                    status: "playing",
+                    term: randomTerm,
+                    correctDefinition: correctDefinition,
+                    roles: roles
+                });
             });
-        }
-
-        function sendChatMessage() {
-            var message = document.getElementById("chatInput").value.trim();
-            if (message === "") return;
-            db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message);
-            document.getElementById("chatInput").value = "";
-        }
-
-        function submitFakeDefinition() {
-            var definition = document.getElementById("fakeDefinitionInput").value;
-            db.ref("games/" + gameCode + "/definitions/").push(definition);
-            sendChatMessage(); // Also add it to chat
         }
     </script>
 </body>
