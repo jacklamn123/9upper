@@ -63,7 +63,8 @@
             db.ref("games/" + gameCode).set({
                 status: "waiting",
                 players: {},
-                host: playerName
+                host: playerName,
+                chat: {}
             }).then(() => {
                 document.getElementById("gameCodeDisplay").innerText = gameCode;
                 document.getElementById("setupArea").classList.add("hidden");
@@ -106,6 +107,11 @@
                     }
                 }
 
+                if (gameData.chat) {
+                    var messages = Object.values(gameData.chat).map(msg => `<p>${msg}</p>`).join("");
+                    document.getElementById("chatMessages").innerHTML = messages;
+                }
+
                 if (gameData.status === "playing") {
                     document.getElementById("waitingRoom").classList.add("hidden");
                     document.getElementById("gameScreen").classList.remove("hidden");
@@ -124,7 +130,7 @@
         }
 
         function startGame() {
-            fetch("9upper_terms.json")  // ✅ Load terms from JSON file
+            fetch("9upper_terms.json")
                 .then(response => response.json())
                 .then(terms => {
                     db.ref("games/" + gameCode + "/players").once("value", snapshot => {
@@ -134,7 +140,6 @@
                             return;
                         }
 
-                        // ✅ Assign Roles Randomly
                         var judge = players[Math.floor(Math.random() * players.length)];
                         var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
 
@@ -143,7 +148,6 @@
                         roles[judge] = "Judge";
                         roles[correctPlayer] = "Correct Definition";
 
-                        // ✅ Pick a Random Term from JSON
                         var randomIndex = Math.floor(Math.random() * terms.length);
                         var randomTerm = terms[randomIndex].term;
                         var correctDefinition = terms[randomIndex].definition;
@@ -157,6 +161,13 @@
                     });
                 })
                 .catch(error => console.error("Error loading terms:", error));
+        }
+
+        function sendChatMessage() {
+            var message = document.getElementById("chatInput").value.trim();
+            if (message === "") return;
+            db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message);
+            document.getElementById("chatInput").value = "";
         }
     </script>
 </head>
@@ -176,6 +187,7 @@
 
     <div id="gameArea" class="hidden">
         <h2>Game Code: <span id="gameCodeDisplay"></span></h2>
+
         <div id="waitingRoom">
             <h2>Players in Room</h2>
             <div id="playerList"></div>
@@ -190,6 +202,14 @@
                 <h3>Correct Definition: <span id="correctDefinition"></span></h3>
             </div>
         </div>
+
+        <!-- ✅ Chatbox Added -->
+        <div class="chatbox">
+            <div id="chatMessages"></div>
+        </div>
+        <input type="text" id="chatInput" placeholder="Type a message">
+        <button onclick="sendChatMessage()">Send</button>
+
     </div>
 </body>
 </html>
