@@ -250,79 +250,77 @@ function startGame() {
             .catch(error => console.error("Error loading terms:", error));
     });
 }
+          var roundTimer;
 
-function startNewRound(terms, round, totalRounds, roundTime) {
-    db.ref("games/" + gameCode + "/players").once("value", snapshot => {
-        var players = Object.keys(snapshot.val());
-        if (players.length < 3) return;
+    function startNewRound(terms, round, totalRounds, roundTime) {
+        db.ref("games/" + gameCode + "/players").once("value", snapshot => {
+            var players = Object.keys(snapshot.val());
+            if (players.length < 3) return;
 
-        var judge = players[Math.floor(Math.random() * players.length)];
-        var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
+            var judge = players[Math.floor(Math.random() * players.length)];
+            var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
 
-        var roles = {};
-        players.forEach(p => roles[p] = "Fake Definition");
-        roles[judge] = "Judge";
-        roles[correctPlayer] = "Correct Definition";
+            var roles = {};
+            players.forEach(p => roles[p] = "Fake Definition");
+            roles[judge] = "Judge";
+            roles[correctPlayer] = "Correct Definition";
 
-        var randomIndex = Math.floor(Math.random() * terms.length);
-        var randomTerm = terms[randomIndex].term;
-        var correctDefinition = terms[randomIndex].definition;
+            var randomIndex = Math.floor(Math.random() * terms.length);
+            var randomTerm = terms[randomIndex].term;
+            var correctDefinition = terms[randomIndex].definition;
 
-        db.ref("games/" + gameCode).update({
-            currentRound: round,
-            term: randomTerm,
-            correctDefinition: correctDefinition,
-            roles: roles,
-            timeLeft: roundTime
-        });
+            db.ref("games/" + gameCode).update({
+                currentRound: round,
+                term: randomTerm,
+                correctDefinition: correctDefinition,
+                roles: roles,
+                timeLeft: roundTime
+            });
 
-        startRoundTimer(roundTime, round, totalRounds);
-    });
-}
-        
-var roundTimer; // Declare timer globally so we can clear it
-
-function startRoundTimer(roundTime, round, totalRounds) {
-    roundTimer = setInterval(() => {
-        db.ref("games/" + gameCode).once("value", snapshot => {
-            var gameData = snapshot.val();
-            if (!gameData) return;
-
-            var timeLeft = gameData.timeLeft;
-            if (timeLeft <= 0 || gameData.winner) {  // ✅ Stop if time runs out OR if judge picked a player
-                clearInterval(roundTimer);
-                endRound(round, totalRounds);
-            } else {
-                db.ref("games/" + gameCode).update({
-                    timeLeft: timeLeft - 1
-                });
-            }
-        });
-    }, 1000);
-}
-
-function endRound(round, totalRounds) {
-    if (round >= totalRounds) {
-        db.ref("games/" + gameCode).update({
-            status: "finished"
-        });
-        alert("Game Over!");
-    } else {
-        db.ref("games/" + gameCode).once("value", snapshot => {
-            var gameData = snapshot.val();
-            if (!gameData) return;
-
-            var roundTime = gameData.roundTime;  // ✅ Get roundTime from Firebase
-
-            fetch("9upper_terms.json")
-                .then(response => response.json())
-                .then(terms => {
-                    startNewRound(terms, round + 1, totalRounds, roundTime);
-                });
+            startRoundTimer(roundTime, round, totalRounds);
         });
     }
-}
 
+    function startRoundTimer(roundTime, round, totalRounds) {
+        roundTimer = setInterval(() => {
+            db.ref("games/" + gameCode).once("value", snapshot => {
+                var gameData = snapshot.val();
+                if (!gameData) return;
+
+                var timeLeft = gameData.timeLeft;
+                if (timeLeft <= 0) {  // ✅ Ensure this condition is properly closed
+                    clearInterval(roundTimer);
+                    endRound(round, totalRounds);
+                } else {
+                    db.ref("games/" + gameCode).update({
+                        timeLeft: timeLeft - 1
+                    });
+                }
+            });
+        }, 1000);
+    }
+
+    function endRound(round, totalRounds) {
+        if (round >= totalRounds) {
+            db.ref("games/" + gameCode).update({
+                status: "finished"
+            });
+            alert("Game Over!");
+        } else {
+            db.ref("games/" + gameCode).once("value", snapshot => {
+                var gameData = snapshot.val();
+                if (!gameData) return;
+
+                var roundTime = gameData.roundTime;  // ✅ Fetch roundTime before calling startNewRound()
+
+                fetch("9upper_terms.json")
+                    .then(response => response.json())
+                    .then(terms => {
+                        startNewRound(terms, round + 1, totalRounds, roundTime);
+                    });
+            });
+        }
+    }
 
 
         function sendChatMessage() {
