@@ -159,7 +159,7 @@ function displayJudgeOptions(gameData) {
 
     // ✅ Create buttons for each player
     var buttonsHTML = selectablePlayers.map(player =>
-        <button onclick="judgeSelectPlayer('${player}')">${player}</button>
+        `<button onclick="judgeSelectPlayer('${player}')">${player}</button>`
     ).join(" ");
 
     document.getElementById("judgeOptions").innerHTML = buttonsHTML;
