@@ -119,98 +119,47 @@
             document.getElementById("setupArea").classList.remove("hidden");
         }
 
-        function createGame() {
-            gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
-            db.ref("games/" + gameCode).set({
-                status: "waiting",
-                players: {},
-                host: playerName
-            }).then(function() {
-                document.getElementById("gameCodeDisplay").innerText = gameCode;
-                document.getElementById("setupArea").classList.add("hidden");
-                document.getElementById("gameArea").classList.remove("hidden");
-                db.ref("games/" + gameCode + "/players/" + playerName).set(true);
-                listenForUpdates();
-            });
-        }
-
-        function joinGame() {
-            gameCode = document.getElementById("gameCodeInput").value.toUpperCase();
-            if (!gameCode) {
-                alert("Please enter a valid game code!");
-                return;
-            }
-            db.ref("games/" + gameCode).get().then(function(snapshot) {
-                if (snapshot.exists()) {
-                    document.getElementById("gameCodeDisplay").innerText = gameCode;
-                    document.getElementById("setupArea").classList.add("hidden");
-                    document.getElementById("gameArea").classList.remove("hidden");
-                    db.ref("games/" + gameCode + "/players/" + playerName).set(true);
-                    listenForUpdates();
-                } else {
-                    alert("Game not found!");
-                }
-            });
-        }
-
-        function listenForUpdates() {
-            db.ref("games/" + gameCode).on("value", function(snapshot) {
-                var gameData = snapshot.val();
-                if (!gameData) return;
-
-                if (gameData.players) {
-                    var playerList = Object.keys(gameData.players).map(name => `<li>${name}</li>`).join("");
-                    document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
-
-                    if (gameData.host === playerName) {
-                        document.getElementById("startGameButton").classList.remove("hidden");
-                    }
-                }
-
-                if (gameData.status === "playing") {
-                    document.getElementById("waitingRoom").classList.add("hidden");
-                    document.getElementById("gameScreen").classList.remove("hidden");
-
-                    document.getElementById("gameTerm").innerText = gameData.term;
-                    document.getElementById("playerRole").innerText = gameData.roles[playerName];
-
-                    if (gameData.roles[playerName] === "Correct Definition") {
-                        document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
-                        document.getElementById("correctDefinitionBox").classList.remove("hidden");
-                    } else if (gameData.roles[playerName] === "Fake Definition") {
-                        document.getElementById("definitionInputBox").classList.remove("hidden");
-                    }
-                }
-            });
-        }
-
         function startGame() {
-            db.ref("games/" + gameCode + "/players").once("value", function(snapshot) {
-                var players = Object.keys(snapshot.val());
-                if (players.length < 3) {
-                    alert("At least 3 players are needed to start the game!");
-                    return;
-                }
+            fetch("9upper_terms.json")  // ✅ Load terms from JSON file
+                .then(response => response.json())
+                .then(terms => {
+                    db.ref("games/" + gameCode + "/players").once("value", function(snapshot) {
+                        var players = Object.keys(snapshot.val());
+                        if (players.length < 3) {
+                            alert("At least 3 players are needed to start the game!");
+                            return;
+                        }
 
-                var judge = players[Math.floor(Math.random() * players.length)];
-                var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
+                        // ✅ Assign Roles Randomly
+                        var judge = players[Math.floor(Math.random() * players.length)];
+                        var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
 
-                var roles = {};
-                players.forEach(p => roles[p] = "Fake Definition");
-                roles[judge] = "Judge";
-                roles[correctPlayer] = "Correct Definition";
+                        var roles = {};
+                        players.forEach(p => roles[p] = "Fake Definition");
+                        roles[judge] = "Judge";
+                        roles[correctPlayer] = "Correct Definition";
 
-                var terms = { "Bonkers": "Crazy or absurd behavior." };
-                var randomTerm = Object.keys(terms)[Math.floor(Math.random() * Object.keys(terms).length)];
-                var correctDefinition = terms[randomTerm];
+                        // ✅ Pick a Random Term from JSON
+                        var randomIndex = Math.floor(Math.random() * terms.length);
+                        var randomTerm = terms[randomIndex].term;
+                        var correctDefinition = terms[randomIndex].definition;
 
-                db.ref("games/" + gameCode).update({
-                    status: "playing",
-                    term: randomTerm,
-                    correctDefinition: correctDefinition,
-                    roles: roles
-                });
-            });
+                        db.ref("games/" + gameCode).update({
+                            status: "playing",
+                            term: randomTerm,
+                            correctDefinition: correctDefinition,
+                            roles: roles
+                        });
+                    });
+                })
+                .catch(error => console.error("Error loading terms:", error));
+        }
+
+        function sendChatMessage() {
+            var message = document.getElementById("chatInput").value.trim();
+            if (message === "") return;
+            db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message);
+            document.getElementById("chatInput").value = "";
         }
     </script>
 </body>
