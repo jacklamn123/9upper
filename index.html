@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>9upper Online</title>
 
-    <!-- ✅ Correct Firebase CDN Scripts (DO NOT use import statements) -->
+    <!-- ✅ Firebase Scripts (DO NOT use import statements) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -51,24 +51,11 @@
         <button id="nextRound" class="hidden" onclick="nextRound()">Next Round</button>
     </div>
 
-    <!-- ✅ Ensure Firebase is Initialized Before Using It -->
+    <!-- ✅ Load Firebase Config -->
+    <script src="firebase-config.js"></script>
+
+    <!-- ✅ Game Logic Below -->
     <script>
-        // ✅ Firebase Configuration
-        var firebaseConfig = {
-            apiKey: "AIzaSyBlPPLZl8380-xEpyVX3z8ya9eRji2H-uk",
-            authDomain: "upper-2c864.firebaseapp.com",
-            databaseURL: "https://upper-2c864.firebaseio.com",
-            projectId: "upper-2c864",
-            storageBucket: "upper-2c864.firebasestorage.app",
-            messagingSenderId: "1065732661608",
-            appId: "1:1065732661608:web:2db40ab8d600697b34f6dd",
-            measurementId: "G-F348XKS47Q"
-        };
-
-        // ✅ Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        var db = firebase.database();  // ✅ Firebase Now Defined
-
         var gameCode = ""; 
         var playerName = "Player" + Math.floor(Math.random() * 1000);
         var terms = ["Gobbledegook", "Zzyzx", "Faff", "Dullsville", "Nowheresville", "Flibbertigibbet", "Peculiar Knob", "Curmudgeon", "Why, Arizona", "Chinwag", "Bumfuzzle", "Snollygoster", "Wagga Wagga", "Lollygag", "Llanfairpwllgwyngyll", "Discombobulate", "Bonkers", "Taradiddle", "Absquatulate", "Gadzooks"];
@@ -146,4 +133,22 @@
         }
     </script>
 </body>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyB1PPLZl8380-xEpyVX3z8ya9eRji2H-uk",
+        authDomain: "upper-2c864.firebaseapp.com",
+        databaseURL: "https://upper-2c864-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "upper-2c864",
+        storageBucket: "upper-2c864.firebasestorage.app",
+        messagingSenderId: "1065732661608",
+        appId: "1:1065732661608:web:2db40ab8d60697b34f6dd",
+        measurementId: "G-F348XKS47Q"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+</script>
+
 </html>
