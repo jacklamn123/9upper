@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>9upper Online</title>
 
-    <!-- ✅ Use Only Firebase CDN Scripts (No Import Statements) -->
+    <!-- ✅ Use Firebase CDN Scripts (DO NOT USE 'import' Statements) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
@@ -51,7 +51,7 @@
         <button id="nextRound" class="hidden" onclick="nextRound()">Next Round</button>
     </div>
 
-    <!-- ✅ Firebase Initialization -->
+    <!-- ✅ Ensure Firebase is Initialized Before Using It -->
     <script>
         let gameCode = ""; 
         let playerName = "Player" + Math.floor(Math.random() * 1000);
