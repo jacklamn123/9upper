@@ -99,8 +99,7 @@
         if (!gameData) return;
 
         if (gameData.players) {
-            var playerList = Object.keys(gameData.players)
-                .map(name => `<li>${name}</li>`).join("");
+            var playerList = Object.keys(gameData.players).map(name => `<li>${name}</li>`).join("");
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
 
             if (gameData.host === playerName) {
@@ -113,24 +112,26 @@
             document.getElementById("waitingRoom").classList.add("hidden");
             document.getElementById("gameScreen").classList.remove("hidden");
 
+            document.getElementById("currentRound").innerText = gameData.round;
+            document.getElementById("totalRounds").innerText = gameData.totalRounds;
             document.getElementById("gameTerm").innerText = gameData.term;
             document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
             if (gameData.roles[playerName] === "Correct Definition") {
                 document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
                 document.getElementById("correctDefinitionBox").classList.remove("hidden");
-            } 
-            else if (gameData.roles[playerName] === "Fake Definition") {
+            } else if (gameData.roles[playerName] === "Fake Definition") {
                 document.getElementById("definitionInputBox").classList.remove("hidden");
             }
 
             if (gameData.roles[playerName] === "Judge") {
                 document.getElementById("judgePanel").classList.remove("hidden");
-                displayJudgeOptions(gameData);
+                displayDefinitionsForJudge();
             }
         }
     });
 }
+
 
 
 function displayJudgeOptions(gameData) {
@@ -152,48 +153,123 @@ function displayJudgeOptions(gameData) {
 
 // ✅ Judge selects a player
 function judgeSelectPlayer(selectedPlayer) {
-    db.ref("games/" + gameCode).update({
-        winner: selectedPlayer
-    });
+    clearInterval(roundTimer); // Stop timer when judge selects
 
-    alert(`Judge selected ${selectedPlayer} as the correct definition!`);
+    db.ref("games/" + gameCode).once("value", snapshot => {
+        let gameData = snapshot.val();
+        let currentRound = gameData.round;
+        let totalRounds = gameData.totalRounds;
+
+        if (currentRound < totalRounds) {
+            // Proceed to next round
+            db.ref("games/" + gameCode).update({
+                round: currentRound + 1
+            });
+            alert(`${selectedPlayer} was selected. Next round starts!`);
+            startNewRound();
+        } else {
+            // Game over
+            db.ref("games/" + gameCode).update({
+                status: "ended"
+            });
+            alert(`Game Over! ${selectedPlayer} was the final winner.`);
+        }
+    });
 }
 
 
 
-        function startGame() {
-            fetch("9upper_terms.json")
-                .then(response => response.json())
-                .then(terms => {
-                    db.ref("games/" + gameCode + "/players").once("value", snapshot => {
-                        var players = Object.keys(snapshot.val());
-                        if (players.length < 3) {
-                            alert("At least 3 players are needed to start the game!");
-                            return;
-                        }
 
-                        var judge = players[Math.floor(Math.random() * players.length)];
-                        var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
+function startGame() {
+    fetch("9upper_terms.json")
+        .then(response => response.json())
+        .then(terms => {
+            db.ref("games/" + gameCode).once("value", snapshot => {
+                let gameData = snapshot.val();
+                let players = Object.keys(gameData.players);
+                if (players.length < 3) {
+                    alert("At least 3 players are needed to start the game!");
+                    return;
+                }
 
-                        var roles = {};
-                        players.forEach(p => roles[p] = "Fake Definition");
-                        roles[judge] = "Judge";
-                        roles[correctPlayer] = "Correct Definition";
+                let rounds = gameData.rounds || 5; // Default 5 rounds if not set
+                let timePerRound = gameData.timePerRound || 2; // Default 2 mins
 
-                        var randomIndex = Math.floor(Math.random() * terms.length);
-                        var randomTerm = terms[randomIndex].term;
-                        var correctDefinition = terms[randomIndex].definition;
+                let judge = players[Math.floor(Math.random() * players.length)];
+                let correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
 
-                        db.ref("games/" + gameCode).update({
-                            status: "playing",
-                            term: randomTerm,
-                            correctDefinition: correctDefinition,
-                            roles: roles
-                        });
-                    });
-                })
-                .catch(error => console.error("Error loading terms:", error));
+                let roles = {};
+                players.forEach(p => roles[p] = "Fake Definition");
+                roles[judge] = "Judge";
+                roles[correctPlayer] = "Correct Definition";
+
+                let randomIndex = Math.floor(Math.random() * terms.length);
+                let randomTerm = terms[randomIndex].term;
+                let correctDefinition = terms[randomIndex].definition;
+
+                db.ref("games/" + gameCode).update({
+                    status: "playing",
+                    round: 1,
+                    totalRounds: rounds,
+                    timePerRound: timePerRound,
+                    term: randomTerm,
+                    correctDefinition: correctDefinition,
+                    roles: roles
+                });
+
+                startRoundTimer(timePerRound);
+            });
+        })
+        .catch(error => console.error("Error loading terms:", error));
+}
+var roundTimer;
+
+function startRoundTimer(timeLimit) {
+    let timeLeft = timeLimit * 60; // Convert minutes to seconds
+    document.getElementById("roundTimer").innerText = `Time Left: ${timeLeft}s`;
+
+    roundTimer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("roundTimer").innerText = `Time Left: ${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+            clearInterval(roundTimer);
+            endRound(); // Auto-end round if time runs out
         }
+    }, 1000); // Update every second
+}
+
+function startNewRound() {
+    fetch("9upper_terms.json")
+        .then(response => response.json())
+        .then(terms => {
+            db.ref("games/" + gameCode).once("value", snapshot => {
+                let gameData = snapshot.val();
+                let players = Object.keys(gameData.players);
+
+                let judge = players[Math.floor(Math.random() * players.length)];
+                let correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
+
+                let roles = {};
+                players.forEach(p => roles[p] = "Fake Definition");
+                roles[judge] = "Judge";
+                roles[correctPlayer] = "Correct Definition";
+
+                let randomIndex = Math.floor(Math.random() * terms.length);
+                let randomTerm = terms[randomIndex].term;
+                let correctDefinition = terms[randomIndex].definition;
+
+                db.ref("games/" + gameCode).update({
+                    term: randomTerm,
+                    correctDefinition: correctDefinition,
+                    roles: roles
+                });
+
+                startRoundTimer(gameData.timePerRound);
+            });
+        })
+        .catch(error => console.error("Error loading terms:", error));
+}
 
         function sendChatMessage() {
             var message = document.getElementById("chatInput").value.trim();
@@ -274,21 +350,27 @@ function saveGameSettings() {
 
 
 <div id="gameScreen" class="hidden">
-            <h3>Round 1</h3>
-            <h3>Term: <span id="gameTerm"></span></h3>
-            <h3>Your Role: <span id="playerRole"></span></h3>
-            <div id="correctDefinitionBox" class="hidden">
-                <h3>Correct Definition: <span id="correctDefinition"></span></h3>
+    <h3>Round <span id="currentRound"></span> of <span id="totalRounds"></span></h3>
+    <h3 id="roundTimer">Time Left: --</h3>
+    <h3>Term: <span id="gameTerm"></span></h3>
+    <h3>Your Role: <span id="playerRole"></span></h3>
 
+    <div id="correctDefinitionBox" class="hidden">
+        <h3>Correct Definition: <span id="correctDefinition"></span></h3>
+    </div>
 
-            </div>
+    <div id="judgePanel" class="hidden">
+        <h3>Judge: Pick the correct player</h3>
+        <div id="judgeOptions"></div>
+    </div>
 
-
-<div id="judgePanel" class="hidden">
-    <h3>Judge: Pick the correct player</h3>
-    <div id="judgeOptions"></div>
+    <div class="chatbox">
+        <div id="chatMessages"></div>
+    </div>
+    <input type="text" id="chatInput" placeholder="Type a message">
+    <button onclick="sendChatMessage()">Send</button>
 </div>
-</div>
+
 
 
         <!-- ✅ Chatbox Added -->
