@@ -93,207 +93,112 @@
             });
         }
 
-  function listenForUpdates() {
+        function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
 
-        // ✅ Update player list in the waiting room
         if (gameData.players) {
-            var playerList = Object.keys(gameData.players).map(name => `<li>${name}</li>`).join("");
+            var playerList = Object.keys(gameData.players)
+                .map(name => `<li>${name}</li>`).join("");
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
 
-            // ✅ Only the host can see game settings and start button
             if (gameData.host === playerName) {
-                document.getElementById("gameSettings").classList.remove("hidden");
                 document.getElementById("startGameButton").classList.remove("hidden");
             }
         }
 
-        // ✅ If the game has started
+        if (gameData.chat) {
+            var messages = Object.values(gameData.chat)
+                .map(msg => `<p>${msg}</p>`).join("");
+            document.getElementById("chatMessages").innerHTML = messages;
+        }
+
         if (gameData.status === "playing") {
             document.getElementById("waitingRoom").classList.add("hidden");
             document.getElementById("gameScreen").classList.remove("hidden");
 
-            document.getElementById("currentRound").innerText = gameData.round;
-            document.getElementById("totalRounds").innerText = gameData.totalRounds;
             document.getElementById("gameTerm").innerText = gameData.term;
             document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
-            // ✅ Display the correct definition only to the correct player
             if (gameData.roles[playerName] === "Correct Definition") {
                 document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
                 document.getElementById("correctDefinitionBox").classList.remove("hidden");
-            } else {
-                document.getElementById("correctDefinitionBox").classList.add("hidden");
-            }
-
-            // ✅ Show definition input box for Fake Definition players
-            if (gameData.roles[playerName] === "Fake Definition") {
+            } 
+            else if (gameData.roles[playerName] === "Fake Definition") {
                 document.getElementById("definitionInputBox").classList.remove("hidden");
-            } else {
-                document.getElementById("definitionInputBox").classList.add("hidden");
             }
 
-            // ✅ Show judge panel for the judge
+            // ✅ NEW: If Player is Judge, Show the Panel
             if (gameData.roles[playerName] === "Judge") {
                 document.getElementById("judgePanel").classList.remove("hidden");
-                displayDefinitionsForJudge();
-            } else {
-                document.getElementById("judgePanel").classList.add("hidden");
-            }
-
-            // ✅ Update time for all players (not just the host)
-            if (gameData.timeLeft !== undefined) {
-                document.getElementById("timeLeft").innerText = gameData.timeLeft + "s";
-
-                // Prevent duplicate intervals
-                if (!window.timerRunning) {
-                    window.timerRunning = true;
-                    clearInterval(timerInterval);
-                    startTimer(gameData.timeLeft);
-                }
+                displayJudgeOptions(gameData);
             }
         }
     });
 }
 
+function displayJudgeOptions(gameData) {
+    var players = Object.keys(gameData.players);
+    var judge = players.find(p => gameData.roles[p] === "Judge");
 
+    // ✅ Filter out the Judge from the selection
+    var selectablePlayers = players.filter(p => p !== judge);
 
+    // ✅ Create buttons for each player
+    var buttonsHTML = selectablePlayers.map(player =>
+        `<button onclick="judgeSelectPlayer('${player}')">${player}</button>`
+    ).join(" ");
 
-function displayDefinitionsForJudge() {
-    db.ref("games/" + gameCode + "/players").once("value", snapshot => {
-        var players = Object.keys(snapshot.val());
-        var judge = players.find(p => gameData.roles[p] === "Judge");
-
-        // ✅ Ensure the judge can only pick from players with Fake or Correct definitions
-        var selectablePlayers = players.filter(p => p !== judge && gameData.roles[p] !== "Judge");
-        
-        var buttonsHTML = selectablePlayers.map(player =>
-            `<button onclick="judgeSelectPlayer('${player}')">${player}</button>`
-        ).join(" ");
-
-        document.getElementById("judgeOptions").innerHTML = buttonsHTML;
-        document.getElementById("judgePanel").classList.remove("hidden");
-    });
+    document.getElementById("judgeOptions").innerHTML = buttonsHTML;
+    document.getElementById("judgePanel").classList.remove("hidden");
 }
-
 
 
 // ✅ Judge selects a player
 function judgeSelectPlayer(selectedPlayer) {
-    clearInterval(roundTimer); // Stop timer when judge selects
-
-    db.ref("games/" + gameCode).once("value", snapshot => {
-        let gameData = snapshot.val();
-        let currentRound = gameData.round;
-        let totalRounds = gameData.totalRounds;
-
-        if (currentRound < totalRounds) {
-            // Proceed to next round
-            db.ref("games/" + gameCode).update({
-                round: currentRound + 1
-            });
-            alert(`${selectedPlayer} was selected. Next round starts!`);
-            startNewRound();
-        } else {
-            // Game over
-            db.ref("games/" + gameCode).update({
-                status: "ended"
-            });
-            alert(`Game Over! ${selectedPlayer} was the final winner.`);
-        }
+    db.ref("games/" + gameCode).update({
+        winner: selectedPlayer
     });
+
+    alert(`Judge selected ${selectedPlayer} as the correct definition!`);
 }
 
 
 
+        function startGame() {
+            fetch("9upper_terms.json")
+                .then(response => response.json())
+                .then(terms => {
+                    db.ref("games/" + gameCode + "/players").once("value", snapshot => {
+                        var players = Object.keys(snapshot.val());
+                        if (players.length < 3) {
+                            alert("At least 3 players are needed to start the game!");
+                            return;
+                        }
 
-function startGame() {
-    fetch("9upper_terms.json")
-        .then(response => response.json())
-        .then(terms => {
-            db.ref("games/" + gameCode + "/players").once("value", snapshot => {
-                var players = Object.keys(snapshot.val());
-                if (players.length < 3) {
-                    alert("At least 3 players are needed to start the game!");
-                    return;
-                }
+                        var judge = players[Math.floor(Math.random() * players.length)];
+                        var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
 
-                var judge = players[Math.floor(Math.random() * players.length)];
-                var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
+                        var roles = {};
+                        players.forEach(p => roles[p] = "Fake Definition");
+                        roles[judge] = "Judge";
+                        roles[correctPlayer] = "Correct Definition";
 
-                var roles = {};
-                players.forEach(p => roles[p] = "Fake Definition");
-                roles[judge] = "Judge";
-                roles[correctPlayer] = "Correct Definition";
+                        var randomIndex = Math.floor(Math.random() * terms.length);
+                        var randomTerm = terms[randomIndex].term;
+                        var correctDefinition = terms[randomIndex].definition;
 
-                var randomIndex = Math.floor(Math.random() * terms.length);
-                var randomTerm = terms[randomIndex].term;
-                var correctDefinition = terms[randomIndex].definition;
-
-                db.ref("games/" + gameCode).update({
-                    status: "playing",
-                    term: randomTerm,
-                    correctDefinition: correctDefinition,
-                    roles: roles,
-                    timeLeft: roundTimeLimit // Add the selected time limit to the database
-                });
-
-                startTimer(roundTimeLimit); // Ensure the timer starts immediately
-            });
-        })
-        .catch(error => console.error("Error loading terms:", error));
-}
-
-var roundTimer;
-
-function startRoundTimer(timeLimit) {
-    let timeLeft = timeLimit * 60; // Convert minutes to seconds
-    document.getElementById("roundTimer").innerText = `Time Left: ${timeLeft}s`;
-
-    roundTimer = setInterval(() => {
-        timeLeft--;
-        document.getElementById("roundTimer").innerText = `Time Left: ${timeLeft}s`;
-
-        if (timeLeft <= 0) {
-            clearInterval(roundTimer);
-            endRound(); // Auto-end round if time runs out
+                        db.ref("games/" + gameCode).update({
+                            status: "playing",
+                            term: randomTerm,
+                            correctDefinition: correctDefinition,
+                            roles: roles
+                        });
+                    });
+                })
+                .catch(error => console.error("Error loading terms:", error));
         }
-    }, 1000); // Update every second
-}
-
-function startNewRound() {
-    fetch("9upper_terms.json")
-        .then(response => response.json())
-        .then(terms => {
-            db.ref("games/" + gameCode).once("value", snapshot => {
-                let gameData = snapshot.val();
-                let players = Object.keys(gameData.players);
-
-                let judge = players[Math.floor(Math.random() * players.length)];
-                let correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
-
-                let roles = {};
-                players.forEach(p => roles[p] = "Fake Definition");
-                roles[judge] = "Judge";
-                roles[correctPlayer] = "Correct Definition";
-
-                let randomIndex = Math.floor(Math.random() * terms.length);
-                let randomTerm = terms[randomIndex].term;
-                let correctDefinition = terms[randomIndex].definition;
-
-                db.ref("games/" + gameCode).update({
-                    term: randomTerm,
-                    correctDefinition: correctDefinition,
-                    roles: roles
-                });
-
-                startRoundTimer(gameData.timePerRound);
-            });
-        })
-        .catch(error => console.error("Error loading terms:", error));
-}
 
         function sendChatMessage() {
             var message = document.getElementById("chatInput").value.trim();
@@ -301,30 +206,6 @@ function startNewRound() {
             db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message);
             document.getElementById("chatInput").value = "";
         }
-        function updateRoundsDisplay() {
-    document.getElementById("roundsDisplay").innerText = document.getElementById("roundsSlider").value;
-}
-
-function updateTimeDisplay() {
-    document.getElementById("timeDisplay").innerText = document.getElementById("timeSlider").value;
-}
-function saveGameSettings() {
-    if (playerName !== gameData.host) {
-        alert("Only the host can set game settings!");
-        return;
-    }
-
-    let rounds = document.getElementById("roundsSlider").value;
-    let timePerRound = document.getElementById("timeSlider").value;
-
-    db.ref("games/" + gameCode).update({
-        rounds: parseInt(rounds),
-        timePerRound: parseInt(timePerRound)
-    });
-
-    alert("Game settings saved!");
-}
-
     </script>
 </head>
 <body>
@@ -345,51 +226,27 @@ function saveGameSettings() {
         <h2>Game Code: <span id="gameCodeDisplay"></span></h2>
 
         <div id="waitingRoom">
-    <h2>Players in Room</h2>
-    <div id="playerList"></div>
-
-    <!-- ✅ Game Settings (Only Host Can Adjust) -->
-    <div id="gameSettings" class="hidden">
-        <h3>Game Settings</h3>
-        
-        <label for="roundsSlider">Rounds:</label>
-        <input type="range" id="roundsSlider" min="5" max="20" step="5" value="10" 
-               oninput="updateRoundsDisplay()">
-        <span id="roundsDisplay">10</span>
-
-        <br><br>
-
-        <label for="timeSlider">Time per Round (minutes):</label>
-        <input type="range" id="timeSlider" min="1" max="10" step="1" value="5" 
-               oninput="updateTimeDisplay()">
-        <span id="timeDisplay">5</span>
-
-        <br><br>
-
-        <button id="saveSettingsButton" onclick="saveGameSettings()">Save Settings</button>
-    </div>
-
-    <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
-</div>
-
+            <h2>Players in Room</h2>
+            <div id="playerList"></div>
+            <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
+        </div>
 
 <div id="gameScreen" class="hidden">
-    <h3>Round <span id="currentRound"></span> of <span id="totalRounds"></span></h3>
-    <h3 id="roundTimer">Time Left: --</h3>
-    <h3>Term: <span id="gameTerm"></span></h3>
-    <h3>Your Role: <span id="playerRole"></span></h3>
+            <h3>Round 1</h3>
+            <h3>Term: <span id="gameTerm"></span></h3>
+            <h3>Your Role: <span id="playerRole"></span></h3>
+            <div id="correctDefinitionBox" class="hidden">
+                <h3>Correct Definition: <span id="correctDefinition"></span></h3>
 
-    <div id="correctDefinitionBox" class="hidden">
-        <h3>Correct Definition: <span id="correctDefinition"></span></h3>
-    </div>
 
-    <div id="judgePanel" class="hidden">
-        <h3>Judge: Pick the correct player</h3>
-        <div id="judgeOptions"></div>
-    </div>
+            </div>
 
+
+<div id="judgePanel" class="hidden">
+    <h3>Judge: Pick the correct player</h3>
+    <div id="judgeOptions"></div>
 </div>
-
+</div>
 
 
         <!-- ✅ Chatbox Added -->
