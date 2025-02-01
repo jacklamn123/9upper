@@ -169,13 +169,38 @@ function displayJudgeOptions(gameData) {
 
 
 // ✅ Judge selects a player
-function judgeSelectPlayer(selectedPlayer) {
+
+        function judgeSelectPlayer(selectedPlayer) {
+    // Stop the timer immediately
+    clearInterval(roundTimer);
+
     db.ref("games/" + gameCode).update({
-        winner: selectedPlayer
+        winner: selectedPlayer,
+        timeLeft: 0
     });
 
     alert(`Judge selected ${selectedPlayer} as the correct definition!`);
+
+    db.ref("games/" + gameCode + "/currentRound").once("value", snapshot => {
+        var round = snapshot.val();
+
+        db.ref("games/" + gameCode + "/totalRounds").once("value", totalSnapshot => {
+            var totalRounds = totalSnapshot.val();
+
+            if (round >= totalRounds) {
+                db.ref("games/" + gameCode).update({ status: "finished" });
+                alert("Game Over!");
+            } else {
+                fetch("9upper_terms.json")
+                    .then(response => response.json())
+                    .then(terms => {
+                        startNewRound(terms, round + 1, totalRounds, roundTime);
+                    });
+            }
+        });
+    });
 }
+
 
 
 
@@ -201,17 +226,90 @@ function judgeSelectPlayer(selectedPlayer) {
                         var randomIndex = Math.floor(Math.random() * terms.length);
                         var randomTerm = terms[randomIndex].term;
                         var correctDefinition = terms[randomIndex].definition;
+                        var totalRounds = gameData.totalRounds;
+                var roundTime = gameData.roundTime;
 
                         db.ref("games/" + gameCode).update({
                             status: "playing",
                             term: randomTerm,
                             correctDefinition: correctDefinition,
-                            roles: roles
+                            roles: roles,
+                            currentRound: 1,
+                    totalRounds: totalRounds,
+                    roundTime: roundTime
                         });
+                        startNewRound(terms, 1, totalRounds, roundTime);
                     });
                 })
                 .catch(error => console.error("Error loading terms:", error));
         }
+
+function startNewRound(terms, round, totalRounds, roundTime) {
+    db.ref("games/" + gameCode + "/players").once("value", snapshot => {
+        var players = Object.keys(snapshot.val());
+        if (players.length < 3) return;
+
+        var judge = players[Math.floor(Math.random() * players.length)];
+        var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
+
+        var roles = {};
+        players.forEach(p => roles[p] = "Fake Definition");
+        roles[judge] = "Judge";
+        roles[correctPlayer] = "Correct Definition";
+
+        var randomIndex = Math.floor(Math.random() * terms.length);
+        var randomTerm = terms[randomIndex].term;
+        var correctDefinition = terms[randomIndex].definition;
+
+        db.ref("games/" + gameCode).update({
+            currentRound: round,
+            term: randomTerm,
+            correctDefinition: correctDefinition,
+            roles: roles,
+            timeLeft: roundTime
+        });
+
+        startRoundTimer(roundTime, round, totalRounds);
+    });
+}
+        
+var roundTimer; // Declare timer globally so we can clear it
+
+function startRoundTimer(roundTime, round, totalRounds) {
+    roundTimer = setInterval(() => {
+        db.ref("games/" + gameCode).once("value", snapshot => {
+            var gameData = snapshot.val();
+            if (!gameData) return;
+
+            var timeLeft = gameData.timeLeft;
+            if (timeLeft <= 0 || gameData.winner) {  // ✅ Stop if time runs out OR if judge picked a player
+                clearInterval(roundTimer);
+                endRound(round, totalRounds);
+            } else {
+                db.ref("games/" + gameCode).update({
+                    timeLeft: timeLeft - 1
+                });
+            }
+        });
+    }, 1000);
+}
+function endRound(round, totalRounds) {
+    if (round >= totalRounds) {
+        db.ref("games/" + gameCode).update({
+            status: "finished"
+        });
+        alert("Game Over!");
+    } else {
+        fetch("9upper_terms.json")
+            .then(response => response.json())
+            .then(terms => {
+                startNewRound(terms, round + 1, totalRounds, roundTime);
+            });
+    }
+}
+
+
+
 
         function sendChatMessage() {
             var message = document.getElementById("chatInput").value.trim();
