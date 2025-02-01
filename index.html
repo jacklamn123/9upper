@@ -59,21 +59,29 @@
             document.getElementById("setupArea").classList.remove("hidden");
         }
 
-        function createGame() {
-            gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
-            db.ref("games/" + gameCode).set({
-                status: "waiting",
-                players: {},
-                host: playerName,
-                chat: {}
-            }).then(() => {
-                document.getElementById("gameCodeDisplay").innerText = gameCode;
-                document.getElementById("setupArea").classList.add("hidden");
-                document.getElementById("gameArea").classList.remove("hidden");
-                db.ref("games/" + gameCode + "/players/" + playerName).set(true);
-                listenForUpdates();
-            });
-        }
+   
+
+function createGame() {
+    gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+    var totalRounds = document.getElementById("roundsSlider").value;
+    var roundTime = document.getElementById("timeSlider").value;
+
+    db.ref("games/" + gameCode).set({
+        status: "waiting",
+        players: {},
+        host: playerName,
+        chat: {},
+        totalRounds: totalRounds,  // ✅ Store total rounds
+        roundTime: roundTime       // ✅ Store time per round
+    }).then(() => {
+        document.getElementById("gameCodeDisplay").innerText = gameCode;
+        document.getElementById("setupArea").classList.add("hidden");
+        document.getElementById("gameArea").classList.remove("hidden");
+        db.ref("games/" + gameCode + "/players/" + playerName).set(true);
+        listenForUpdates();
+    });
+}
+
 
         function joinGame() {
             gameCode = document.getElementById("gameCodeInput").value.toUpperCase();
@@ -103,8 +111,12 @@
             var playerList = Object.keys(gameData.players)
                 .map(name => `<li>${name}</li>`).join("");
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
-
+// ✅ Display total rounds & time per round for all players
+            document.getElementById("roundsValue").innerText = gameData.totalRounds;
+            document.getElementById("timeValue").innerText = gameData.roundTime;
+            
             if (gameData.host === playerName) {
+                document.getElementById("gameSettings").classList.remove("hidden");
                 document.getElementById("startGameButton").classList.remove("hidden");
             }
         }
@@ -207,6 +219,14 @@ function judgeSelectPlayer(selectedPlayer) {
             db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message);
             document.getElementById("chatInput").value = "";
         }
+function updateRounds() {
+    document.getElementById("roundsValue").innerText = document.getElementById("roundsSlider").value;
+}
+
+function updateTime() {
+    document.getElementById("timeValue").innerText = document.getElementById("timeSlider").value;
+}
+
     </script>
 </head>
 <body>
@@ -229,6 +249,19 @@ function judgeSelectPlayer(selectedPlayer) {
         <div id="waitingRoom">
             <h2>Players in Room</h2>
             <div id="playerList"></div>
+<!-- ✅ Game Settings for Host -->
+<div id="gameSettings" class="hidden">
+    <h3>Game Settings</h3>
+
+    <label for="roundsSlider">Rounds: <span id="roundsValue">5</span></label>
+    <input type="range" id="roundsSlider" min="5" max="20" step="5" value="5" oninput="updateRounds()">
+
+    <br>
+
+    <label for="timeSlider">Time per Round (seconds): <span id="timeValue">60</span></label>
+    <input type="range" id="timeSlider" min="60" max="600" step="30" value="60" oninput="updateTime()">
+</div>
+
             <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
         </div>
 
