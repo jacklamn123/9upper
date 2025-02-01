@@ -28,6 +28,325 @@
             background-color: #f0f0f0;
         }
     </style>
+
+    <script>
+        // ✅ Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB1PPLZl8380-xEpyVX3z8ya9eRji2H-uk",
+            authDomain: "upper-2c864.firebaseapp.com",
+            databaseURL: "https://upper-2c864-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "upper-2c864",
+            storageBucket: "upper-2c864.firebasestorage.app",
+            messagingSenderId: "1065732661608",
+            appId: "1:1065732661608:web:2db40ab8d60697b34f6dd",
+            measurementId: "G-F348XKS47Q"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        var gameCode = ""; 
+        var playerName = "";
+
+        function confirmName() {
+            playerName = document.getElementById("playerNameInput").value.trim();
+            if (playerName === "") {
+                alert("Please enter a valid name!");
+                return;
+            }
+            document.getElementById("nameInput").classList.add("hidden");
+            document.getElementById("setupArea").classList.remove("hidden");
+        }
+
+   
+
+function createGame() {
+    gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+    var totalRounds = document.getElementById("roundsSlider").value;
+    var roundTime = document.getElementById("timeSlider").value;
+
+    db.ref("games/" + gameCode).set({
+        status: "waiting",
+        players: {},
+        host: playerName,
+        chat: {},
+        totalRounds: totalRounds,  // ✅ Store total rounds
+        roundTime: roundTime       // ✅ Store time per round
+    }).then(() => {
+        document.getElementById("gameCodeDisplay").innerText = gameCode;
+        document.getElementById("setupArea").classList.add("hidden");
+        document.getElementById("gameArea").classList.remove("hidden");
+        db.ref("games/" + gameCode + "/players/" + playerName).set(true);
+        listenForUpdates();
+    });
+}
+
+
+        function joinGame() {
+            gameCode = document.getElementById("gameCodeInput").value.toUpperCase();
+            if (!gameCode) {
+                alert("Please enter a valid game code!");
+                return;
+            }
+            db.ref("games/" + gameCode).get().then(snapshot => {
+                if (snapshot.exists()) {
+                    document.getElementById("gameCodeDisplay").innerText = gameCode;
+                    document.getElementById("setupArea").classList.add("hidden");
+                    document.getElementById("gameArea").classList.remove("hidden");
+                    db.ref("games/" + gameCode + "/players/" + playerName).set(true);
+                    listenForUpdates();
+                } else {
+                    alert("Game not found!");
+                }
+            });
+        }
+
+        function listenForUpdates() {
+    db.ref("games/" + gameCode).on("value", snapshot => {
+        var gameData = snapshot.val();
+        if (!gameData) return;
+
+        if (gameData.players) {
+            var playerList = Object.keys(gameData.players)
+                .map(name => <li>${name}</li>).join("");
+            document.getElementById("playerList").innerHTML = <ul>${playerList}</ul>;
+// ✅ Display total rounds & time per round for all players
+            document.getElementById("roundsValue").innerText = gameData.totalRounds;
+            document.getElementById("timeValue").innerText = gameData.roundTime;
+            
+            if (gameData.host === playerName) {
+                document.getElementById("gameSettings").classList.remove("hidden");
+                document.getElementById("startGameButton").classList.remove("hidden");
+            }
+        }
+
+        if (gameData.chat) {
+            var messages = Object.values(gameData.chat)
+                .map(msg => <p>${msg}</p>).join("");
+            document.getElementById("chatMessages").innerHTML = messages;
+        }
+
+        if (gameData.status === "playing") {
+            document.getElementById("waitingRoom").classList.add("hidden");
+            document.getElementById("gameScreen").classList.remove("hidden");
+
+            document.getElementById("gameTerm").innerText = gameData.term;
+            document.getElementById("playerRole").innerText = gameData.roles[playerName];
+
+            if (gameData.roles[playerName] === "Correct Definition") {
+                document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
+                document.getElementById("correctDefinitionBox").classList.remove("hidden");
+            } 
+            else if (gameData.roles[playerName] === "Fake Definition") {
+                document.getElementById("definitionInputBox").classList.remove("hidden");
+            }
+
+            // ✅ NEW: If Player is Judge, Show the Panel
+            if (gameData.roles[playerName] === "Judge") {
+                document.getElementById("judgePanel").classList.remove("hidden");
+                displayJudgeOptions(gameData);
+            }
+        }
+    });
+}
+
+function displayJudgeOptions(gameData) {
+    var players = Object.keys(gameData.players);
+    var judge = players.find(p => gameData.roles[p] === "Judge");
+
+    // ✅ Filter out the Judge from the selection
+    var selectablePlayers = players.filter(p => p !== judge);
+
+    // ✅ Create buttons for each player
+    var buttonsHTML = selectablePlayers.map(player =>
+        <button onclick="judgeSelectPlayer('${player}')">${player}</button>
+    ).join(" ");
+
+    document.getElementById("judgeOptions").innerHTML = buttonsHTML;
+    document.getElementById("judgePanel").classList.remove("hidden");
+}
+
+
+// ✅ Judge selects a player
+
+        function judgeSelectPlayer(selectedPlayer) {
+    // Stop the timer immediately
+    clearInterval(roundTimer);
+
+    db.ref("games/" + gameCode).update({
+        winner: selectedPlayer,
+        timeLeft: 0
+    });
+
+    alert(Judge selected ${selectedPlayer} as the correct definition!);
+
+    db.ref("games/" + gameCode + "/currentRound").once("value", snapshot => {
+        var round = snapshot.val();
+
+        db.ref("games/" + gameCode + "/totalRounds").once("value", totalSnapshot => {
+            var totalRounds = totalSnapshot.val();
+
+            if (round >= totalRounds) {
+                db.ref("games/" + gameCode).update({ status: "finished" });
+                alert("Game Over!");
+            } else {
+                fetch("9upper_terms.json")
+                    .then(response => response.json())
+                    .then(terms => {
+                        startNewRound(terms, round + 1, totalRounds, roundTime);
+                    });
+            }
+        });
+    });
+}
+
+
+
+
+function startGame() {
+    db.ref("games/" + gameCode).once("value", snapshot => {
+        var gameData = snapshot.val();
+        if (!gameData) return;
+
+        var totalRounds = gameData.totalRounds;
+        var roundTime = gameData.roundTime;
+
+        fetch("9upper_terms.json")
+            .then(response => response.json())
+            .then(terms => {
+                db.ref("games/" + gameCode + "/players").once("value", playerSnapshot => {
+                    var players = Object.keys(playerSnapshot.val());
+                    if (players.length < 3) {
+                        alert("At least 3 players are needed to start the game!");
+                        return;
+                    }
+
+                    var judge = players[Math.floor(Math.random() * players.length)];
+                    var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
+
+                    var roles = {};
+                    players.forEach(p => roles[p] = "Fake Definition");
+                    roles[judge] = "Judge";
+                    roles[correctPlayer] = "Correct Definition";
+
+                    var randomIndex = Math.floor(Math.random() * terms.length);
+                    var randomTerm = terms[randomIndex].term;
+                    var correctDefinition = terms[randomIndex].definition;
+
+                    db.ref("games/" + gameCode).update({
+                        status: "playing",
+                        term: randomTerm,
+                        correctDefinition: correctDefinition,
+                        roles: roles,
+                        currentRound: 1,
+                        totalRounds: totalRounds,
+                        roundTime: roundTime
+                    });
+
+                    startNewRound(terms, 1, totalRounds, roundTime);
+                });
+            })
+            .catch(error => console.error("Error loading terms:", error));
+    });
+}
+          var roundTimer;
+
+function startNewRound(terms, round, totalRounds, roundTime) {
+    db.ref("games/" + gameCode + "/players").once("value", snapshot => {
+        var players = Object.keys(snapshot.val());
+        if (players.length < 3) return;
+
+        var judge = players[Math.floor(Math.random() * players.length)];
+        var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
+
+        var roles = {};
+        players.forEach(p => roles[p] = "Fake Definition");
+        roles[judge] = "Judge";
+        roles[correctPlayer] = "Correct Definition";
+
+        var randomIndex = Math.floor(Math.random() * terms.length);
+        var randomTerm = terms[randomIndex].term;
+        var correctDefinition = terms[randomIndex].definition;
+
+        // ✅ Fetch roundTime to ensure it exists before calling timer
+        db.ref("games/" + gameCode).once("value", gameSnapshot => {
+            var gameData = gameSnapshot.val();
+            var updatedRoundTime = gameData.roundTime || 60;  // Default to 60 seconds if undefined
+
+            db.ref("games/" + gameCode).update({
+                currentRound: round,
+                term: randomTerm,
+                correctDefinition: correctDefinition,
+                roles: roles,
+                timeLeft: updatedRoundTime  // ✅ Corrected round time
+            });
+
+            document.getElementById("currentRound").innerText = round;  // ✅ Update UI
+            startRoundTimer(updatedRoundTime, round, totalRounds);
+        });
+    });
+}
+
+
+function startRoundTimer(roundTime, round, totalRounds) {
+    roundTimer = setInterval(() => {
+        db.ref("games/" + gameCode).once("value", snapshot => {
+            var gameData = snapshot.val();
+            if (!gameData) return;
+
+            var timeLeft = gameData.timeLeft;
+
+            if (timeLeft <= 0 || gameData.winner) {  // ✅ Stop if time runs out OR if judge picked a player
+                clearInterval(roundTimer);
+                endRound(round, totalRounds);
+            } else {
+                db.ref("games/" + gameCode).update({
+                    timeLeft: timeLeft - 1
+                });
+                document.getElementById("timeLeft").innerText = timeLeft - 1;  // ✅ Update UI
+            }
+        });
+    }, 1000);
+}
+
+    function endRound(round, totalRounds) {
+        if (round >= totalRounds) {
+            db.ref("games/" + gameCode).update({
+                status: "finished"
+            });
+            alert("Game Over!");
+        } else {
+            db.ref("games/" + gameCode).once("value", snapshot => {
+                var gameData = snapshot.val();
+                if (!gameData) return;
+
+                var roundTime = gameData.roundTime;  // ✅ Fetch roundTime before calling startNewRound()
+
+                fetch("9upper_terms.json")
+                    .then(response => response.json())
+                    .then(terms => {
+                        startNewRound(terms, round + 1, totalRounds, roundTime);
+                    });
+            });
+        }
+    }
+
+
+        function sendChatMessage() {
+            var message = document.getElementById("chatInput").value.trim();
+            if (message === "") return;
+            db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message);
+            document.getElementById("chatInput").value = "";
+        }
+function updateRounds() {
+    document.getElementById("roundsValue").innerText = document.getElementById("roundsSlider").value;
+}
+
+function updateTime() {
+    document.getElementById("timeValue").innerText = document.getElementById("timeSlider").value;
+}
+
+    </script>
 </head>
 <body>
     <h1>9upper Online Multiplayer</h1>
@@ -49,34 +368,39 @@
         <div id="waitingRoom">
             <h2>Players in Room</h2>
             <div id="playerList"></div>
+<!-- ✅ Game Settings for Host -->
+<div id="gameSettings" class="hidden">
+    <h3>Game Settings</h3>
 
-            <!-- ✅ Game Settings for Host -->
-            <div id="gameSettings" class="hidden">
-                <h3>Game Settings</h3>
-                <label for="roundsSlider">Rounds: <span id="roundsValue">5</span></label>
-                <input type="range" id="roundsSlider" min="5" max="20" step="5" value="5" oninput="updateRounds()">
-                <br>
-                <label for="timeSlider">Time per Round (seconds): <span id="timeValue">60</span></label>
-                <input type="range" id="timeSlider" min="60" max="600" step="30" value="60" oninput="updateTime()">
-            </div>
+    <label for="roundsSlider">Rounds: <span id="roundsValue">5</span></label>
+    <input type="range" id="roundsSlider" min="5" max="20" step="5" value="5" oninput="updateRounds()">
+
+    <br>
+
+    <label for="timeSlider">Time per Round (seconds): <span id="timeValue">60</span></label>
+    <input type="range" id="timeSlider" min="60" max="600" step="30" value="60" oninput="updateTime()">
+</div>
 
             <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
         </div>
 
-        <div id="gameScreen" class="hidden">
-            <h3>Round <span id="currentRound"></span> of <span id="totalRounds"></span></h3>
-            <h3>Time Left: <span id="timeLeft"></span>s</h3>
+<div id="gameScreen" class="hidden">
+            <h3>Round 1</h3>
             <h3>Term: <span id="gameTerm"></span></h3>
             <h3>Your Role: <span id="playerRole"></span></h3>
             <div id="correctDefinitionBox" class="hidden">
                 <h3>Correct Definition: <span id="correctDefinition"></span></h3>
+
+
             </div>
 
-            <div id="judgePanel" class="hidden">
-                <h3>Judge: Pick the correct player</h3>
-                <div id="judgeOptions"></div>
-            </div>
-        </div>
+
+<div id="judgePanel" class="hidden">
+    <h3>Judge: Pick the correct player</h3>
+    <div id="judgeOptions"></div>
+</div>
+</div>
+
 
         <!-- ✅ Chatbox Added -->
         <div class="chatbox">
@@ -84,133 +408,7 @@
         </div>
         <input type="text" id="chatInput" placeholder="Type a message">
         <button onclick="sendChatMessage()">Send</button>
+
     </div>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            databaseURL: "YOUR_DATABASE_URL",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        var gameCode = ""; 
-        var playerName = "";
-        var roundTimer;
-
-        function confirmName() {
-            playerName = document.getElementById("playerNameInput").value.trim();
-            if (!playerName) {
-                alert("Please enter a valid name!");
-                return;
-            }
-            document.getElementById("nameInput").classList.add("hidden");
-            document.getElementById("setupArea").classList.remove("hidden");
-        }
-
-        function createGame() {
-            gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
-            var totalRounds = document.getElementById("roundsSlider").value;
-            var roundTime = document.getElementById("timeSlider").value;
-
-            db.ref("games/" + gameCode).set({
-                status: "waiting",
-                players: {},
-                host: playerName,
-                chat: {},
-                totalRounds: totalRounds,
-                roundTime: roundTime
-            }).then(() => {
-                document.getElementById("gameCodeDisplay").innerText = gameCode;
-                document.getElementById("setupArea").classList.add("hidden");
-                document.getElementById("gameArea").classList.remove("hidden");
-                db.ref("games/" + gameCode + "/players/" + playerName).set(true);
-                listenForUpdates();
-            });
-        }
-
-        function startGame() {
-            db.ref("games/" + gameCode).once("value", snapshot => {
-                var gameData = snapshot.val();
-                if (!gameData) return;
-
-                var totalRounds = gameData.totalRounds;
-                var roundTime = gameData.roundTime;
-
-                fetch("9upper_terms.json")
-                    .then(response => response.json())
-                    .then(terms => {
-                        startNewRound(terms, 1, totalRounds, roundTime);
-                    });
-            });
-        }
-
-        function startNewRound(terms, round, totalRounds, roundTime) {
-            db.ref("games/" + gameCode + "/players").once("value", snapshot => {
-                var players = Object.keys(snapshot.val());
-                if (players.length < 3) return;
-
-                var judge = players[Math.floor(Math.random() * players.length)];
-                var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
-
-                var roles = {};
-                players.forEach(p => roles[p] = "Fake Definition");
-                roles[judge] = "Judge";
-                roles[correctPlayer] = "Correct Definition";
-
-                var randomIndex = Math.floor(Math.random() * terms.length);
-                var randomTerm = terms[randomIndex].term;
-                var correctDefinition = terms[randomIndex].definition;
-
-                db.ref("games/" + gameCode).update({
-                    currentRound: round,
-                    term: randomTerm,
-                    correctDefinition: correctDefinition,
-                    roles: roles,
-                    timeLeft: roundTime
-                });
-
-                startRoundTimer(roundTime, round, totalRounds);
-            });
-        }
-
-        function startRoundTimer(roundTime, round, totalRounds) {
-            roundTimer = setInterval(() => {
-                db.ref("games/" + gameCode).once("value", snapshot => {
-                    var gameData = snapshot.val();
-                    if (!gameData) return;
-
-                    var timeLeft = gameData.timeLeft;
-                    if (timeLeft <= 0) {
-                        clearInterval(roundTimer);
-                        endRound(round, totalRounds);
-                    } else {
-                        db.ref("games/" + gameCode).update({
-                            timeLeft: timeLeft - 1
-                        });
-                    }
-                });
-            }, 1000);
-        }
-
-        function endRound(round, totalRounds) {
-            if (round >= totalRounds) {
-                db.ref("games/" + gameCode).update({ status: "finished" });
-                alert("Game Over!");
-            } else {
-                fetch("9upper_terms.json")
-                    .then(response => response.json())
-                    .then(terms => {
-                        startNewRound(terms, round + 1, totalRounds, roundTime);
-                    });
-            }
-        }
-    </script>
 </body>
 </html>
