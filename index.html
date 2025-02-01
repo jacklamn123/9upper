@@ -154,17 +154,23 @@ function displayJudgeOptions(gameData) {
     var players = Object.keys(gameData.players);
     var judge = players.find(p => gameData.roles[p] === "Judge");
 
-    // ✅ Filter out the Judge from the selection
+    if (playerName !== judge) {
+        // ✅ Hide judge panel for non-judges
+        document.getElementById("judgePanel").classList.add("hidden");
+        return;
+    }
+
+    // ✅ If the player is the judge, display the panel
     var selectablePlayers = players.filter(p => p !== judge);
 
-    // ✅ Create buttons for each player
     var buttonsHTML = selectablePlayers.map(player =>
         `<button onclick="judgeSelectPlayer('${player}')">${player}</button>`
     ).join(" ");
 
     document.getElementById("judgeOptions").innerHTML = buttonsHTML;
-    document.getElementById("judgePanel").classList.remove("hidden");
+    document.getElementById("judgePanel").classList.remove("hidden"); // ✅ Show only for Judge
 }
+
 
 
 // ✅ Judge selects a player
