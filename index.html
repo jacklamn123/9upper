@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>9upper Online</title>
 
-    <!-- ✅ Correct Firebase CDN Scripts (No import statements) -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+    <!-- ✅ Correct Firebase CDN Scripts (DO NOT use import statements) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
         body {
@@ -54,7 +54,7 @@
     <!-- ✅ Ensure Firebase is Initialized Before Using It -->
     <script>
         // ✅ Firebase Configuration
-        const firebaseConfig = {
+        var firebaseConfig = {
             apiKey: "AIzaSyBlPPLZl8380-xEpyVX3z8ya9eRji2H-uk",
             authDomain: "upper-2c864.firebaseapp.com",
             databaseURL: "https://upper-2c864.firebaseio.com",
@@ -67,26 +67,28 @@
 
         // ✅ Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();  // ✅ Firebase Now Defined
+        var db = firebase.database();  // ✅ Firebase Now Defined
 
-        let gameCode = ""; 
-        let playerName = "Player" + Math.floor(Math.random() * 1000);
-        const terms = ["Gobbledegook", "Zzyzx", "Faff", "Dullsville", "Nowheresville", "Flibbertigibbet", "Peculiar Knob", "Curmudgeon", "Why, Arizona", "Chinwag", "Bumfuzzle", "Snollygoster", "Wagga Wagga", "Lollygag", "Llanfairpwllgwyngyll", "Discombobulate", "Bonkers", "Taradiddle", "Absquatulate", "Gadzooks"];
+        var gameCode = ""; 
+        var playerName = "Player" + Math.floor(Math.random() * 1000);
+        var terms = ["Gobbledegook", "Zzyzx", "Faff", "Dullsville", "Nowheresville", "Flibbertigibbet", "Peculiar Knob", "Curmudgeon", "Why, Arizona", "Chinwag", "Bumfuzzle", "Snollygoster", "Wagga Wagga", "Lollygag", "Llanfairpwllgwyngyll", "Discombobulate", "Bonkers", "Taradiddle", "Absquatulate", "Gadzooks"];
 
         function createGame() {
             gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
-            const randomTerm = terms[Math.floor(Math.random() * terms.length)];
+            var randomTerm = terms[Math.floor(Math.random() * terms.length)];
             db.ref("games/" + gameCode).set({
                 round: 1,
                 term: randomTerm,
                 definitions: {},
                 judge: "",
                 status: "waiting"
-            }).then(() => {
+            }).then(function() {
                 document.getElementById("gameCodeDisplay").innerText = gameCode;
                 document.getElementById("setupArea").classList.add("hidden");
                 document.getElementById("gameArea").classList.remove("hidden");
-            }).catch(error => console.error("Database Error:", error));
+            }).catch(function(error) {
+                console.error("Database Error:", error);
+            });
         }
 
         function joinGame() {
@@ -95,7 +97,7 @@
                 alert("Please enter a valid game code!");
                 return;
             }
-            db.ref("games/" + gameCode).get().then(snapshot => {
+            db.ref("games/" + gameCode).get().then(function(snapshot) {
                 if (snapshot.exists()) {
                     document.getElementById("gameCodeDisplay").innerText = gameCode;
                     document.getElementById("setupArea").classList.add("hidden");
@@ -104,21 +106,23 @@
                 } else {
                     alert("Game not found!");
                 }
-            }).catch(error => {
+            }).catch(function(error) {
                 console.error("Firebase Error:", error);
             });
         }
 
         function submitDefinition() {
-            let definition = document.getElementById("playerDefinition").value;
+            var definition = document.getElementById("playerDefinition").value;
             db.ref("games/" + gameCode + "/definitions/").push({ player: playerName, definition: definition });
         }
 
         function listenForUpdates() {
-            db.ref("games/" + gameCode + "/definitions").on("value", snapshot => {
-                const definitions = snapshot.val();
+            db.ref("games/" + gameCode + "/definitions").on("value", function(snapshot) {
+                var definitions = snapshot.val();
                 if (definitions) {
-                    document.getElementById("judgeOptions").innerHTML = Object.values(definitions).map(def => `<div class='definition-box' onclick='judgePick("${def.definition}")'>${def.definition}</div>`).join("");
+                    document.getElementById("judgeOptions").innerHTML = Object.values(definitions).map(function(def) {
+                        return `<div class='definition-box' onclick='judgePick("${def.definition}")'>${def.definition}</div>`;
+                    }).join("");
                     document.getElementById("judgeDecision").classList.remove("hidden");
                 }
             });
@@ -132,7 +136,7 @@
         }
 
         function nextRound() {
-            const randomTerm = terms[Math.floor(Math.random() * terms.length)];
+            var randomTerm = terms[Math.floor(Math.random() * terms.length)];
             db.ref("games/" + gameCode).update({
                 round: firebase.database.ServerValue.increment(1),
                 term: randomTerm,
