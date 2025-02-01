@@ -58,21 +58,24 @@
             document.getElementById("setupArea").classList.remove("hidden");
         }
 
-        function createGame() {
-            gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
-            db.ref("games/" + gameCode).set({
-                status: "waiting",
-                players: {},
-                host: playerName,
-                chat: {}
-            }).then(() => {
-                document.getElementById("gameCodeDisplay").innerText = gameCode;
-                document.getElementById("setupArea").classList.add("hidden");
-                document.getElementById("gameArea").classList.remove("hidden");
-                db.ref("games/" + gameCode + "/players/" + playerName).set(true);
-                listenForUpdates();
-            });
-        }
+function createGame() {
+    gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+    db.ref("games/" + gameCode).set({
+        status: "waiting",
+        players: {},
+        host: playerName,
+        chat: {},
+        totalRounds: 5,   // Default rounds
+        timePerRound: 1,  // Default time per round
+    }).then(() => {
+        document.getElementById("gameCodeDisplay").innerText = gameCode;
+        document.getElementById("setupArea").classList.add("hidden");
+        document.getElementById("gameArea").classList.remove("hidden");
+        db.ref("games/" + gameCode + "/players/" + playerName).set(true);
+        listenForUpdates();
+    });
+}
+
 
         function joinGame() {
             gameCode = document.getElementById("gameCodeInput").value.toUpperCase();
@@ -93,7 +96,7 @@
             });
         }
 
-        function listenForUpdates() {
+    function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
@@ -104,20 +107,17 @@
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
 
             if (gameData.host === playerName) {
+                document.getElementById("gameSettings").classList.remove("hidden");
                 document.getElementById("startGameButton").classList.remove("hidden");
             }
-        }
-
-        if (gameData.chat) {
-            var messages = Object.values(gameData.chat)
-                .map(msg => `<p>${msg}</p>`).join("");
-            document.getElementById("chatMessages").innerHTML = messages;
         }
 
         if (gameData.status === "playing") {
             document.getElementById("waitingRoom").classList.add("hidden");
             document.getElementById("gameScreen").classList.remove("hidden");
 
+            document.getElementById("currentRound").innerText = gameData.round;
+            document.getElementById("totalRounds").innerText = gameData.totalRounds;
             document.getElementById("gameTerm").innerText = gameData.term;
             document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
@@ -125,14 +125,22 @@
                 document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
                 document.getElementById("correctDefinitionBox").classList.remove("hidden");
             } 
-            else if (gameData.roles[playerName] === "Fake Definition") {
-                document.getElementById("definitionInputBox").classList.remove("hidden");
-            }
 
-            // ✅ NEW: If Player is Judge, Show the Panel
             if (gameData.roles[playerName] === "Judge") {
                 document.getElementById("judgePanel").classList.remove("hidden");
                 displayJudgeOptions(gameData);
+            }
+
+            // ✅ Update and Start Timer for all players
+            if (gameData.timeLeft !== undefined) {
+                document.getElementById("timeLeft").innerText = gameData.timeLeft + "s";
+
+                // Prevent duplicate intervals
+                if (!window.timerRunning) {
+                    window.timerRunning = true;
+                    clearInterval(timerInterval);
+                    startTimer(gameData.timeLeft);
+                }
             }
         }
     });
@@ -162,43 +170,75 @@ function judgeSelectPlayer(selectedPlayer) {
     });
 
     alert(`Judge selected ${selectedPlayer} as the correct definition!`);
+    endRound(); // End round when judge selects a player
+}
+
+function endRound() {
+    db.ref("games/" + gameCode).once("value").then(snapshot => {
+        var gameData = snapshot.val();
+        if (!gameData) return;
+
+        if (gameData.round >= gameData.totalRounds) {
+            alert("Game Over!");
+            db.ref("games/" + gameCode).update({ status: "ended" });
+        } else {
+            let newRound = gameData.round + 1;
+            let newTime = gameData.timePerRound;
+            
+            db.ref("games/" + gameCode).update({
+                round: newRound,
+                timeLeft: newTime
+            });
+
+            startTimer(newTime);
+        }
+    });
 }
 
 
 
-        function startGame() {
-            fetch("9upper_terms.json")
-                .then(response => response.json())
-                .then(terms => {
-                    db.ref("games/" + gameCode + "/players").once("value", snapshot => {
-                        var players = Object.keys(snapshot.val());
-                        if (players.length < 3) {
-                            alert("At least 3 players are needed to start the game!");
-                            return;
-                        }
+ function startGame() {
+    let selectedRounds = parseInt(document.getElementById("roundsSlider").value);
+    let selectedTime = parseInt(document.getElementById("timeSlider").value) * 60; // Convert to seconds
 
-                        var judge = players[Math.floor(Math.random() * players.length)];
-                        var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
+    fetch("9upper_terms.json")
+        .then(response => response.json())
+        .then(terms => {
+            db.ref("games/" + gameCode + "/players").once("value", snapshot => {
+                var players = Object.keys(snapshot.val());
+                if (players.length < 3) {
+                    alert("At least 3 players are needed to start the game!");
+                    return;
+                }
 
-                        var roles = {};
-                        players.forEach(p => roles[p] = "Fake Definition");
-                        roles[judge] = "Judge";
-                        roles[correctPlayer] = "Correct Definition";
+                var judge = players[Math.floor(Math.random() * players.length)];
+                var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
 
-                        var randomIndex = Math.floor(Math.random() * terms.length);
-                        var randomTerm = terms[randomIndex].term;
-                        var correctDefinition = terms[randomIndex].definition;
+                var roles = {};
+                players.forEach(p => roles[p] = "Fake Definition");
+                roles[judge] = "Judge";
+                roles[correctPlayer] = "Correct Definition";
 
-                        db.ref("games/" + gameCode).update({
-                            status: "playing",
-                            term: randomTerm,
-                            correctDefinition: correctDefinition,
-                            roles: roles
-                        });
-                    });
-                })
-                .catch(error => console.error("Error loading terms:", error));
-        }
+                var randomIndex = Math.floor(Math.random() * terms.length);
+                var randomTerm = terms[randomIndex].term;
+                var correctDefinition = terms[randomIndex].definition;
+
+                db.ref("games/" + gameCode).update({
+                    status: "playing",
+                    totalRounds: selectedRounds,
+                    round: 1,
+                    timePerRound: selectedTime,
+                    timeLeft: selectedTime,
+                    term: randomTerm,
+                    correctDefinition: correctDefinition,
+                    roles: roles
+                });
+
+                startTimer(selectedTime);
+            });
+        })
+        .catch(error => console.error("Error loading terms:", error));
+}
 
         function sendChatMessage() {
             var message = document.getElementById("chatInput").value.trim();
@@ -206,6 +246,21 @@ function judgeSelectPlayer(selectedPlayer) {
             db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message);
             document.getElementById("chatInput").value = "";
         }
+function startTimer(duration) {
+    let timeRemaining = duration;
+    timerInterval = setInterval(() => {
+        if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            window.timerRunning = false;
+            endRound(); // Auto-end round if timer reaches 0
+        } else {
+            timeRemaining--;
+            db.ref("games/" + gameCode).update({ timeLeft: timeRemaining });
+        }
+    }, 1000);
+}
+
+
     </script>
 </head>
 <body>
@@ -228,6 +283,17 @@ function judgeSelectPlayer(selectedPlayer) {
         <div id="waitingRoom">
             <h2>Players in Room</h2>
             <div id="playerList"></div>
+<div id="gameSettings" class="hidden">
+    <h3>Game Settings (Only Host Can Set)</h3>
+    
+    <label>Number of Rounds: <span id="roundsDisplay">5</span></label>
+    <input type="range" id="roundsSlider" min="5" max="20" value="5" step="5" 
+           oninput="document.getElementById('roundsDisplay').innerText = this.value">
+    
+    <label>Time Per Round (mins): <span id="timeDisplay">1</span></label>
+    <input type="range" id="timeSlider" min="1" max="10" value="1" step="1" 
+           oninput="document.getElementById('timeDisplay').innerText = this.value">
+</div>
             <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
         </div>
 
