@@ -108,7 +108,7 @@ function createGame() {
 
         if (gameData.players) {
             var playerList = Object.keys(gameData.players)
-                .map(name => <li>${name}</li>).join("");
+                .map(name => `<li>${name}</li>`).join("");
             document.getElementById("playerList").innerHTML = <ul>${playerList}</ul>;
 // ✅ Display total rounds & time per round for all players
             document.getElementById("roundsValue").innerText = gameData.totalRounds;
