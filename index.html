@@ -94,45 +94,47 @@
         }
 
         function listenForUpdates() {
-            db.ref("games/" + gameCode).on("value", snapshot => {
-                var gameData = snapshot.val();
-                if (!gameData) return;
+    db.ref("games/" + gameCode).on("value", snapshot => {
+        var gameData = snapshot.val();
+        if (!gameData) return;
 
-                if (gameData.players) {
-                    var playerList = Object.keys(gameData.players).map(name => <li>${name}</li>).join("");
-                    document.getElementById("playerList").innerHTML = <ul>${playerList}</ul>;
+        if (gameData.players) {
+            var playerList = Object.keys(gameData.players).map(name => `<li>${name}</li>`).join("");
+            document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
 
-                    if (gameData.host === playerName) {
-                        document.getElementById("startGameButton").classList.remove("hidden");
-                    }
-                }
+            if (gameData.host === playerName) {
+                document.getElementById("startGameButton").classList.remove("hidden");
+            }
+        }
 
-                if (gameData.chat) {
-                    var messages = Object.values(gameData.chat).map(msg => <p>${msg}</p>).join("");
-                    document.getElementById("chatMessages").innerHTML = messages;
-                }
+        if (gameData.chat) {
+            var messages = Object.values(gameData.chat).map(msg => `<p>${msg}</p>`).join("");
+            document.getElementById("chatMessages").innerHTML = messages;
+        }
 
-                if (gameData.status === "playing") {
-                    document.getElementById("waitingRoom").classList.add("hidden");
-                    document.getElementById("gameScreen").classList.remove("hidden");
+        if (gameData.status === "playing") {
+            document.getElementById("waitingRoom").classList.add("hidden");
+            document.getElementById("gameScreen").classList.remove("hidden");
 
-                    document.getElementById("gameTerm").innerText = gameData.term;
-                    document.getElementById("playerRole").innerText = gameData.roles[playerName];
+            document.getElementById("gameTerm").innerText = gameData.term;
+            document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
-                    if (gameData.roles[playerName] === "Correct Definition") {
-                        document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
-                        document.getElementById("correctDefinitionBox").classList.remove("hidden");
-                    } else if (gameData.roles[playerName] === "Fake Definition") {
-                        document.getElementById("definitionInputBox").classList.remove("hidden");
-                    }
-                    // ✅ NEW: Show judge panel when the player is a judge
+            if (gameData.roles[playerName] === "Correct Definition") {
+                document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
+                document.getElementById("correctDefinitionBox").classList.remove("hidden");
+            } else if (gameData.roles[playerName] === "Fake Definition") {
+                document.getElementById("definitionInputBox").classList.remove("hidden");
+            }
+
+            // ✅ NEW: Show judge panel when the player is a judge
             if (gameData.roles[playerName] === "Judge") {
                 document.getElementById("judgePanel").classList.remove("hidden");
                 displayDefinitionsForJudge();
             }
-                }
-            });
         }
+    });
+}
+
 function displayDefinitionsForJudge() {
     db.ref("games/" + gameCode + "/players").once("value", snapshot => {
         var players = Object.keys(snapshot.val());
