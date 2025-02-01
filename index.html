@@ -154,8 +154,9 @@ function createGame() {
 
 function displayJudgeOptions(gameData) {
     var judge = Object.keys(gameData.players).find(p => gameData.roles[p] === "Judge");
+    var playerRole = gameData.roles[playerName];
 
-    if (gameData.roles[playerName] === "Judge") {
+    if (playerRole === "Judge") {
         // ✅ Show judge panel only if the player is the judge
         document.getElementById("judgePanel").classList.remove("hidden");
 
@@ -166,12 +167,14 @@ function displayJudgeOptions(gameData) {
         ).join(" ");
 
         document.getElementById("judgeOptions").innerHTML = buttonsHTML;
-    } else {
-        // ✅ Hide for everyone else, ensuring it's re-hidden if role changes
+    } 
+    else if (playerRole === "Correct Definition" || playerRole === "Fake Definition") {
+        // ✅ Explicitly hide panel for Correct Definition & Fake Definition players
         document.getElementById("judgePanel").classList.add("hidden");
         document.getElementById("judgeOptions").innerHTML = ""; // Clear buttons
     }
 }
+
 
 
 
