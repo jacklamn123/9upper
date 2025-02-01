@@ -71,6 +71,8 @@
         <div id="gameContent" class="hidden">
             <h3 id="roundInfo"></h3>
             <div id="termDisplay"></div>
+            <h3>Your Role: <span id="playerRole"></span></h3>
+            
             <div id="definitionForm" class="hidden">
                 <textarea id="playerDefinition" placeholder="Enter your definition..."></textarea>
                 <button onclick="submitDefinition()">Submit</button>
@@ -146,7 +148,6 @@
                     var playerList = Object.keys(gameData.players).map(name => `<li>${name}</li>`).join("");
                     document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
 
-                    // ✅ Only the host sees the "Start Game" button
                     if (gameData.host === playerName) {
                         document.getElementById("startGameButton").classList.remove("hidden");
                     }
@@ -157,30 +158,34 @@
                     document.getElementById("gameContent").classList.remove("hidden");
                     document.getElementById("roundInfo").innerText = "Round " + gameData.round;
                     document.getElementById("termDisplay").innerHTML = `<h3>Term: ${gameData.term}</h3>`;
+                    document.getElementById("playerRole").innerText = gameData.roles[playerName];
+
+                    if (gameData.roles[playerName] === "Judge") {
+                        document.getElementById("judgeDecision").classList.remove("hidden");
+                    } else if (gameData.roles[playerName] === "Fake Definition") {
+                        document.getElementById("definitionForm").classList.remove("hidden");
+                    }
                 }
             });
         }
 
         function startGame() {
-            var randomTerm = terms[Math.floor(Math.random() * terms.length)];
-            db.ref("games/" + gameCode).update({
-                status: "playing",
-                term: randomTerm
-            });
-        }
+            var players = [];
+            db.ref("games/" + gameCode + "/players").once("value", function(snapshot) {
+                players = Object.keys(snapshot.val());
+                var judge = players[Math.floor(Math.random() * players.length)];
+                var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
 
-        function submitDefinition() {
-            var definition = document.getElementById("playerDefinition").value;
-            db.ref("games/" + gameCode + "/definitions/").push({ player: playerName, definition: definition });
-        }
+                var roles = {};
+                players.forEach(p => roles[p] = "Fake Definition");
+                roles[judge] = "Judge";
+                roles[correctPlayer] = "Correct Definition";
 
-        function nextRound() {
-            var randomTerm = terms[Math.floor(Math.random() * terms.length)];
-            db.ref("games/" + gameCode).update({
-                round: firebase.database.ServerValue.increment(1),
-                term: randomTerm,
-                definitions: {},
-                status: "playing"
+                db.ref("games/" + gameCode).update({
+                    status: "playing",
+                    term: terms[Math.floor(Math.random() * terms.length)],
+                    roles: roles
+                });
             });
         }
     </script>
