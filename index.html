@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>9upper Online</title>
 
-    <!-- ✅ Firebase Scripts (DO NOT use import statements) -->
+    <!-- ✅ Load Firebase Scripts Once (In <head>) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -25,6 +25,23 @@
             background-color: #f0f0f0;
         }
     </style>
+
+    <script>
+        // ✅ Initialize Firebase Before Using It
+        const firebaseConfig = {
+            apiKey: "AIzaSyB1PPLZl8380-xEpyVX3z8ya9eRji2H-uk",
+            authDomain: "upper-2c864.firebaseapp.com",
+            databaseURL: "https://upper-2c864-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "upper-2c864",
+            storageBucket: "upper-2c864.firebasestorage.app",
+            messagingSenderId: "1065732661608",
+            appId: "1:1065732661608:web:2db40ab8d60697b34f6dd",
+            measurementId: "G-F348XKS47Q"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+    </script>
 </head>
 <body>
     <h1>9upper Online Multiplayer</h1>
@@ -51,10 +68,7 @@
         <button id="nextRound" class="hidden" onclick="nextRound()">Next Round</button>
     </div>
 
-    <!-- ✅ Load Firebase Config -->
-    <script src="firebase-config.js"></script>
-
-    <!-- ✅ Game Logic Below -->
+    <!-- ✅ Game Logic (After Firebase Initialization) -->
     <script>
         var gameCode = ""; 
         var playerName = "Player" + Math.floor(Math.random() * 1000);
@@ -133,22 +147,4 @@
         }
     </script>
 </body>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyB1PPLZl8380-xEpyVX3z8ya9eRji2H-uk",
-        authDomain: "upper-2c864.firebaseapp.com",
-        databaseURL: "https://upper-2c864-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "upper-2c864",
-        storageBucket: "upper-2c864.firebasestorage.app",
-        messagingSenderId: "1065732661608",
-        appId: "1:1065732661608:web:2db40ab8d60697b34f6dd",
-        measurementId: "G-F348XKS47Q"
-    };
-    
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-</script>
-
 </html>
