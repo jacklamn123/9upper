@@ -300,6 +300,7 @@ function startRoundTimer(roundTime, round, totalRounds) {
         });
     }, 1000);
 }
+
 function endRound(round, totalRounds) {
     if (round >= totalRounds) {
         db.ref("games/" + gameCode).update({
@@ -307,14 +308,20 @@ function endRound(round, totalRounds) {
         });
         alert("Game Over!");
     } else {
-        fetch("9upper_terms.json")
-            .then(response => response.json())
-            .then(terms => {
-                startNewRound(terms, round + 1, totalRounds, roundTime);
-            });
+        db.ref("games/" + gameCode).once("value", snapshot => {
+            var gameData = snapshot.val();
+            if (!gameData) return;
+
+            var roundTime = gameData.roundTime;  // ✅ Get roundTime from Firebase
+
+            fetch("9upper_terms.json")
+                .then(response => response.json())
+                .then(terms => {
+                    startNewRound(terms, round + 1, totalRounds, roundTime);
+                });
+        });
     }
 }
-
 
 
 
