@@ -99,8 +99,10 @@
                 if (!gameData) return;
 
                 if (gameData.players) {
-                    var playerList = Object.keys(gameData.players).map(name => `<li>${name}</li>`).join("");
-                    document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
+                    var playerList = Object.keys(gameData.players).map(name => 
+                        `<button onclick="judgePick('${name}')">${name}</button>`
+                    ).join(" ");
+                    document.getElementById("playerList").innerHTML = playerList;
 
                     if (gameData.host === playerName) {
                         document.getElementById("startGameButton").classList.remove("hidden");
@@ -122,8 +124,8 @@
                     if (gameData.roles[playerName] === "Correct Definition") {
                         document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
                         document.getElementById("correctDefinitionBox").classList.remove("hidden");
-                    } else if (gameData.roles[playerName] === "Fake Definition") {
-                        document.getElementById("definitionInputBox").classList.remove("hidden");
+                    } else if (gameData.roles[playerName] === "Judge") {
+                        document.getElementById("judgePanel").classList.remove("hidden");
                     }
                 }
             });
@@ -163,6 +165,11 @@
                 .catch(error => console.error("Error loading terms:", error));
         }
 
+        function judgePick(selectedPlayer) {
+            db.ref("games/" + gameCode).update({ selectedCorrectPlayer: selectedPlayer });
+            alert("Judge picked: " + selectedPlayer);
+        }
+
         function sendChatMessage() {
             var message = document.getElementById("chatInput").value.trim();
             if (message === "") return;
@@ -198,18 +205,17 @@
             <h3>Round 1</h3>
             <h3>Term: <span id="gameTerm"></span></h3>
             <h3>Your Role: <span id="playerRole"></span></h3>
-            <div id="correctDefinitionBox" class="hidden">
-                <h3>Correct Definition: <span id="correctDefinition"></span></h3>
+            <div id="judgePanel" class="hidden">
+                <h3>Judge: Pick the correct player</h3>
+                <div id="playerList"></div>
             </div>
         </div>
 
-        <!-- ✅ Chatbox Added -->
         <div class="chatbox">
             <div id="chatMessages"></div>
         </div>
         <input type="text" id="chatInput" placeholder="Type a message">
         <button onclick="sendChatMessage()">Send</button>
-
     </div>
 </body>
 </html>
