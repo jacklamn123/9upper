@@ -17,6 +17,16 @@
         .hidden {
             display: none;
         }
+        .chatbox {
+            width: 300px;
+            height: 200px;
+            border: 1px solid black;
+            overflow-y: auto;
+            margin: 10px auto;
+            text-align: left;
+            padding: 5px;
+            background-color: #f0f0f0;
+        }
         .definition-box {
             border: 1px solid #000;
             padding: 10px;
@@ -67,6 +77,14 @@
             <div id="playerList"></div>
             <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
         </div>
+
+        <!-- ✅ Chatbox -->
+        <div class="chatbox" id="chatbox">
+            <h3>Chat</h3>
+            <div id="chatMessages"></div>
+        </div>
+        <input type="text" id="chatInput" placeholder="Type a message...">
+        <button onclick="sendChatMessage()">Send</button>
 
         <!-- ✅ Game Screen -->
         <div id="gameScreen" class="hidden">
@@ -140,18 +158,15 @@
                 var gameData = snapshot.val();
                 if (!gameData) return;
 
-                // ✅ Update player list
                 if (gameData.players) {
                     var playerList = Object.keys(gameData.players).map(name => `<li>${name}</li>`).join("");
                     document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
 
-                    // ✅ If host, show start game button
                     if (gameData.host === playerName) {
                         document.getElementById("startGameButton").classList.remove("hidden");
                     }
                 }
 
-                // ✅ If game has started, show roles
                 if (gameData.status === "playing") {
                     document.getElementById("waitingRoom").classList.add("hidden");
                     document.getElementById("gameScreen").classList.remove("hidden");
@@ -162,39 +177,28 @@
                     if (gameData.roles[playerName] === "Correct Definition") {
                         document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
                         document.getElementById("correctDefinitionBox").classList.remove("hidden");
+                    } else if (gameData.roles[playerName] === "Fake Definition") {
+                        document.getElementById("definitionInputBox").classList.remove("hidden");
                     }
                 }
             });
+
+            db.ref("games/" + gameCode + "/chat").on("child_added", function(snapshot) {
+                document.getElementById("chatMessages").innerHTML += `<p>${snapshot.val()}</p>`;
+            });
         }
 
-        function startGame() {
-            db.ref("games/" + gameCode + "/players").once("value", function(snapshot) {
-                var players = Object.keys(snapshot.val());
-                if (players.length < 3) {
-                    alert("At least 3 players are needed to start the game!");
-                    return;
-                }
+        function sendChatMessage() {
+            var message = document.getElementById("chatInput").value.trim();
+            if (message === "") return;
+            db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message);
+            document.getElementById("chatInput").value = "";
+        }
 
-                var judge = players[Math.floor(Math.random() * players.length)];
-                var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
-
-                var roles = {};
-                players.forEach(p => roles[p] = "Fake Definition");
-                roles[judge] = "Judge";
-                roles[correctPlayer] = "Correct Definition";
-
-                var terms = { "Bonkers": "Crazy or absurd behavior." };
-                var termKeys = Object.keys(terms);
-                var randomTerm = termKeys[Math.floor(Math.random() * termKeys.length)];
-                var correctDefinition = terms[randomTerm];
-
-                db.ref("games/" + gameCode).update({
-                    status: "playing",
-                    term: randomTerm,
-                    correctDefinition: correctDefinition,
-                    roles: roles
-                });
-            });
+        function submitFakeDefinition() {
+            var definition = document.getElementById("fakeDefinitionInput").value;
+            db.ref("games/" + gameCode + "/definitions/").push(definition);
+            sendChatMessage(); // Also add it to chat
         }
     </script>
 </body>
