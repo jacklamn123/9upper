@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>9upper Online</title>
 
-    <!-- ✅ Load Firebase Scripts Once (In <head>) -->
+    <!-- ✅ Load Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -27,7 +27,7 @@
     </style>
 
     <script>
-        // ✅ Initialize Firebase Before Using It
+        // ✅ Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyB1PPLZl8380-xEpyVX3z8ya9eRji2H-uk",
             authDomain: "upper-2c864.firebaseapp.com",
@@ -45,17 +45,24 @@
 </head>
 <body>
     <h1>9upper Online Multiplayer</h1>
-    
+
     <div id="setupArea">
         <button onclick="createGame()">Create Game</button>
         <input type="text" id="gameCodeInput" placeholder="Enter Game Code">
         <button onclick="joinGame()">Join Game</button>
     </div>
-    
+
     <div id="gameArea" class="hidden">
         <h2>Game Code: <span id="gameCodeDisplay"></span></h2>
         <h3 id="roundInfo"></h3>
         <div id="termDisplay"></div>
+
+        <!-- ✅ Waiting Room: Display Players -->
+        <div id="waitingRoom">
+            <h2>Players in Room</h2>
+            <div id="playerList"></div>
+        </div>
+
         <div id="definitionForm" class="hidden">
             <textarea id="playerDefinition" placeholder="Enter your definition..."></textarea>
             <button onclick="submitDefinition()">Submit</button>
@@ -68,7 +75,6 @@
         <button id="nextRound" class="hidden" onclick="nextRound()">Next Round</button>
     </div>
 
-    <!-- ✅ Game Logic (After Firebase Initialization) -->
     <script>
         var gameCode = ""; 
         var playerName = "Player" + Math.floor(Math.random() * 1000);
@@ -77,16 +83,21 @@
         function createGame() {
             gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
             var randomTerm = terms[Math.floor(Math.random() * terms.length)];
+
             db.ref("games/" + gameCode).set({
                 round: 1,
                 term: randomTerm,
                 definitions: {},
                 judge: "",
-                status: "waiting"
+                status: "waiting",
+                players: { [playerName]: true }  // ✅ Add the host player
             }).then(function() {
+                console.log("Game created:", gameCode);
                 document.getElementById("gameCodeDisplay").innerText = gameCode;
                 document.getElementById("setupArea").classList.add("hidden");
                 document.getElementById("gameArea").classList.remove("hidden");
+
+                listenForUpdates();
             }).catch(function(error) {
                 console.error("Database Error:", error);
             });
@@ -98,11 +109,16 @@
                 alert("Please enter a valid game code!");
                 return;
             }
+
             db.ref("games/" + gameCode).get().then(function(snapshot) {
                 if (snapshot.exists()) {
                     document.getElementById("gameCodeDisplay").innerText = gameCode;
                     document.getElementById("setupArea").classList.add("hidden");
                     document.getElementById("gameArea").classList.remove("hidden");
+
+                    // ✅ Add the player to the game
+                    db.ref("games/" + gameCode + "/players/" + playerName).set(true);
+
                     listenForUpdates();
                 } else {
                     alert("Game not found!");
@@ -112,21 +128,36 @@
             });
         }
 
+        function listenForUpdates() {
+            db.ref("games/" + gameCode).on("value", function(snapshot) {
+                var gameData = snapshot.val();
+                
+                if (!gameData) {
+                    console.error("Game data not found!");
+                    return;
+                }
+
+                console.log("Game data received:", gameData);
+
+                document.getElementById("roundInfo").innerText = "Round " + gameData.round;
+                document.getElementById("termDisplay").innerHTML = `<h3>Term: ${gameData.term}</h3>`;
+
+                // ✅ Show the player list
+                if (gameData.players) {
+                    var playerList = Object.keys(gameData.players).map(name => `<li>${name}</li>`).join("");
+                    document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
+                }
+
+                // Show definition form if game is waiting
+                if (gameData.status === "waiting") {
+                    document.getElementById("definitionForm").classList.remove("hidden");
+                }
+            });
+        }
+
         function submitDefinition() {
             var definition = document.getElementById("playerDefinition").value;
             db.ref("games/" + gameCode + "/definitions/").push({ player: playerName, definition: definition });
-        }
-
-        function listenForUpdates() {
-            db.ref("games/" + gameCode + "/definitions").on("value", function(snapshot) {
-                var definitions = snapshot.val();
-                if (definitions) {
-                    document.getElementById("judgeOptions").innerHTML = Object.values(definitions).map(function(def) {
-                        return `<div class='definition-box' onclick='judgePick("${def.definition}")'>${def.definition}</div>`;
-                    }).join("");
-                    document.getElementById("judgeDecision").classList.remove("hidden");
-                }
-            });
         }
 
         function judgePick(selectedDefinition) {
