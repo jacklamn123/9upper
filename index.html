@@ -204,45 +204,52 @@ function displayJudgeOptions(gameData) {
 
 
 
-        function startGame() {
-            fetch("9upper_terms.json")
-                .then(response => response.json())
-                .then(terms => {
-                    db.ref("games/" + gameCode + "/players").once("value", snapshot => {
-                        var players = Object.keys(snapshot.val());
-                        if (players.length < 3) {
-                            alert("At least 3 players are needed to start the game!");
-                            return;
-                        }
+function startGame() {
+    db.ref("games/" + gameCode).once("value", snapshot => {
+        var gameData = snapshot.val();
+        if (!gameData) return;
 
-                        var judge = players[Math.floor(Math.random() * players.length)];
-                        var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
+        var totalRounds = gameData.totalRounds;
+        var roundTime = gameData.roundTime;
 
-                        var roles = {};
-                        players.forEach(p => roles[p] = "Fake Definition");
-                        roles[judge] = "Judge";
-                        roles[correctPlayer] = "Correct Definition";
+        fetch("9upper_terms.json")
+            .then(response => response.json())
+            .then(terms => {
+                db.ref("games/" + gameCode + "/players").once("value", playerSnapshot => {
+                    var players = Object.keys(playerSnapshot.val());
+                    if (players.length < 3) {
+                        alert("At least 3 players are needed to start the game!");
+                        return;
+                    }
 
-                        var randomIndex = Math.floor(Math.random() * terms.length);
-                        var randomTerm = terms[randomIndex].term;
-                        var correctDefinition = terms[randomIndex].definition;
-                        var totalRounds = gameData.totalRounds;
-                var roundTime = gameData.roundTime;
+                    var judge = players[Math.floor(Math.random() * players.length)];
+                    var correctPlayer = players.filter(p => p !== judge)[Math.floor(Math.random() * (players.length - 1))];
 
-                        db.ref("games/" + gameCode).update({
-                            status: "playing",
-                            term: randomTerm,
-                            correctDefinition: correctDefinition,
-                            roles: roles,
-                            currentRound: 1,
-                    totalRounds: totalRounds,
-                    roundTime: roundTime
-                        });
-                        startNewRound(terms, 1, totalRounds, roundTime);
+                    var roles = {};
+                    players.forEach(p => roles[p] = "Fake Definition");
+                    roles[judge] = "Judge";
+                    roles[correctPlayer] = "Correct Definition";
+
+                    var randomIndex = Math.floor(Math.random() * terms.length);
+                    var randomTerm = terms[randomIndex].term;
+                    var correctDefinition = terms[randomIndex].definition;
+
+                    db.ref("games/" + gameCode).update({
+                        status: "playing",
+                        term: randomTerm,
+                        correctDefinition: correctDefinition,
+                        roles: roles,
+                        currentRound: 1,
+                        totalRounds: totalRounds,
+                        roundTime: roundTime
                     });
-                })
-                .catch(error => console.error("Error loading terms:", error));
-        }
+
+                    startNewRound(terms, 1, totalRounds, roundTime);
+                });
+            })
+            .catch(error => console.error("Error loading terms:", error));
+    });
+}
 
 function startNewRound(terms, round, totalRounds, roundTime) {
     db.ref("games/" + gameCode + "/players").once("value", snapshot => {
