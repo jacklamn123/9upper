@@ -51,61 +51,7 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-    </script>
-</head>
-<body>
-    <h1>9upper Online Multiplayer</h1>
 
-    <!-- ✅ Name Input Before Creating/Joining -->
-    <div id="nameInput">
-        <input type="text" id="playerNameInput" placeholder="Enter Your Name">
-        <button onclick="confirmName()">Continue</button>
-    </div>
-
-    <div id="setupArea" class="hidden">
-        <button onclick="createGame()">Create Game</button>
-        <input type="text" id="gameCodeInput" placeholder="Enter Game Code">
-        <button onclick="joinGame()">Join Game</button>
-    </div>
-
-    <div id="gameArea" class="hidden">
-        <h2>Game Code: <span id="gameCodeDisplay"></span></h2>
-
-        <!-- ✅ Waiting Room: Display Players -->
-        <div id="waitingRoom">
-            <h2>Players in Room</h2>
-            <div id="playerList"></div>
-            <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
-        </div>
-
-        <!-- ✅ Chatbox -->
-        <div class="chatbox" id="chatbox">
-            <h3>Chat</h3>
-            <div id="chatMessages"></div>
-        </div>
-        <input type="text" id="chatInput" placeholder="Type a message...">
-        <button onclick="sendChatMessage()">Send</button>
-
-        <!-- ✅ Game Screen -->
-        <div id="gameScreen" class="hidden">
-            <h3>Round 1</h3>
-            <h3>Term: <span id="gameTerm"></span></h3>
-            <h3>Your Role: <span id="playerRole"></span></h3>
-            <div id="correctDefinitionBox" class="hidden">
-                <h3>Correct Definition: <span id="correctDefinition"></span></h3>
-            </div>
-            <div id="definitionInputBox" class="hidden">
-                <textarea id="fakeDefinitionInput" placeholder="Enter your fake definition..."></textarea>
-                <button onclick="submitFakeDefinition()">Submit</button>
-            </div>
-            <div id="judgeSelectionBox" class="hidden">
-                <h3>Pick the correct definition:</h3>
-                <div id="definitionOptions"></div>
-            </div>
-        </div>
-    </div>
-
-    <script>
         var gameCode = ""; 
         var playerName = "";
 
@@ -119,11 +65,76 @@
             document.getElementById("setupArea").classList.remove("hidden");
         }
 
+        function createGame() {
+            gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+            db.ref("games/" + gameCode).set({
+                status: "waiting",
+                players: {},
+                host: playerName
+            }).then(() => {
+                document.getElementById("gameCodeDisplay").innerText = gameCode;
+                document.getElementById("setupArea").classList.add("hidden");
+                document.getElementById("gameArea").classList.remove("hidden");
+                db.ref("games/" + gameCode + "/players/" + playerName).set(true);
+                listenForUpdates();
+            });
+        }
+
+        function joinGame() {
+            gameCode = document.getElementById("gameCodeInput").value.toUpperCase();
+            if (!gameCode) {
+                alert("Please enter a valid game code!");
+                return;
+            }
+            db.ref("games/" + gameCode).get().then(snapshot => {
+                if (snapshot.exists()) {
+                    document.getElementById("gameCodeDisplay").innerText = gameCode;
+                    document.getElementById("setupArea").classList.add("hidden");
+                    document.getElementById("gameArea").classList.remove("hidden");
+                    db.ref("games/" + gameCode + "/players/" + playerName).set(true);
+                    listenForUpdates();
+                } else {
+                    alert("Game not found!");
+                }
+            });
+        }
+
+        function listenForUpdates() {
+            db.ref("games/" + gameCode).on("value", snapshot => {
+                var gameData = snapshot.val();
+                if (!gameData) return;
+
+                if (gameData.players) {
+                    var playerList = Object.keys(gameData.players).map(name => `<li>${name}</li>`).join("");
+                    document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
+
+                    if (gameData.host === playerName) {
+                        document.getElementById("startGameButton").classList.remove("hidden");
+                    }
+                }
+
+                if (gameData.status === "playing") {
+                    document.getElementById("waitingRoom").classList.add("hidden");
+                    document.getElementById("gameScreen").classList.remove("hidden");
+
+                    document.getElementById("gameTerm").innerText = gameData.term;
+                    document.getElementById("playerRole").innerText = gameData.roles[playerName];
+
+                    if (gameData.roles[playerName] === "Correct Definition") {
+                        document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
+                        document.getElementById("correctDefinitionBox").classList.remove("hidden");
+                    } else if (gameData.roles[playerName] === "Fake Definition") {
+                        document.getElementById("definitionInputBox").classList.remove("hidden");
+                    }
+                }
+            });
+        }
+
         function startGame() {
             fetch("9upper_terms.json")  // ✅ Load terms from JSON file
                 .then(response => response.json())
                 .then(terms => {
-                    db.ref("games/" + gameCode + "/players").once("value", function(snapshot) {
+                    db.ref("games/" + gameCode + "/players").once("value", snapshot => {
                         var players = Object.keys(snapshot.val());
                         if (players.length < 3) {
                             alert("At least 3 players are needed to start the game!");
@@ -162,5 +173,28 @@
             document.getElementById("chatInput").value = "";
         }
     </script>
+</head>
+<body>
+    <h1>9upper Online Multiplayer</h1>
+
+    <div id="nameInput">
+        <input type="text" id="playerNameInput" placeholder="Enter Your Name">
+        <button onclick="confirmName()">Continue</button>
+    </div>
+
+    <div id="setupArea" class="hidden">
+        <button onclick="createGame()">Create Game</button>
+        <input type="text" id="gameCodeInput" placeholder="Enter Game Code">
+        <button onclick="joinGame()">Join Game</button>
+    </div>
+
+    <div id="gameArea" class="hidden">
+        <h2>Game Code: <span id="gameCodeDisplay"></span></h2>
+        <div id="waitingRoom">
+            <h2>Players in Room</h2>
+            <div id="playerList"></div>
+            <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
+        </div>
+    </div>
 </body>
 </html>
