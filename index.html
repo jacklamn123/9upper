@@ -138,20 +138,30 @@
 function displayDefinitionsForJudge() {
     db.ref("games/" + gameCode + "/players").once("value", snapshot => {
         var players = Object.keys(snapshot.val());
-        var buttons = players
-            .filter(p => p !== playerName) // Exclude the judge themselves
-            .map(p => `<button class='player-button' onclick="judgePick('${p}')">${p}</button>`)
-            .join("");
+        var judge = players.find(p => gameData.roles[p] === "Judge");
 
-        document.getElementById("judgeOptions").innerHTML = buttons;
+        // ✅ Filter out the Judge from the selection
+        var selectablePlayers = players.filter(p => p !== judge);
+        
+        // ✅ Create buttons for each player
+        var buttonsHTML = selectablePlayers.map(player =>
+            `<button onclick="judgeSelectPlayer('${player}')">${player}</button>`
+        ).join(" ");
+
+        document.getElementById("judgeOptions").innerHTML = buttonsHTML;
         document.getElementById("judgePanel").classList.remove("hidden");
     });
 }
 
-function judgePick(selectedPlayer) {
-    db.ref("games/" + gameCode).update({ selectedCorrectPlayer: selectedPlayer });
-    alert("Judge picked: " + selectedPlayer);
+// ✅ Judge selects a player
+function judgeSelectPlayer(selectedPlayer) {
+    db.ref("games/" + gameCode).update({
+        winner: selectedPlayer
+    });
+
+    alert(`${selectedPlayer} has been selected as the correct definition!`);
 }
+
 
         function startGame() {
             fetch("9upper_terms.json")
