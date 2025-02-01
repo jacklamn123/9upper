@@ -169,7 +169,7 @@ function displayJudgeOptions(gameData) {
 
 // ✅ Judge selects a player
 
-        function judgeSelectPlayer(selectedPlayer) {
+function judgeSelectPlayer(selectedPlayer) {
     // Stop the timer immediately
     clearInterval(roundTimer);
 
@@ -178,27 +178,36 @@ function displayJudgeOptions(gameData) {
         timeLeft: 0
     });
 
-alert(`Judge selected ${selectedPlayer} as the correct definition!`);
+    alert(`Judge selected ${selectedPlayer} as the correct definition!`);
 
+    // Fetch current round number
     db.ref("games/" + gameCode + "/currentRound").once("value", snapshot => {
         var round = snapshot.val();
 
+        // Fetch total rounds
         db.ref("games/" + gameCode + "/totalRounds").once("value", totalSnapshot => {
             var totalRounds = totalSnapshot.val();
 
-            if (round >= totalRounds) {
-                db.ref("games/" + gameCode).update({ status: "finished" });
-                alert("Game Over!");
-            } else {
-                fetch("9upper_terms.json")
-                    .then(response => response.json())
-                    .then(terms => {
-                        startNewRound(terms, round + 1, totalRounds, roundTime);
-                    });
-            }
+            // Fetch roundTime ✅ FIXED
+            db.ref("games/" + gameCode).once("value", gameSnapshot => {
+                var gameData = gameSnapshot.val();
+                var roundTime = gameData.roundTime || 60;  // Default to 60 seconds if missing
+
+                if (round >= totalRounds) {
+                    db.ref("games/" + gameCode).update({ status: "finished" });
+                    alert("Game Over!");
+                } else {
+                    fetch("9upper_terms.json")
+                        .then(response => response.json())
+                        .then(terms => {
+                            startNewRound(terms, round + 1, totalRounds, roundTime);
+                        });
+                }
+            });
         });
     });
 }
+
 
 
 
