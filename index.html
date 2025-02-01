@@ -27,15 +27,6 @@
             padding: 5px;
             background-color: #f0f0f0;
         }
-        .player-button {
-            display: block;
-            margin: 5px auto;
-            padding: 10px;
-            background-color: #ddd;
-            cursor: pointer;
-            border: none;
-            width: 150px;
-        }
     </style>
 
     <script>
@@ -73,8 +64,7 @@
                 status: "waiting",
                 players: {},
                 host: playerName,
-                chat: {},
-                definitions: {}
+                chat: {}
             }).then(() => {
                 document.getElementById("gameCodeDisplay").innerText = gameCode;
                 document.getElementById("setupArea").classList.add("hidden");
@@ -109,8 +99,8 @@
                 if (!gameData) return;
 
                 if (gameData.players) {
-                    var playerList = Object.keys(gameData.players).map(name => `<li>${name}</li>`).join("");
-                    document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
+                    var playerList = Object.keys(gameData.players).map(name => <li>${name}</li>).join("");
+                    document.getElementById("playerList").innerHTML = <ul>${playerList}</ul>;
 
                     if (gameData.host === playerName) {
                         document.getElementById("startGameButton").classList.remove("hidden");
@@ -118,7 +108,7 @@
                 }
 
                 if (gameData.chat) {
-                    var messages = Object.values(gameData.chat).map(msg => `<p>${msg}</p>`).join("");
+                    var messages = Object.values(gameData.chat).map(msg => <p>${msg}</p>).join("");
                     document.getElementById("chatMessages").innerHTML = messages;
                 }
 
@@ -132,13 +122,34 @@
                     if (gameData.roles[playerName] === "Correct Definition") {
                         document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
                         document.getElementById("correctDefinitionBox").classList.remove("hidden");
-                    } else if (gameData.roles[playerName] === "Judge") {
-                        document.getElementById("judgePanel").classList.remove("hidden");
-                        displayDefinitionsForJudge(gameData.definitions);
+                    } else if (gameData.roles[playerName] === "Fake Definition") {
+                        document.getElementById("definitionInputBox").classList.remove("hidden");
                     }
+                    // ✅ NEW: Show judge panel when the player is a judge
+            if (gameData.roles[playerName] === "Judge") {
+                document.getElementById("judgePanel").classList.remove("hidden");
+                displayDefinitionsForJudge();
+            }
                 }
             });
         }
+function displayDefinitionsForJudge() {
+    db.ref("games/" + gameCode + "/players").once("value", snapshot => {
+        var players = Object.keys(snapshot.val());
+        var buttons = players
+            .filter(p => p !== playerName) // Exclude the judge themselves
+            .map(p => `<button class='player-button' onclick="judgePick('${p}')">${p}</button>`)
+            .join("");
+
+        document.getElementById("judgeOptions").innerHTML = buttons;
+        document.getElementById("judgePanel").classList.remove("hidden");
+    });
+}
+
+function judgePick(selectedPlayer) {
+    db.ref("games/" + gameCode).update({ selectedCorrectPlayer: selectedPlayer });
+    alert("Judge picked: " + selectedPlayer);
+}
 
         function startGame() {
             fetch("9upper_terms.json")
@@ -174,19 +185,6 @@
                 .catch(error => console.error("Error loading terms:", error));
         }
 
-        function displayDefinitionsForJudge(definitions) {
-            if (!definitions) return;
-            var judgeOptions = Object.entries(definitions).map(([player, definition]) =>
-                `<button class='player-button' onclick="judgePick('${player}')">${player}: ${definition}</button>`
-            ).join("");
-            document.getElementById("judgeOptions").innerHTML = judgeOptions;
-        }
-
-        function judgePick(selectedPlayer) {
-            db.ref("games/" + gameCode).update({ selectedCorrectPlayer: selectedPlayer });
-            alert("Judge picked: " + selectedPlayer);
-        }
-
         function sendChatMessage() {
             var message = document.getElementById("chatInput").value.trim();
             if (message === "") return;
@@ -211,11 +209,34 @@
 
     <div id="gameArea" class="hidden">
         <h2>Game Code: <span id="gameCodeDisplay"></span></h2>
-        <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
-        <div id="judgePanel" class="hidden">
-            <h3>Judge: Pick the correct player</h3>
-            <div id="judgeOptions"></div>
+
+        <div id="waitingRoom">
+            <h2>Players in Room</h2>
+            <div id="playerList"></div>
+            <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
         </div>
+
+        <div id="gameScreen" class="hidden">
+            <h3>Round 1</h3>
+            <h3>Term: <span id="gameTerm"></span></h3>
+            <h3>Your Role: <span id="playerRole"></span></h3>
+            <div id="correctDefinitionBox" class="hidden">
+                <h3>Correct Definition: <span id="correctDefinition"></span></h3>
+<div id="judgePanel" class="hidden">
+    <h3>Judge: Pick the correct player</h3>
+    <div id="judgeOptions"></div>
+</div>
+
+            </div>
+        </div>
+
+        <!-- ✅ Chatbox Added -->
+        <div class="chatbox">
+            <div id="chatMessages"></div>
+        </div>
+        <input type="text" id="chatInput" placeholder="Type a message">
+        <button onclick="sendChatMessage()">Send</button>
+
     </div>
 </body>
 </html>
