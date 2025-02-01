@@ -178,7 +178,7 @@ function displayJudgeOptions(gameData) {
         timeLeft: 0
     });
 
-    alert(Judge selected ${selectedPlayer} as the correct definition!);
+alert(`Judge selected ${selectedPlayer} as the correct definition!`);
 
     db.ref("games/" + gameCode + "/currentRound").once("value", snapshot => {
         var round = snapshot.val();
