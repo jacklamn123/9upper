@@ -133,9 +133,16 @@ if (gameData.chat) {
         chatMessagesDiv.appendChild(messageElement);
     });
 
-    // ✅ Auto-scroll to the newest message
-    chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+    // ✅ Debugging: Check scroll height before and after
+    console.log("Before scroll: ", chatMessagesDiv.scrollTop, chatMessagesDiv.scrollHeight);
+
+    // ✅ Force a delay before scrolling to ensure the DOM updates
+    setTimeout(() => {
+        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+        console.log("After scroll: ", chatMessagesDiv.scrollTop, chatMessagesDiv.scrollHeight);
+    }, 100); // Small delay to allow rendering
 }
+
 
 
        if (gameData.status === "playing") {
@@ -400,11 +407,23 @@ function sendChatMessage() {
 
     db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message).then(() => {
         var chatMessagesDiv = document.getElementById("chatMessages");
-        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // ✅ Auto-scroll after sending
+
+        // ✅ Debugging: Ensure chat div exists
+        if (!chatMessagesDiv) {
+            console.error("Chat messages div not found!");
+            return;
+        }
+
+        // ✅ Small delay to allow rendering before scrolling
+        setTimeout(() => {
+            chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+            console.log("Scroll after message send: ", chatMessagesDiv.scrollTop, chatMessagesDiv.scrollHeight);
+        }, 100);
     });
 
     document.getElementById("chatInput").value = "";
 }
+
 
 function updateRounds() {
     document.getElementById("roundsValue").innerText = document.getElementById("roundsSlider").value;
