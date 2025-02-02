@@ -120,32 +120,11 @@ function createGame() {
             }
         }
 
-if (gameData.chat) {
-    var chatMessagesDiv = document.getElementById("chatMessages");
-
-    // ✅ Create a document fragment to minimize reflow
-    var fragment = document.createDocumentFragment();
-
-    // ✅ Append each message dynamically
-    Object.values(gameData.chat).forEach(msg => {
-        var messageElement = document.createElement("p");
-        messageElement.textContent = msg;
-        fragment.appendChild(messageElement);
-    });
-
-    // ✅ Replace old messages with new ones
-    chatMessagesDiv.innerHTML = "";
-    chatMessagesDiv.appendChild(fragment);
-
-    // ✅ Scroll to the latest message
-    setTimeout(() => {
-        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
-        console.log("Auto-scrolling to bottom:", chatMessagesDiv.scrollTop, chatMessagesDiv.scrollHeight);
-    }, 50);  // Small delay ensures UI updates first
-}
-
-
-
+        if (gameData.chat) {
+            var messages = Object.values(gameData.chat)
+                .map(msg => `<p>${msg}</p>`).join("");
+            document.getElementById("chatMessages").innerHTML = messages;
+        }
 
        if (gameData.status === "playing") {
     document.getElementById("waitingRoom").classList.add("hidden");
@@ -403,30 +382,12 @@ function startRoundTimer(roundTime, round, totalRounds) {
     }
 
 
-function sendChatMessage() {
-    var message = document.getElementById("chatInput").value.trim();
-    if (message === "") return;
-
-    db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message").then(() => {
-        var chatMessagesDiv = document.getElementById("chatMessages");
-
-        // ✅ Debugging: Ensure chat div exists
-        if (!chatMessagesDiv) {
-            console.error("Chat messages div not found!");
-            return;
+        function sendChatMessage() {
+            var message = document.getElementById("chatInput").value.trim();
+            if (message === "") return;
+            db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message);
+            document.getElementById("chatInput").value = "";
         }
-
-        // ✅ Scroll to the latest message
-        setTimeout(() => {
-            chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
-            console.log("Scroll after message send: ", chatMessagesDiv.scrollTop, chatMessagesDiv.scrollHeight);
-        }, 100);
-    });
-
-    document.getElementById("chatInput").value = "";
-}
-
-
 function updateRounds() {
     document.getElementById("roundsValue").innerText = document.getElementById("roundsSlider").value;
 }
