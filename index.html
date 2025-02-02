@@ -8,7 +8,6 @@
     <!-- ✅ Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
     <style>
         body {
@@ -59,38 +58,344 @@
             document.getElementById("setupArea").classList.remove("hidden");
         }
 
+   
+
+function createGame() {
+    gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+    var totalRounds = document.getElementById("roundsSlider").value;
+    var roundTime = document.getElementById("timeSlider").value;
+
+    db.ref("games/" + gameCode).set({
+        status: "waiting",
+        players: {},
+        host: playerName,
+        chat: {},
+        totalRounds: totalRounds,  // ✅ Store total rounds
+        roundTime: roundTime       // ✅ Store time per round
+    }).then(() => {
+        document.getElementById("gameCodeDisplay").innerText = gameCode;
+        document.getElementById("setupArea").classList.add("hidden");
+        document.getElementById("gameArea").classList.remove("hidden");
+        db.ref("games/" + gameCode + "/players/" + playerName).set(true);
+        listenForUpdates();
+    });
+}
+
+
+        function joinGame() {
+            gameCode = document.getElementById("gameCodeInput").value.toUpperCase();
+            if (!gameCode) {
+                alert("Please enter a valid game code!");
+                return;
+            }
+            db.ref("games/" + gameCode).get().then(snapshot => {
+                if (snapshot.exists()) {
+                    document.getElementById("gameCodeDisplay").innerText = gameCode;
+                    document.getElementById("setupArea").classList.add("hidden");
+                    document.getElementById("gameArea").classList.remove("hidden");
+                    db.ref("games/" + gameCode + "/players/" + playerName).set(true);
+                    listenForUpdates();
+                } else {
+                    alert("Game not found!");
+                }
+            });
+        }
+
+        function listenForUpdates() {
+    db.ref("games/" + gameCode).on("value", snapshot => {
+        var gameData = snapshot.val();
+        if (!gameData) return;
+
+        if (gameData.players) {
+            var playerList = Object.keys(gameData.players)
+                .map(name => <li>${name}</li>).join("");
+            document.getElementById("playerList").innerHTML = <ul>${playerList}</ul>;
+// ✅ Display total rounds & time per round for all players
+            document.getElementById("roundsValue").innerText = gameData.totalRounds;
+            document.getElementById("timeValue").innerText = gameData.roundTime;
+            
+            if (gameData.host === playerName) {
+                document.getElementById("gameSettings").classList.remove("hidden");
+                document.getElementById("startGameButton").classList.remove("hidden");
+            }
+        }
+
+        if (gameData.chat) {
+            var messages = Object.values(gameData.chat)
+                .map(msg => <p>${msg}</p>).join("");
+            document.getElementById("chatMessages").innerHTML = messages;
+        }
+
+       if (gameData.status === "playing") {
+    document.getElementById("waitingRoom").classList.add("hidden");
+    document.getElementById("gameScreen").classList.remove("hidden");
+
+    document.getElementById("gameTerm").innerText = gameData.term;
+    document.getElementById("playerRole").innerText = gameData.roles[playerName];
+
+            // ✅ Update round number dynamically
+    document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
+    document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
+
+             // ✅ Start the countdown for each round
+            startCountdown(gameData.timeLeft);
+           
+           // ✅ Update remaining time dynamically
+    document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft || "N/A";
+
+    // ✅ First, hide the thinker panel by default for all players
+    document.getElementById("thinkerPanel").classList.add("hidden");
+
+    // ✅ Show content depending on the player's role
+    if (gameData.roles[playerName] === "REALUPPER") {
+        document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
+        document.getElementById("correctDefinitionBox").classList.remove("hidden");
+    } else if (gameData.roles[playerName] === "9UPPER") {
+        document.getElementById("definitionInputBox").classList.remove("hidden");
+    }
+
+    // ✅ Now ensure only the thinker sees the thinker panel
+    displaythinkerOptions(gameData);
+}
+
+    });
+}
+
+        var roundTimer; // ✅ Global timer variable
+
+function startCountdown(timeLeft) {
+    // ✅ Ensure any existing timer is cleared before starting a new one
+    clearInterval(roundTimer);
+
+    roundTimer = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(roundTimer); // ✅ Stop the timer when it reaches zero
+            document.getElementById("timeLeftDisplay").innerText = "Time's up!";
+        } else {
+            document.getElementById("timeLeftDisplay").innerText = timeLeft + " seconds";
+            timeLeft--; // ✅ Decrement time left
+        }
+    }, 1000); // ✅ Update every second
+}
+
+        
+function displaythinkerOptions(gameData) {
+    var thinker = Object.keys(gameData.players).find(p => gameData.roles[p] === "thinker");
+    var playerRole = gameData.roles[playerName];
+
+    if (playerRole === "thinker") {
+        // ✅ Show thinker panel only if the player is the thinker
+        document.getElementById("thinkerPanel").classList.remove("hidden");
+
+        var selectablePlayers = Object.keys(gameData.players).filter(p => p !== thinker);
+
+        var buttonsHTML = selectablePlayers.map(player =>
+            <button onclick="thinkerSelectPlayer('${player}')">${player}</button>
+        ).join(" ");
+
+        document.getElementById("thinkerOptions").innerHTML = buttonsHTML;
+    } 
+    else if (playerRole === "REALUPPER" || playerRole === "9UPPER") {
+        // ✅ Explicitly hide panel for REALUPPER & 9UPPER players
+        document.getElementById("thinkerPanel").classList.add("hidden");
+        document.getElementById("thinkerOptions").innerHTML = ""; // Clear buttons
+    }
+}
+
+
+
+
+
+
+
+// ✅ thinker selects a player
+
+function thinkerSelectPlayer(selectedPlayer) {
+    // Stop the timer immediately
+    clearInterval(roundTimer);
+
+    db.ref("games/" + gameCode).update({
+        winner: selectedPlayer,
+        timeLeft: 0
+    });
+
+    alert(thinker selected ${selectedPlayer} as the REALUPPER!);
+
+    // Fetch current round number
+    db.ref("games/" + gameCode + "/currentRound").once("value", snapshot => {
+        var round = snapshot.val();
+
+        // Fetch total rounds
+        db.ref("games/" + gameCode + "/totalRounds").once("value", totalSnapshot => {
+            var totalRounds = totalSnapshot.val();
+
+            // Fetch roundTime ✅ FIXED
+            db.ref("games/" + gameCode).once("value", gameSnapshot => {
+                var gameData = gameSnapshot.val();
+                var roundTime = gameData.roundTime || 60;  // Default to 60 seconds if missing
+
+                if (round >= totalRounds) {
+                    db.ref("games/" + gameCode).update({ status: "finished" });
+                    alert("Game Over!");
+                } else {
+                    fetch("9upper_terms.json")
+                        .then(response => response.json())
+                        .then(terms => {
+                            startNewRound(terms, round + 1, totalRounds, roundTime);
+                        });
+                }
+            });
+        });
+    });
+}
+
+
+
+
+
+function startGame() {
+    db.ref("games/" + gameCode).once("value", snapshot => {
+        var gameData = snapshot.val();
+        if (!gameData) return;
+
+        var totalRounds = gameData.totalRounds;
+        var roundTime = gameData.roundTime;
+
+        fetch("9upper_terms.json")
+            .then(response => response.json())
+            .then(terms => {
+                db.ref("games/" + gameCode + "/players").once("value", playerSnapshot => {
+                    var players = Object.keys(playerSnapshot.val());
+                    if (players.length < 3) {
+                        alert("At least 3 players are needed to start the game!");
+                        return;
+                    }
+
+                    var thinker = players[Math.floor(Math.random() * players.length)];
+                    var correctPlayer = players.filter(p => p !== thinker)[Math.floor(Math.random() * (players.length - 1))];
+
+                    var roles = {};
+                    players.forEach(p => roles[p] = "9UPPER");
+                    roles[thinker] = "thinker";
+                    roles[correctPlayer] = "REALUPPER";
+
+                    var randomIndex = Math.floor(Math.random() * terms.length);
+                    var randomTerm = terms[randomIndex].term;
+                    var correctDefinition = terms[randomIndex].definition;
+
+                    db.ref("games/" + gameCode).update({
+                        status: "playing",
+                        term: randomTerm,
+                        correctDefinition: correctDefinition,
+                        roles: roles,
+                        currentRound: 1,
+                        totalRounds: totalRounds,
+                        roundTime: roundTime
+                    });
+
+                    startNewRound(terms, 1, totalRounds, roundTime);
+                });
+            })
+            .catch(error => console.error("Error loading terms:", error));
+    });
+}
+          var roundTimer;
+
+function startNewRound(terms, round, totalRounds, roundTime) {
+    db.ref("games/" + gameCode + "/players").once("value", snapshot => {
+        var players = Object.keys(snapshot.val());
+        if (players.length < 3) return;
+
+        var thinker = players[Math.floor(Math.random() * players.length)];
+        var correctPlayer = players.filter(p => p !== thinker)[Math.floor(Math.random() * (players.length - 1))];
+
+        var roles = {};
+        players.forEach(p => roles[p] = "9UPPER");
+        roles[thinker] = "thinker";
+        roles[correctPlayer] = "REALUPPER";
+
+        var randomIndex = Math.floor(Math.random() * terms.length);
+        var randomTerm = terms[randomIndex].term;
+        var correctDefinition = terms[randomIndex].definition;
+
+        // ✅ Fetch roundTime to ensure it exists before calling timer
+        db.ref("games/" + gameCode).once("value", gameSnapshot => {
+            var gameData = gameSnapshot.val();
+            var updatedRoundTime = gameData.roundTime || 60;  // Default to 60 seconds if undefined
+
+            db.ref("games/" + gameCode).update({
+                currentRound: round,
+                term: randomTerm,
+                correctDefinition: correctDefinition,
+                roles: roles,
+                timeLeft: updatedRoundTime  // ✅ Corrected round time
+            });
+
+            document.getElementById("currentRound").innerText = round;  // ✅ Update UI
+            startRoundTimer(updatedRoundTime, round, totalRounds);
+        });
+    });
+}
+
+
+function startRoundTimer(roundTime, round, totalRounds) {
+    roundTimer = setInterval(() => {
+        db.ref("games/" + gameCode).once("value", snapshot => {
+            var gameData = snapshot.val();
+            if (!gameData) return;
+
+            var timeLeft = gameData.timeLeft;
+
+            if (timeLeft <= 0 || gameData.winner) {  // ✅ Stop if time runs out OR if thinker picked a player
+                clearInterval(roundTimer);
+                endRound(round, totalRounds);
+            } else {
+                db.ref("games/" + gameCode).update({
+                    timeLeft: timeLeft - 1
+                });
+                document.getElementById("timeLeft").innerText = timeLeft - 1;  // ✅ Update UI
+            }
+        });
+    }, 1000);
+}
+
+    function endRound(round, totalRounds) {
+        if (round >= totalRounds) {
+            db.ref("games/" + gameCode).update({
+                status: "finished"
+            });
+            alert("Game Over!");
+        } else {
+            db.ref("games/" + gameCode).once("value", snapshot => {
+                var gameData = snapshot.val();
+                if (!gameData) return;
+
+                var roundTime = gameData.roundTime;  // ✅ Fetch roundTime before calling startNewRound()
+
+                fetch("9upper_terms.json")
+                    .then(response => response.json())
+                    .then(terms => {
+                        startNewRound(terms, round + 1, totalRounds, roundTime);
+                    });
+            });
+        }
+    }
+
+
         function sendChatMessage() {
             var message = document.getElementById("chatInput").value.trim();
             if (message === "") return;
             db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message);
             document.getElementById("chatInput").value = "";
-
-            // ✅ Scroll to the newest message after sending (with animation)
-            setTimeout(() => scrollChatToBottom(true), 100);
         }
+function updateRounds() {
+    document.getElementById("roundsValue").innerText = document.getElementById("roundsSlider").value;
+}
 
-        function listenForUpdates() {
-            db.ref("games/" + gameCode + "/chat").on("value", snapshot => {
-                var messages = snapshot.val();
-                if (!messages) return;
+function updateTime() {
+    document.getElementById("timeValue").innerText = document.getElementById("timeSlider").value;
+}
 
-                var chatContent = Object.values(messages)
-                    .map(msg => `<p>${msg}</p>`).join("");
-                document.getElementById("chatMessages").innerHTML = chatContent;
-
-                // ✅ Scroll to the bottom when a new message arrives
-                setTimeout(() => scrollChatToBottom(true), 100);
-            });
-        }
-
-        function scrollChatToBottom(animate = true) {
-            var chatBox = $(".chatbox");
-            if (animate) {
-                chatBox.animate({ scrollTop: chatBox.prop("scrollHeight") }, 500);
-            } else {
-                chatBox.scrollTop(chatBox.prop("scrollHeight"));
-            }
-        }
     </script>
 </head>
 <body>
@@ -110,12 +415,52 @@
     <div id="gameArea" class="hidden">
         <h2>Game Code: <span id="gameCodeDisplay"></span></h2>
 
-        <!-- ✅ Chatbox with Auto-Scroll -->
+        <div id="waitingRoom">
+            <h2>Players in Room</h2>
+            <div id="playerList"></div>
+<!-- ✅ Game Settings for Host -->
+<div id="gameSettings" class="hidden">
+    <h3>Game Settings</h3>
+
+    <label for="roundsSlider">Rounds: <span id="roundsValue">5</span></label>
+    <input type="range" id="roundsSlider" min="5" max="20" step="5" value="5" oninput="updateRounds()">
+
+    <br>
+
+    <label for="timeSlider">Time per Round (seconds): <span id="timeValue">60</span></label>
+    <input type="range" id="timeSlider" min="60" max="600" step="30" value="60" oninput="updateTime()">
+</div>
+
+            <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
+        </div>
+
+<div id="gameScreen" class="hidden">
+    <h3>Round <span id="currentRoundDisplay"></span> / <span id="totalRoundsDisplay"></span></h3>
+    <h3>Time Remaining: <span id="timeLeftDisplay">--</span></h3>
+    <h3>Term: <span id="gameTerm"></span></h3>
+    <h3>Your Role: <span id="playerRole"></span></h3>
+
+    <div id="correctDefinitionBox" class="hidden">
+        <h3>REALUPPER: <span id="correctDefinition"></span></h3>
+    </div>
+
+    <div id="thinkerPanel" class="hidden">
+        <h3>thinker: Pick the correct player</h3>
+        <div id="thinkerOptions"></div>
+    </div>
+</div>
+
+
+
+
+
+        <!-- ✅ Chatbox Added -->
         <div class="chatbox">
             <div id="chatMessages"></div>
         </div>
         <input type="text" id="chatInput" placeholder="Type a message">
         <button onclick="sendChatMessage()">Send</button>
+
     </div>
 </body>
 </html>
