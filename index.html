@@ -112,7 +112,7 @@ function createGame() {
         }
 
 function listenForUpdates() {
-    db.ref("games/" + gameCode).on("value", snapshot => {
+    db.ref("games/" + gameCode + "/chat").on("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
 
@@ -130,13 +130,10 @@ function listenForUpdates() {
             }
         }
 
-        // ✅ Chat Handling with Auto-Scrolling Fix
+        // ✅ Chat Handling: Always Scroll to Bottom
         if (gameData.chat) {
-            var chatBox = $("#chatMessages"); // ✅ jQuery selector for chat messages container
-            var chatboxContainer = $(".chatbox"); // ✅ Select the scrolling container
-
-            // ✅ Store whether user was already at the bottom before update
-            var wasScrolledToBottom = chatboxContainer.prop("scrollTop") + chatboxContainer.innerHeight() >= chatboxContainer.prop("scrollHeight") - 50;
+            var chatBox = $("#chatMessages"); // ✅ Chat messages container
+            var chatboxContainer = $(".chatbox"); // ✅ The scrollable chat area
 
             chatBox.empty(); // ✅ Clear previous messages
 
@@ -144,12 +141,10 @@ function listenForUpdates() {
                 chatBox.append(`<p>${msg}</p>`); 
             });
 
-            // ✅ Use jQuery `stop().animate()` method to ensure smooth scrolling
-            if (wasScrolledToBottom) {
-                chatboxContainer.stop().animate({
-                    scrollTop: chatboxContainer.prop("scrollHeight")
-                }, 500); // ✅ 500ms smooth scrolling
-            }
+            // ✅ Always scroll to the latest message (No check needed)
+            requestAnimationFrame(() => {
+                chatboxContainer.scrollTop(chatboxContainer.prop("scrollHeight"));
+            });
         }
 
         if (gameData.status === "playing") {
@@ -179,6 +174,7 @@ function listenForUpdates() {
         }
     });
 }
+
 
 
 
