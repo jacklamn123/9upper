@@ -101,7 +101,7 @@ function createGame() {
             });
         }
 
-   function listenForUpdates() {
+function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
@@ -120,17 +120,17 @@ function createGame() {
         }
 
         if (gameData.chat) {
-            var chatBox = document.getElementById("chatMessages");
-            chatBox.innerHTML = ""; // Clear existing chat before appending new messages
+            var chatBox = $("#chatMessages"); // ✅ Use jQuery for chatbox
+            chatBox.empty(); // ✅ Clear previous messages
 
             Object.values(gameData.chat).forEach(msg => {
-                let p = document.createElement("p");
-                p.textContent = msg;
-                chatBox.appendChild(p);
+                chatBox.append(`<p>${msg}</p>`); // ✅ Append new messages
             });
 
-            // ✅ Automatically scroll to the latest message
-            chatBox.scrollTop = chatBox.scrollHeight;
+            // ✅ Auto-scroll to the newest message (with animation)
+            chatBox.animate({
+                scrollTop: chatBox.prop("scrollHeight")
+            }, 1000);
         }
 
         if (gameData.status === "playing") {
@@ -159,6 +159,7 @@ function createGame() {
         }
     });
 }
+
 
 
         var roundTimer; // ✅ Global timer variable
