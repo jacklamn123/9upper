@@ -130,10 +130,14 @@ function listenForUpdates() {
             }
         }
 
-        // ✅ Chat Handling: Always Scroll to Bottom
+        // ✅ Chat Handling with New Message Notification
         if (gameData.chat) {
             var chatBox = $("#chatMessages"); // ✅ Chat messages container
             var chatboxContainer = $(".chatbox"); // ✅ The scrollable chat area
+            var newMessageAlert = $("#newMessageAlert"); // ✅ Notification element
+
+            // ✅ Check if user is scrolled to the bottom
+            var isScrolledToBottom = chatboxContainer.prop("scrollTop") + chatboxContainer.innerHeight() >= chatboxContainer.prop("scrollHeight") - 50;
 
             chatBox.empty(); // ✅ Clear previous messages
 
@@ -141,10 +145,12 @@ function listenForUpdates() {
                 chatBox.append(`<p>${msg}</p>`); 
             });
 
-            // ✅ Always scroll to the latest message (No check needed)
-            requestAnimationFrame(() => {
-                chatboxContainer.scrollTop(chatboxContainer.prop("scrollHeight"));
-            });
+            // ✅ Show new message notification if user is NOT at the bottom
+            if (!isScrolledToBottom) {
+                newMessageAlert.show(); // ✅ Show the notification
+            } else {
+                newMessageAlert.hide(); // ✅ Hide notification if already at the bottom
+            }
         }
 
         if (gameData.status === "playing") {
@@ -174,6 +180,7 @@ function listenForUpdates() {
         }
     });
 }
+
 
 
 
@@ -420,6 +427,15 @@ function sendChatMessage() {
 }
 
 
+function scrollToBottom() {
+    var chatboxContainer = $(".chatbox");
+
+    chatboxContainer.stop().animate({
+        scrollTop: chatboxContainer.prop("scrollHeight")
+    }, 500); // ✅ Smooth scrolling to bottom
+
+    $("#newMessageAlert").hide(); // ✅ Hide the notification after scrolling
+}
 
 
 function updateRounds() {
@@ -498,5 +514,21 @@ function updateTime() {
 
 
     </div>
+    
+    <div id="newMessageAlert" onclick="scrollToBottom()" style="
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #ff9800;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+">
+    New Message! Click to Scroll ↓
+</div>
+
 </body>
 </html>
