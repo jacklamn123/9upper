@@ -36,7 +36,6 @@
     overflow-y: auto; /* ✅ Allows scrolling */
 }
 
-
     </style>
 
     <script>
@@ -111,16 +110,16 @@ function createGame() {
             });
         }
 
-function listenForUpdates() {
-    db.ref("games/" + gameCode + "/chat").on("value", snapshot => {
+        function listenForUpdates() {
+    db.ref("games/" + gameCode).on("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
 
         if (gameData.players) {
             var playerList = Object.keys(gameData.players)
-                .map(name => `<li>${name}</li>`).join(""); 
+                .map(name => `<li>${name}</li>`).join("");
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
-
+// ✅ Display total rounds & time per round for all players
             document.getElementById("roundsValue").innerText = gameData.totalRounds;
             document.getElementById("timeValue").innerText = gameData.roundTime;
             
@@ -130,64 +129,46 @@ function listenForUpdates() {
             }
         }
 
-        // ✅ Chat Handling with New Message Notification
         if (gameData.chat) {
-            var chatBox = $("#chatMessages"); // ✅ Chat messages container
-            var chatboxContainer = $(".chatbox"); // ✅ The scrollable chat area
-            var newMessageAlert = $("#newMessageAlert"); // ✅ Notification element
-
-            // ✅ Check if user is scrolled to the bottom
-            var isScrolledToBottom = chatboxContainer.prop("scrollTop") + chatboxContainer.innerHeight() >= chatboxContainer.prop("scrollHeight") - 50;
-
-            chatBox.empty(); // ✅ Clear previous messages
-
-            Object.values(gameData.chat).forEach(msg => {
-                chatBox.append(`<p>${msg}</p>`); 
-            });
-
-            // ✅ Show new message notification if user is NOT at the bottom
-            if (!isScrolledToBottom) {
-                newMessageAlert.show(); // ✅ Show the notification
-            } else {
-                newMessageAlert.hide(); // ✅ Hide notification if already at the bottom
-            }
+            var messages = Object.values(gameData.chat)
+                .map(msg => `<p>${msg}</p>`).join("");
+            document.getElementById("chatMessages").innerHTML = messages;
         }
 
-        if (gameData.status === "playing") {
-            document.getElementById("waitingRoom").classList.add("hidden");
-            document.getElementById("gameScreen").classList.remove("hidden");
+       if (gameData.status === "playing") {
+    document.getElementById("waitingRoom").classList.add("hidden");
+    document.getElementById("gameScreen").classList.remove("hidden");
 
-            document.getElementById("gameTerm").innerText = gameData.term;
-            document.getElementById("playerRole").innerText = gameData.roles[playerName];
+    document.getElementById("gameTerm").innerText = gameData.term;
+    document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
-            document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
-            document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
+            // ✅ Update round number dynamically
+    document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
+    document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
+             // ✅ Start the countdown for each round
             startCountdown(gameData.timeLeft);
            
-            document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft || "N/A";
+           // ✅ Update remaining time dynamically
+    document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft || "N/A";
 
-            document.getElementById("thinkerPanel").classList.add("hidden");
+    // ✅ First, hide the thinker panel by default for all players
+    document.getElementById("thinkerPanel").classList.add("hidden");
 
-            if (gameData.roles[playerName] === "REALUPPER") {
-                document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
-                document.getElementById("correctDefinitionBox").classList.remove("hidden");
-            } else if (gameData.roles[playerName] === "9UPPER") {
-                document.getElementById("definitionInputBox").classList.remove("hidden");
-            }
+    // ✅ Show content depending on the player's role
+    if (gameData.roles[playerName] === "REALUPPER") {
+        document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
+        document.getElementById("correctDefinitionBox").classList.remove("hidden");
+    } else if (gameData.roles[playerName] === "9UPPER") {
+        document.getElementById("definitionInputBox").classList.remove("hidden");
+    }
 
-            displaythinkerOptions(gameData);
-        }
-    });
+    // ✅ Now ensure only the thinker sees the thinker panel
+    displaythinkerOptions(gameData);
 }
 
-
-
-
-
-
-
-
+    });
+}
 
         var roundTimer; // ✅ Global timer variable
 
@@ -427,15 +408,6 @@ function sendChatMessage() {
 }
 
 
-function scrollToBottom() {
-    var chatboxContainer = $(".chatbox");
-
-    chatboxContainer.stop().animate({
-        scrollTop: chatboxContainer.prop("scrollHeight")
-    }, 500); // ✅ Smooth scrolling to bottom
-
-    $("#newMessageAlert").hide(); // ✅ Hide the notification after scrolling
-}
 
 
 function updateRounds() {
@@ -511,24 +483,6 @@ function updateTime() {
         <input type="text" id="chatInput" placeholder="Type a message">
         <button onclick="sendChatMessage()">Send</button>
 
-
-
     </div>
-    
-    <div id="newMessageAlert" onclick="scrollToBottom()" style="
-    display: none;
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #ff9800;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-">
-    New Message! Click to Scroll ↓
-</div>
-
 </body>
 </html>
