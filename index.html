@@ -384,22 +384,21 @@ function startRoundTimer(roundTime, round, totalRounds) {
 
 
 function sendChatMessage() {
-    var message = document.getElementById("chatInput").value.trim();
+    var message = $("#chatInput").val().trim(); // ✅ Use jQuery for input field
     if (message === "") return;
 
     db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message).then(() => {
-        var chatBox = document.getElementById("chatMessages"); // ✅ Get chatbox using vanilla JS
+        var chatBox = $("#chatMessages"); // ✅ Use jQuery for chatbox
 
-        // ✅ Auto-scroll to the latest message (without jQuery)
-       
-chatBox.animate({
-      scrollTop: chatBox.prop('scrollHeight')
-    }, 1000);
+        // ✅ Smooth auto-scroll using jQuery
+        chatBox.animate({
+            scrollTop: chatBox.prop("scrollHeight")  // ✅ Correct usage
+        }, 1000);
     });
 
-
-    document.getElementById("chatInput").value = "";
+    $("#chatInput").val(""); // ✅ Clear input field using jQuery
 }
+
 
 
 
