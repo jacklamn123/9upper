@@ -101,7 +101,7 @@ function createGame() {
             });
         }
 
-        function listenForUpdates() {
+       function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
@@ -110,10 +110,9 @@ function createGame() {
             var playerList = Object.keys(gameData.players)
                 .map(name => `<li>${name}</li>`).join("");
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
-// ✅ Display total rounds & time per round for all players
             document.getElementById("roundsValue").innerText = gameData.totalRounds;
             document.getElementById("timeValue").innerText = gameData.roundTime;
-            
+
             if (gameData.host === playerName) {
                 document.getElementById("gameSettings").classList.remove("hidden");
                 document.getElementById("startGameButton").classList.remove("hidden");
@@ -121,45 +120,46 @@ function createGame() {
         }
 
         if (gameData.chat) {
-            var messages = Object.values(gameData.chat)
-                .map(msg => `<p>${msg}</p>`).join("");
-            document.getElementById("chatMessages").innerHTML = messages;
+            var chatBox = document.getElementById("chatMessages");
+            chatBox.innerHTML = ""; // Clear existing chat before appending new messages
+
+            Object.values(gameData.chat).forEach(msg => {
+                let p = document.createElement("p");
+                p.textContent = msg;
+                chatBox.appendChild(p);
+            });
+
+            // ✅ Automatically scroll to the latest message
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-       if (gameData.status === "playing") {
-    document.getElementById("waitingRoom").classList.add("hidden");
-    document.getElementById("gameScreen").classList.remove("hidden");
+        if (gameData.status === "playing") {
+            document.getElementById("waitingRoom").classList.add("hidden");
+            document.getElementById("gameScreen").classList.remove("hidden");
 
-    document.getElementById("gameTerm").innerText = gameData.term;
-    document.getElementById("playerRole").innerText = gameData.roles[playerName];
+            document.getElementById("gameTerm").innerText = gameData.term;
+            document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
-            // ✅ Update round number dynamically
-    document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
-    document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
+            document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
+            document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
-             // ✅ Start the countdown for each round
             startCountdown(gameData.timeLeft);
-           
-           // ✅ Update remaining time dynamically
-    document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft || "N/A";
+            document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft || "N/A";
 
-    // ✅ First, hide the thinker panel by default for all players
-    document.getElementById("thinkerPanel").classList.add("hidden");
+            document.getElementById("thinkerPanel").classList.add("hidden");
 
-    // ✅ Show content depending on the player's role
-    if (gameData.roles[playerName] === "REALUPPER") {
-        document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
-        document.getElementById("correctDefinitionBox").classList.remove("hidden");
-    } else if (gameData.roles[playerName] === "9UPPER") {
-        document.getElementById("definitionInputBox").classList.remove("hidden");
-    }
+            if (gameData.roles[playerName] === "REALUPPER") {
+                document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
+                document.getElementById("correctDefinitionBox").classList.remove("hidden");
+            } else if (gameData.roles[playerName] === "9UPPER") {
+                document.getElementById("definitionInputBox").classList.remove("hidden");
+            }
 
-    // ✅ Now ensure only the thinker sees the thinker panel
-    displaythinkerOptions(gameData);
-}
-
+            displaythinkerOptions(gameData);
+        }
     });
 }
+
 
         var roundTimer; // ✅ Global timer variable
 
