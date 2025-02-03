@@ -108,8 +108,8 @@ function createGame() {
 
         if (gameData.players) {
             var playerList = Object.keys(gameData.players)
-                .map(name => <li>${name}</li>).join("");
-            document.getElementById("playerList").innerHTML = <ul>${playerList}</ul>;
+                .map(name => `<li>${name}</li>`).join("");
+            document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
 // ✅ Display total rounds & time per round for all players
             document.getElementById("roundsValue").innerText = gameData.totalRounds;
             document.getElementById("timeValue").innerText = gameData.roundTime;
@@ -122,7 +122,7 @@ function createGame() {
 
         if (gameData.chat) {
             var messages = Object.values(gameData.chat)
-                .map(msg => <p>${msg}</p>).join("");
+                .map(msg => `<p>${msg}</p>`).join("");
             document.getElementById("chatMessages").innerHTML = messages;
         }
 
@@ -190,7 +190,7 @@ function displaythinkerOptions(gameData) {
         var selectablePlayers = Object.keys(gameData.players).filter(p => p !== thinker);
 
         var buttonsHTML = selectablePlayers.map(player =>
-            <button onclick="thinkerSelectPlayer('${player}')">${player}</button>
+            `<button onclick="thinkerSelectPlayer('${player}')">${player}</button>`
         ).join(" ");
 
         document.getElementById("thinkerOptions").innerHTML = buttonsHTML;
@@ -219,7 +219,7 @@ function thinkerSelectPlayer(selectedPlayer) {
         timeLeft: 0
     });
 
-    alert(thinker selected ${selectedPlayer} as the REALUPPER!);
+    alert(`thinker selected ${selectedPlayer} as the REALUPPER!`);
 
     // Fetch current round number
     db.ref("games/" + gameCode + "/currentRound").once("value", snapshot => {
@@ -382,22 +382,12 @@ function startRoundTimer(roundTime, round, totalRounds) {
     }
 
 
- function sendChatMessage() {
-    var message = document.getElementById("chatInput").value.trim();
-    if (message === "") return;
-
-    db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message).then(() => {
-        var chatBox = $(".chatbox"); // ✅ Use jQuery for the chatbox
-
-        // ✅ Auto-scroll to the latest message with animation
-        chatBox.animate({
-            scrollTop: chatBox.prop("scrollHeight")
-        }, 1000);
-    });
-
-    document.getElementById("chatInput").value = "";
-}
-
+        function sendChatMessage() {
+            var message = document.getElementById("chatInput").value.trim();
+            if (message === "") return;
+            db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message);
+            document.getElementById("chatInput").value = "";
+        }
 function updateRounds() {
     document.getElementById("roundsValue").innerText = document.getElementById("roundsSlider").value;
 }
