@@ -8,6 +8,7 @@
     <!-- ✅ Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <style>
         body {
@@ -389,12 +390,13 @@ function sendChatMessage() {
     db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message).then(() => {
         var chatBox = document.getElementById("chatMessages"); // ✅ Get chatbox using vanilla JS
 
-        // ✅ Smooth scrolling using requestAnimationFrame
-        chatBox.scrollTo({
-            top: chatBox.scrollHeight,
-            behavior: "smooth" // ✅ Smooth scroll effect
-        });
+        // ✅ Auto-scroll to the latest message (without jQuery)
+        chatBox.scrollTop = chatBox.scrollHeight;
+chatBox.animate({
+      scrollTop: chatBox.prop('scrollHeight')
+    }, 1000);
     });
+
 
     document.getElementById("chatInput").value = "";
 }
