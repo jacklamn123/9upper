@@ -129,10 +129,21 @@ function createGame() {
             }
         }
 
-        if (gameData.chat) {
-            var messages = Object.values(gameData.chat)
-                .map(msg => `<p>${msg}</p>`).join("");
-            document.getElementById("chatMessages").innerHTML = messages;
+
+            if (gameData.chat) {
+            var chatBox = $("#chatMessages"); // ✅ Chat messages container
+            var chatboxContainer = $(".chatbox"); // ✅ The scrollable chat area
+
+            chatBox.empty(); // ✅ Clear previous messages before adding new ones
+
+            Object.values(gameData.chat).forEach(msg => {
+                chatBox.append(`<p>${msg}</p>`); 
+            });
+
+            // ✅ Always scroll to bottom (for both sender & receiver)
+            requestAnimationFrame(() => {
+                chatboxContainer.scrollTop(chatboxContainer.prop("scrollHeight"));
+            });
         }
 
        if (gameData.status === "playing") {
