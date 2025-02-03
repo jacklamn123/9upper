@@ -112,7 +112,7 @@ function createGame() {
         }
 
 function listenForUpdates() {
-    db.ref("games/" + gameCode).on("value", snapshot => {
+    db.ref("games/" + gameCode + "/chat").on("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
 
@@ -130,11 +130,12 @@ function listenForUpdates() {
             }
         }
 
-        // ✅ Chat Handling with Auto-Scroll for Received Messages
+        // ✅ Chat Handling with Auto-Scroll Fix
         if (gameData.chat) {
             var chatBox = $("#chatMessages"); 
             var chatboxContainer = $(".chatbox"); 
 
+            // ✅ Capture whether the user was already at the bottom before update
             var wasScrolledToBottom = chatboxContainer.prop("scrollTop") + chatboxContainer.innerHeight() >= chatboxContainer.prop("scrollHeight") - 10;
 
             chatBox.empty(); // ✅ Clear messages before adding new ones
@@ -143,10 +144,12 @@ function listenForUpdates() {
                 chatBox.append(`<p>${msg}</p>`); 
             });
 
-            // ✅ Force scrolling down for receivers when a new message is added
-            if (!wasScrolledToBottom) {
-                scrollToBottom();
-            }
+            // ✅ Delay scrolling slightly to ensure messages are fully rendered first
+            setTimeout(() => {
+                if (wasScrolledToBottom) {
+                    chatboxContainer.scrollTop(chatboxContainer.prop("scrollHeight"));
+                }
+            }, 300); // ✅ Ensures Firebase updates first
         }
 
         if (gameData.status === "playing") {
@@ -177,16 +180,16 @@ function listenForUpdates() {
     });
 }
 
+
 function observeChat() {
     var chatBox = document.getElementById("chatMessages");
     var chatboxContainer = document.querySelector(".chatbox");
 
-    if (!chatBox) {  // ✅ Prevent error if chatMessages does not exist yet
+    if (!chatBox) {  
         console.error("Error: #chatMessages element not found.");
         return;
     }
 
-    // ✅ Use MutationObserver to detect when new messages are added
     var observer = new MutationObserver(() => {
         chatboxContainer.scrollTop = chatboxContainer.scrollHeight;
     });
