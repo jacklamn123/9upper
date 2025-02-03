@@ -130,31 +130,29 @@ function listenForUpdates() {
             }
         }
 
-   if (gameData.chat) {
-    var chatBox = $("#chatMessages"); // ✅ jQuery selector for chatbox
-    var chatboxContainer = $(".chatbox"); // ✅ Select the scrolling container
+        // ✅ Chat Handling with Auto-Scroll Fix
+        if (gameData.chat) {
+            var chatBox = $("#chatMessages"); // ✅ jQuery selector for chat messages container
+            var chatboxContainer = $(".chatbox"); // ✅ Select the outer scrolling container
 
-    var previousScrollHeight = chatboxContainer.prop("scrollHeight"); // ✅ Store previous height
+            var isScrolledToBottom = chatboxContainer.prop("scrollTop") + chatboxContainer.innerHeight() >= chatboxContainer.prop("scrollHeight") - 50;
 
-    chatBox.empty(); // ✅ Clear old messages
+            // ✅ Keep track of existing messages (Don't clear everything)
+            var existingMessages = chatBox.children().length;
 
-    Object.values(gameData.chat).forEach(msg => {
-        chatBox.append(`<p>${msg}</p>`); // ✅ Append each message
-    });
+            Object.values(gameData.chat).slice(existingMessages).forEach(msg => {
+                chatBox.append(`<p>${msg}</p>`); // ✅ Append only new messages
+            });
 
-    // ✅ Check if user is already scrolled near the bottom before updating
-    var isScrolledToBottom = chatboxContainer.scrollTop() + chatboxContainer.innerHeight() >= previousScrollHeight - 10;
-
-    if (isScrolledToBottom) {
-        // ✅ Smooth scroll ONLY if user was already at the bottom
-        setTimeout(() => {
-            chatboxContainer.animate({
-                scrollTop: chatboxContainer.prop("scrollHeight")
-            }, 500);
-        }, 100); // ✅ Small delay to allow Firebase update
-    }
-}
-
+            // ✅ Ensure scrolling happens after messages fully load
+            setTimeout(() => {
+                if (isScrolledToBottom) {
+                    chatboxContainer.animate({
+                        scrollTop: chatboxContainer.prop("scrollHeight")
+                    }, 500);
+                }
+            }, 200); // ✅ Delay ensures Firebase updates before scrolling
+        }
 
         if (gameData.status === "playing") {
             document.getElementById("waitingRoom").classList.add("hidden");
@@ -189,6 +187,7 @@ function listenForUpdates() {
         }
     });
 }
+
 
 
         var roundTimer; // ✅ Global timer variable
