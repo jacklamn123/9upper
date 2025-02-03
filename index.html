@@ -131,7 +131,7 @@ function createGame() {
 
 
            
-      if (gameData.chat) {
+   if (gameData.chat) {
     const chatBox = $("#chatMessages");
     const chatboxContainer = $(".chatbox");
 
@@ -143,20 +143,19 @@ function createGame() {
         chatBox.append(`<p>${msg}</p>`);
     });
 
-    // Force DOM update before scrolling
+    // Ensure the DOM updates before scrolling
     setTimeout(() => {
-        // Use pure JavaScript approach
+        // Use plain JavaScript for smooth scrolling
         const container = document.querySelector(".chatbox");
-        
-        // Alternative: Use jQuery's animate for smooth scroll
-        chatboxContainer.animate({
+        container.scrollTop = container.scrollHeight;
+
+        // Alternative: Use jQuery for smooth scrolling
+        chatboxContainer.stop().animate({
             scrollTop: chatboxContainer.prop("scrollHeight")
-        }, 50);
-        
-        // Regular scroll (without animation)
-        // container.scrollTop = container.scrollHeight;
-    }, 0);
+        }, 200);
+    }, 10);
 }
+
 
        if (gameData.status === "playing") {
     document.getElementById("waitingRoom").classList.add("hidden");
