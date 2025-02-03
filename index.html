@@ -19,15 +19,23 @@
             display: none;
         }
         .chatbox {
-            width: 300px;
-            height: 200px;
-            border: 1px solid black;
-            overflow-y: auto;
-            margin: 10px auto;
-            text-align: left;
-            padding: 5px;
-            background-color: #f0f0f0;
-        }
+    width: 300px;
+    height: 200px;
+    border: 1px solid black;
+    overflow-y: auto; /* ✅ Enables scrolling */
+    margin: 10px auto;
+    text-align: left;
+    padding: 5px;
+    background-color: #f0f0f0;
+    display: flex;
+    flex-direction: column; /* ✅ Ensures messages fill height */
+}
+
+#chatMessages {
+    flex-grow: 1; /* ✅ Makes sure messages fill the chatbox */
+    overflow-y: auto; /* ✅ Allows scrolling */
+}
+
     </style>
 
     <script>
