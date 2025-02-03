@@ -110,7 +110,7 @@ function createGame() {
             });
         }
 
-        function listenForUpdates() {
+      function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
@@ -119,78 +119,64 @@ function createGame() {
             var playerList = Object.keys(gameData.players)
                 .map(name => `<li>${name}</li>`).join("");
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
-// ✅ Display total rounds & time per round for all players
+
             document.getElementById("roundsValue").innerText = gameData.totalRounds;
             document.getElementById("timeValue").innerText = gameData.roundTime;
-            
+
             if (gameData.host === playerName) {
                 document.getElementById("gameSettings").classList.remove("hidden");
                 document.getElementById("startGameButton").classList.remove("hidden");
             }
         }
 
+        // ✅ Chatbox Auto-Scrolling
+        if (gameData.chat) {
+            const chatBox = document.querySelector(".chatbox");
 
-           
-   if (gameData.chat) {
-    const chatBox = $("#chatMessages");
-    const chatboxContainer = $(".chatbox");
+            // Clear existing messages
+            chatBox.innerHTML = "";
 
-    // Clear existing messages
-    chatBox.empty();
+            // Add all messages
+            Object.values(gameData.chat).forEach(msg => {
+                chatBox.innerHTML += `<p>${msg}</p>`;
+            });
 
-    // Add all messages
-    Object.values(gameData.chat).forEach(msg => {
-        chatBox.append(`<p>${msg}</p>`);
-    });
+            // ✅ Ensure chatbox is visible
+            chatBox.style.display = "block";
 
-    // Ensure the DOM updates before scrolling
-    setTimeout(() => {
-        // Use plain JavaScript for smooth scrolling
-        const container = document.querySelector(".chatbox");
-        container.scrollTop = container.scrollHeight;
+            // ✅ Force scroll to the bottom
+            setTimeout(() => {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 100);
+        }
 
-        // Alternative: Use jQuery for smooth scrolling
-        chatboxContainer.stop().animate({
-            scrollTop: chatboxContainer.prop("scrollHeight")
-        }, 200);
-    }, 10);
-}
+        if (gameData.status === "playing") {
+            document.getElementById("waitingRoom").classList.add("hidden");
+            document.getElementById("gameScreen").classList.remove("hidden");
 
+            document.getElementById("gameTerm").innerText = gameData.term;
+            document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
-       if (gameData.status === "playing") {
-    document.getElementById("waitingRoom").classList.add("hidden");
-    document.getElementById("gameScreen").classList.remove("hidden");
+            document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
+            document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
-    document.getElementById("gameTerm").innerText = gameData.term;
-    document.getElementById("playerRole").innerText = gameData.roles[playerName];
-
-            // ✅ Update round number dynamically
-    document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
-    document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
-
-             // ✅ Start the countdown for each round
             startCountdown(gameData.timeLeft);
-           
-           // ✅ Update remaining time dynamically
-    document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft || "N/A";
+            document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft || "N/A";
 
-    // ✅ First, hide the thinker panel by default for all players
-    document.getElementById("thinkerPanel").classList.add("hidden");
+            document.getElementById("thinkerPanel").classList.add("hidden");
 
-    // ✅ Show content depending on the player's role
-    if (gameData.roles[playerName] === "REALUPPER") {
-        document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
-        document.getElementById("correctDefinitionBox").classList.remove("hidden");
-    } else if (gameData.roles[playerName] === "9UPPER") {
-        document.getElementById("definitionInputBox").classList.remove("hidden");
-    }
+            if (gameData.roles[playerName] === "REALUPPER") {
+                document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
+                document.getElementById("correctDefinitionBox").classList.remove("hidden");
+            } else if (gameData.roles[playerName] === "9UPPER") {
+                document.getElementById("definitionInputBox").classList.remove("hidden");
+            }
 
-    // ✅ Now ensure only the thinker sees the thinker panel
-    displaythinkerOptions(gameData);
-}
-
+            displaythinkerOptions(gameData);
+        }
     });
 }
+
 
         var roundTimer; // ✅ Global timer variable
 
