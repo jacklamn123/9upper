@@ -130,21 +130,23 @@ function createGame() {
         }
 
 
-            if (gameData.chat) {
-            var chatBox = $("#chatMessages"); // ✅ Chat messages container
-            var chatboxContainer = $(".chatbox"); // ✅ The scrollable chat area
+           
+        if (gameData.chat) {
+    var chatBox = $("#chatMessages");
+    var chatboxContainer = $(".chatbox");
 
-            chatBox.empty(); // ✅ Clear previous messages before adding new ones
+    chatBox.empty();
 
-            Object.values(gameData.chat).forEach(msg => {
-                chatBox.append(`<p>${msg}</p>`); 
-            });
+    Object.values(gameData.chat).forEach(msg => {
+        chatBox.append(`<p>${msg}</p>`);
+    });
 
-            // ✅ Always scroll to bottom (for both sender & receiver)
-            requestAnimationFrame(() => {
-                chatboxContainer.scrollTop(chatboxContainer.prop("scrollHeight"));
-            });
-        }
+    // ✅ Correct scrolling by targeting the right element and using DOM properties
+    requestAnimationFrame(() => {
+        const container = chatboxContainer[0]; // Use the actual DOM element
+        container.scrollTop = container.scrollHeight;
+    });
+}
 
        if (gameData.status === "playing") {
     document.getElementById("waitingRoom").classList.add("hidden");
