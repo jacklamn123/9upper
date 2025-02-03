@@ -112,15 +112,16 @@ function createGame() {
         }
 
 function listenForUpdates() {
-    db.ref("games/" + gameCode + "/chat").on("value", snapshot => {
+    db.ref("games/" + gameCode).on("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
 
         if (gameData.players) {
             var playerList = Object.keys(gameData.players)
-                .map(name => `<li>${name}</li>`).join(""); 
+                .map(name => `<li>${name}</li>`).join(""); // ✅ Fix: Template literals properly used
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
 
+            // ✅ Display total rounds & time per round for all players
             document.getElementById("roundsValue").innerText = gameData.totalRounds;
             document.getElementById("timeValue").innerText = gameData.roundTime;
             
@@ -130,26 +131,27 @@ function listenForUpdates() {
             }
         }
 
-        // ✅ Chat Handling with Auto-Scroll Fix
+        // ✅ Chat Handling with Proper Auto-Scrolling
         if (gameData.chat) {
-            var chatBox = $("#chatMessages"); 
-            var chatboxContainer = $(".chatbox"); 
+            var chatBox = $("#chatMessages"); // ✅ jQuery selector for chat messages container
+            var chatboxContainer = $(".chatbox"); // ✅ Select the scrolling container
 
-            // ✅ Capture whether the user was already at the bottom before update
-            var wasScrolledToBottom = chatboxContainer.prop("scrollTop") + chatboxContainer.innerHeight() >= chatboxContainer.prop("scrollHeight") - 10;
+            var wasScrolledToBottom = chatboxContainer.scrollTop() + chatboxContainer.innerHeight() >= chatboxContainer.prop("scrollHeight") - 50;
 
             chatBox.empty(); // ✅ Clear messages before adding new ones
 
             Object.values(gameData.chat).forEach(msg => {
-                chatBox.append(`<p>${msg}</p>`); 
+                chatBox.append(`<p>${msg}</p>`); // ✅ Fix: Proper template literals for message text
             });
 
-            // ✅ Delay scrolling slightly to ensure messages are fully rendered first
+            // ✅ Ensure scrolling happens after messages fully load
             setTimeout(() => {
                 if (wasScrolledToBottom) {
-                    chatboxContainer.scrollTop(chatboxContainer.prop("scrollHeight"));
+                    chatboxContainer.animate({
+                        scrollTop: chatboxContainer.prop("scrollHeight")
+                    }, 500);
                 }
-            }, 300); // ✅ Ensures Firebase updates first
+            }, 200); // ✅ Small delay ensures Firebase updates before scrolling
         }
 
         if (gameData.status === "playing") {
@@ -159,15 +161,20 @@ function listenForUpdates() {
             document.getElementById("gameTerm").innerText = gameData.term;
             document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
+            // ✅ Update round number dynamically
             document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
             document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
+            // ✅ Start the countdown for each round
             startCountdown(gameData.timeLeft);
            
+            // ✅ Update remaining time dynamically
             document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft || "N/A";
 
+            // ✅ First, hide the thinker panel by default for all players
             document.getElementById("thinkerPanel").classList.add("hidden");
 
+            // ✅ Show content depending on the player's role
             if (gameData.roles[playerName] === "REALUPPER") {
                 document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
                 document.getElementById("correctDefinitionBox").classList.remove("hidden");
@@ -175,30 +182,12 @@ function listenForUpdates() {
                 document.getElementById("definitionInputBox").classList.remove("hidden");
             }
 
+            // ✅ Now ensure only the thinker sees the thinker panel
             displaythinkerOptions(gameData);
         }
     });
 }
 
-
-function observeChat() {
-    var chatBox = document.getElementById("chatMessages");
-    var chatboxContainer = document.querySelector(".chatbox");
-
-    if (!chatBox) {  
-        console.error("Error: #chatMessages element not found.");
-        return;
-    }
-
-    var observer = new MutationObserver(() => {
-        chatboxContainer.scrollTop = chatboxContainer.scrollHeight;
-    });
-
-    observer.observe(chatBox, { childList: true }); // ✅ Watches for new messages
-}
-
-// ✅ Call this function after the page fully loads
-document.addEventListener("DOMContentLoaded", observeChat);
 
 
 
