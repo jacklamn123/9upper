@@ -177,9 +177,14 @@ function listenForUpdates() {
     });
 }
 
-        function observeChat() {
+function observeChat() {
     var chatBox = document.getElementById("chatMessages");
     var chatboxContainer = document.querySelector(".chatbox");
+
+    if (!chatBox) {  // ✅ Prevent error if chatMessages does not exist yet
+        console.error("Error: #chatMessages element not found.");
+        return;
+    }
 
     // ✅ Use MutationObserver to detect when new messages are added
     var observer = new MutationObserver(() => {
@@ -189,8 +194,8 @@ function listenForUpdates() {
     observer.observe(chatBox, { childList: true }); // ✅ Watches for new messages
 }
 
-// ✅ Call this function once when the page loads
-observeChat();
+// ✅ Call this function after the page fully loads
+document.addEventListener("DOMContentLoaded", observeChat);
 
 
 
