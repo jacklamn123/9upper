@@ -130,21 +130,31 @@ function listenForUpdates() {
             }
         }
 
-        if (gameData.chat) {
-            var chatBox = $("#chatMessages"); // ✅ jQuery for chatbox
-            chatBox.empty(); // ✅ Clear previous messages
+   if (gameData.chat) {
+    var chatBox = $("#chatMessages"); // ✅ jQuery selector for chatbox
+    var chatboxContainer = $(".chatbox"); // ✅ Select the scrolling container
 
-            Object.values(gameData.chat).forEach(msg => {
-                chatBox.append(`<p>${msg}</p>`); // ✅ Append messages
-            });
+    var previousScrollHeight = chatboxContainer.prop("scrollHeight"); // ✅ Store previous height
 
-            // ✅ Auto-scroll to the newest message
-            setTimeout(() => {
-                $(".chatbox").animate({
-                    scrollTop: $(".chatbox").prop("scrollHeight")
-                }, 1000);
-            }, 100); // ✅ Small delay ensures smooth scrolling
-        }
+    chatBox.empty(); // ✅ Clear old messages
+
+    Object.values(gameData.chat).forEach(msg => {
+        chatBox.append(`<p>${msg}</p>`); // ✅ Append each message
+    });
+
+    // ✅ Check if user is already scrolled near the bottom before updating
+    var isScrolledToBottom = chatboxContainer.scrollTop() + chatboxContainer.innerHeight() >= previousScrollHeight - 10;
+
+    if (isScrolledToBottom) {
+        // ✅ Smooth scroll ONLY if user was already at the bottom
+        setTimeout(() => {
+            chatboxContainer.animate({
+                scrollTop: chatboxContainer.prop("scrollHeight")
+            }, 500);
+        }, 100); // ✅ Small delay to allow Firebase update
+    }
+}
+
 
         if (gameData.status === "playing") {
             document.getElementById("waitingRoom").classList.add("hidden");
