@@ -118,10 +118,9 @@ function listenForUpdates() {
 
         if (gameData.players) {
             var playerList = Object.keys(gameData.players)
-                .map(name => `<li>${name}</li>`).join(""); // ✅ Fix: Template literals properly used
+                .map(name => `<li>${name}</li>`).join(""); 
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
 
-            // ✅ Display total rounds & time per round for all players
             document.getElementById("roundsValue").innerText = gameData.totalRounds;
             document.getElementById("timeValue").innerText = gameData.roundTime;
             
@@ -131,27 +130,23 @@ function listenForUpdates() {
             }
         }
 
-        // ✅ Chat Handling with Proper Auto-Scrolling
+        // ✅ Chat Handling with Auto-Scroll for Received Messages
         if (gameData.chat) {
-            var chatBox = $("#chatMessages"); // ✅ jQuery selector for chat messages container
-            var chatboxContainer = $(".chatbox"); // ✅ Select the scrolling container
+            var chatBox = $("#chatMessages"); 
+            var chatboxContainer = $(".chatbox"); 
 
-            var wasScrolledToBottom = chatboxContainer.scrollTop() + chatboxContainer.innerHeight() >= chatboxContainer.prop("scrollHeight") - 50;
+            var wasScrolledToBottom = chatboxContainer.prop("scrollTop") + chatboxContainer.innerHeight() >= chatboxContainer.prop("scrollHeight") - 10;
 
             chatBox.empty(); // ✅ Clear messages before adding new ones
 
             Object.values(gameData.chat).forEach(msg => {
-                chatBox.append(`<p>${msg}</p>`); // ✅ Fix: Proper template literals for message text
+                chatBox.append(`<p>${msg}</p>`); 
             });
 
-            // ✅ Ensure scrolling happens after messages fully load
-            setTimeout(() => {
-                if (wasScrolledToBottom) {
-                    chatboxContainer.animate({
-                        scrollTop: chatboxContainer.prop("scrollHeight")
-                    }, 500);
-                }
-            }, 200); // ✅ Small delay ensures Firebase updates before scrolling
+            // ✅ Force scrolling down for receivers when a new message is added
+            if (!wasScrolledToBottom) {
+                scrollToBottom();
+            }
         }
 
         if (gameData.status === "playing") {
@@ -161,20 +156,15 @@ function listenForUpdates() {
             document.getElementById("gameTerm").innerText = gameData.term;
             document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
-            // ✅ Update round number dynamically
             document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
             document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
-            // ✅ Start the countdown for each round
             startCountdown(gameData.timeLeft);
            
-            // ✅ Update remaining time dynamically
             document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft || "N/A";
 
-            // ✅ First, hide the thinker panel by default for all players
             document.getElementById("thinkerPanel").classList.add("hidden");
 
-            // ✅ Show content depending on the player's role
             if (gameData.roles[playerName] === "REALUPPER") {
                 document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
                 document.getElementById("correctDefinitionBox").classList.remove("hidden");
@@ -182,11 +172,26 @@ function listenForUpdates() {
                 document.getElementById("definitionInputBox").classList.remove("hidden");
             }
 
-            // ✅ Now ensure only the thinker sees the thinker panel
             displaythinkerOptions(gameData);
         }
     });
 }
+
+        function observeChat() {
+    var chatBox = document.getElementById("chatMessages");
+    var chatboxContainer = document.querySelector(".chatbox");
+
+    // ✅ Use MutationObserver to detect when new messages are added
+    var observer = new MutationObserver(() => {
+        chatboxContainer.scrollTop = chatboxContainer.scrollHeight;
+    });
+
+    observer.observe(chatBox, { childList: true }); // ✅ Watches for new messages
+}
+
+// ✅ Call this function once when the page loads
+observeChat();
+
 
 
 
