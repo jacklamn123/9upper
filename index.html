@@ -382,21 +382,20 @@ function startRoundTimer(roundTime, round, totalRounds) {
     }
 
 
-   function sendChatMessage() {
+ function sendChatMessage() {
     var message = document.getElementById("chatInput").value.trim();
     if (message === "") return;
 
     db.ref("games/" + gameCode + "/chat").push(playerName + ": " + message).then(() => {
-        var chatBox = $(".chatbox"); // ✅ Use jQuery for the chatbox
+        var chatBox = document.getElementById("chatMessages"); // ✅ Get chatbox using vanilla JS
 
-        // ✅ Auto-scroll to the latest message with animation
-        chatBox.animate({
-            scrollTop: chatBox.prop("scrollHeight")
-        }, 1000);
+        // ✅ Auto-scroll to the latest message (without jQuery)
+        chatBox.scrollTop = chatBox.scrollHeight;
     });
 
     document.getElementById("chatInput").value = "";
 }
+
 
 function updateRounds() {
     document.getElementById("roundsValue").innerText = document.getElementById("roundsSlider").value;
