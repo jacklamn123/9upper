@@ -461,14 +461,15 @@ function startRoundTimer(roundTime, round, totalRounds) {
 
             var timeLeft = gameData.timeLeft;
 
-            if (timeLeft <= 0 || gameData.winner) {  // ✅ Stop if time runs out OR thinker picked a player
+            if (timeLeft <= 0) {  // ✅ Stop timer and start new round when time runs out
                 clearInterval(roundTimer);
 
-                if (!gameData.winner) {  // ✅ If no one was selected, start new round due to timeout
+                if (!gameData.winner) {  // ✅ If no winner was chosen, trigger timeout logic
                     alert("Time's up! Starting next round...");
+                    db.ref("games/" + gameCode).update({ winner: "timeout" }); // Mark timeout
                 }
 
-                endRound(round, totalRounds);
+                endRound(round, totalRounds); // ✅ Restart the game
             } else {
                 db.ref("games/" + gameCode).update({
                     timeLeft: timeLeft - 1
@@ -482,6 +483,7 @@ function startRoundTimer(roundTime, round, totalRounds) {
         });
     }, 1000);
 }
+
 
 
 function endRound(round, totalRounds) {
@@ -505,6 +507,7 @@ function endRound(round, totalRounds) {
         });
     }
 }
+
 
 
 
