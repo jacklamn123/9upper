@@ -238,8 +238,13 @@ function listenForUpdates() {
         var roundTimer; // ✅ Global timer variable
 
 function startCountdown(timeLeft, round, totalRounds, roundTime) {
-    // ✅ Ensure any existing timer is cleared before starting a new one
-    clearInterval(roundTimer);
+    // ✅ Ensure timeLeft is valid
+    if (isNaN(timeLeft) || timeLeft === undefined) {
+        console.error("Error: timeLeft is NaN or undefined, resetting to 60");
+        timeLeft = 60;  // ✅ Default to 60 seconds if undefined
+    }
+
+    clearInterval(roundTimer); // ✅ Ensure any existing timer is cleared
 
     roundTimer = setInterval(() => {
         if (timeLeft <= 0) {
@@ -430,10 +435,16 @@ function startGame() {
           var roundTimer;
 
 function startNewRound(terms, round, totalRounds, roundTime) {
+    // ✅ Ensure roundTime is always valid
+    if (isNaN(roundTime) || roundTime === undefined) {
+        console.error("Error: roundTime is NaN or undefined, resetting to 60");
+        roundTime = 60;  // ✅ Default to 60 seconds if undefined
+    }
+
     // ✅ Ensure round is a valid number
     if (isNaN(round) || round === undefined) {
         console.error("Error: round is NaN or undefined, resetting to 1");
-        round = 1;  // ✅ Default to 1 if undefined
+        round = 1;
     }
 
     db.ref("games/" + gameCode + "/players").once("value", snapshot => {
@@ -453,11 +464,11 @@ function startNewRound(terms, round, totalRounds, roundTime) {
         var correctDefinition = terms[randomIndex].definition;
 
         db.ref("games/" + gameCode).update({
-            currentRound: round,  // ✅ Ensure it's always a valid number
+            currentRound: round,
             term: randomTerm,
             correctDefinition: "",  // ✅ Reset before assigning a new value
             roles: roles,
-            timeLeft: roundTime
+            timeLeft: roundTime  // ✅ Ensure it's always a number
         }).then(() => {
             db.ref("games/" + gameCode).update({
                 correctDefinition: correctDefinition // ✅ Now set the correct definition for the new REALUPPER
@@ -472,6 +483,7 @@ function startNewRound(terms, round, totalRounds, roundTime) {
         startRoundTimer(roundTime, round, totalRounds);
     });
 }
+
 
 
 
