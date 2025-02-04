@@ -198,13 +198,13 @@ function listenForUpdates() {
             document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
             document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
-            // ✅ Only the host starts the countdown timer
+            // ✅ Host starts the countdown timer
             if (gameData.host === playerName) {
                 startCountdown(gameData.timeLeft, gameData.currentRound, gameData.totalRounds, gameData.roundTime);
             }
 
-            // ✅ All players should read time from Firebase instead of running their own timers
-            document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft || "N/A";
+            // ✅ All players (including host) update UI with the correct time from Firebase
+            document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
 
             document.getElementById("thinkerPanel").classList.add("hidden");
 
@@ -241,28 +241,26 @@ function listenForUpdates() {
 
 
 
+
         var roundTimer; // ✅ Global timer variable
 
 function startCountdown(timeLeft, round, totalRounds, roundTime) {
-    // ✅ Ensure timeLeft is valid
     if (isNaN(timeLeft) || timeLeft === undefined) {
         console.error("Error: timeLeft is NaN or undefined, resetting to 60");
-        timeLeft = 60;  // ✅ Default to 60 seconds if undefined
+        timeLeft = 60;
     }
 
-    clearInterval(roundTimer); // ✅ Ensure any existing timer is cleared
+    clearInterval(roundTimer); // ✅ Clear any existing timer
 
     roundTimer = setInterval(() => {
         if (timeLeft <= 0) {
             clearInterval(roundTimer); // ✅ Stop the timer when it reaches zero
-            document.getElementById("timeLeftDisplay").innerText = "Time's up!";
+            db.ref("games/" + gameCode).update({ timeLeft: 0 });
 
             if (round >= totalRounds) {
-                // ✅ If it's the last round, end the game
                 db.ref("games/" + gameCode).update({ status: "finished" });
                 alert("Game Over!");
             } else {
-                // ✅ Move to the next round
                 alert("Time's up! Moving to the next round...");
 
                 db.ref("games/" + gameCode).once("value", snapshot => {
@@ -279,11 +277,14 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
                 });
             }
         } else {
-            document.getElementById("timeLeftDisplay").innerText = timeLeft + " seconds";
             timeLeft--; // ✅ Decrement time left
+            db.ref("games/" + gameCode).update({ timeLeft: timeLeft }); // ✅ Update Firebase
+
+            document.getElementById("timeLeftDisplay").innerText = timeLeft + " seconds";
         }
-    }, 1000); // ✅ Update every second
+    }, 1000);
 }
+
 
 
 
