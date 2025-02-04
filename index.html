@@ -143,7 +143,7 @@ function createGame() {
             });
         }
 
-  function listenForUpdates() {
+function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
@@ -203,17 +203,35 @@ function createGame() {
 
             document.getElementById("thinkerPanel").classList.add("hidden");
 
-            if (gameData.roles[playerName] === "REALUPPER") {
-                document.getElementById("correctDefinition").innerText = gameData.correctDefinition;
-                document.getElementById("correctDefinitionBox").classList.remove("hidden");
-            } else if (gameData.roles[playerName] === "9UPPER") {
-                document.getElementById("definitionInputBox").classList.remove("hidden");
+            // ✅ Fix: Show definition only for REALUPPER
+            const definitionBox = document.getElementById("correctDefinitionBox");
+            const definitionText = document.getElementById("correctDefinition");
+
+            if (definitionBox && definitionText) {
+                if (gameData.roles[playerName] === "REALUPPER") {
+                    definitionText.innerText = gameData.correctDefinition;
+                    definitionBox.classList.remove("hidden");
+                } else {
+                    definitionBox.classList.add("hidden");
+                    definitionText.innerText = "";  // ✅ Clear previous round’s definition
+                }
+            }
+
+            // ✅ Ensure 9UPPER players don’t see the definition
+            const definitionInputBox = document.getElementById("definitionInputBox");
+            if (definitionInputBox) {
+                if (gameData.roles[playerName] === "9UPPER") {
+                    definitionInputBox.classList.remove("hidden");
+                } else {
+                    definitionInputBox.classList.add("hidden");
+                }
             }
 
             displaythinkerOptions(gameData);
         }
     });
 }
+
 
 
 
