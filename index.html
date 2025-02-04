@@ -243,8 +243,12 @@ function listenForUpdates() {
 
         var roundTimer; // ✅ Global timer variable
 
-// ✅ Start countdown timer
 function startCountdown(timeLeft, round, totalRounds, roundTime) {
+    if (isNaN(timeLeft) || timeLeft === undefined) {
+        console.error("Error: timeLeft is NaN or undefined, resetting to 60");
+        timeLeft = 60;
+    }
+
     clearInterval(roundTimer);
 
     roundTimer = setInterval(() => {
@@ -253,13 +257,13 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
             db.ref("games/" + gameCode).update({ timeLeft: 0 });
 
             if (round >= totalRounds) {
-                handleGameEnd(); // ✅ Centralized game-end logic
+                endRound(round, totalRounds);
             } else {
                 db.ref("games/" + gameCode).once("value", snapshot => {
                     var gameData = snapshot.val();
                     if (!gameData) return;
-                    var nextRound = (gameData.currentRound || 0) + 1;
 
+                    var nextRound = (gameData.currentRound || 0) + 1;
                     fetch("9upper_terms.json")
                         .then(response => response.json())
                         .then(terms => {
@@ -269,7 +273,8 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
             }
         } else {
             timeLeft--;
-            db.ref("games/" + gameCode).update({ timeLeft });
+            db.ref("games/" + gameCode).update({ timeLeft: timeLeft });
+
             document.getElementById("timeLeftDisplay").innerText = timeLeft + " seconds";
         }
     }, 1000);
@@ -309,7 +314,6 @@ function displaythinkerOptions(gameData) {
 
 
 
-// ✅ Thinker selects a player
 function thinkerSelectPlayer(selectedPlayer) {
     clearInterval(roundTimer);
 
@@ -329,11 +333,13 @@ function thinkerSelectPlayer(selectedPlayer) {
             scores[selectedPlayer] = (scores[selectedPlayer] || 0) + 1;
         }
 
-        db.ref("games/" + gameCode).update({ scores, winner: selectedPlayer, timeLeft: 0 })
-            .then(() => {
-                alert(`Thinker selected ${selectedPlayer}`);
-                updateScoreboard(scores);
-            });
+        db.ref("games/" + gameCode).update({
+            scores: scores,
+            winner: selectedPlayer,
+            timeLeft: 0
+        }).then(() => {
+            updateScoreboard(scores);
+        });
 
         db.ref("games/" + gameCode + "/currentRound").once("value", snapshot => {
             var round = snapshot.val();
@@ -341,18 +347,19 @@ function thinkerSelectPlayer(selectedPlayer) {
                 var totalRounds = totalSnapshot.val();
 
                 if (round >= totalRounds) {
-                    handleGameEnd(); // ✅ Use the centralized handler
+                    endRound(round, totalRounds);
                 } else {
                     fetch("9upper_terms.json")
                         .then(response => response.json())
                         .then(terms => {
-                            startNewRound(terms, round + 1, totalRounds, gameData.roundTime || 60);
+                            startNewRound(terms, round + 1, totalRounds, gameData.roundTime);
                         });
                 }
             });
         });
     });
 }
+
 
 
 
@@ -506,18 +513,21 @@ function startRoundTimer(roundTime, round, totalRounds) {
 
 
 
-// ✅ End round and move to next or end game
 function endRound(round, totalRounds) {
-    clearInterval(roundTimer);
+    clearInterval(roundTimer); // ✅ Stop any running timer
 
-    if (round >= totalRounds) {
-        handleGameEnd(); // ✅ Call centralized game-end handler
-    } else {
-        db.ref("games/" + gameCode).once("value", snapshot => {
-            var gameData = snapshot.val();
-            if (!gameData) return;
+    db.ref("games/" + gameCode).once("value", snapshot => {
+        var gameData = snapshot.val();
+        if (!gameData) return;
 
-            var roundTime = gameData.roundTime;
+        var roundTime = gameData.roundTime; // ✅ Fetch roundTime before calling startNewRound()
+
+        if (round >= totalRounds) {
+            db.ref("games/" + gameCode).update({ status: "finished" });
+
+            // ✅ Ensure all players receive the endgame screen
+            showEndgameScreen(gameData.scores);
+        } else {
             fetch("9upper_terms.json")
                 .then(response => response.json())
                 .then(terms => {
@@ -531,9 +541,10 @@ function endRound(round, totalRounds) {
                         startNewRound(terms, round + 1, totalRounds, roundTime);
                     });
                 });
-        });
-    }
+        }
+    });
 }
+
 
 
 
@@ -596,66 +607,58 @@ function handleGameEnd() {
     });
 }
 
-// ✅ Show Final Scoreboard & Options
-function showFinalScoreboard() {
-    const gameScreen = document.getElementById("gameScreen");
-    gameScreen.innerHTML = ""; // Clear the game screen
+function showEndgameScreen(scores) {
+    var endGameModal = document.createElement("div");
+    endGameModal.id = "endGameModal";
+    endGameModal.style.position = "fixed";
+    endGameModal.style.top = "50%";
+    endGameModal.style.left = "50%";
+    endGameModal.style.transform = "translate(-50%, -50%)";
+    endGameModal.style.background = "white";
+    endGameModal.style.padding = "20px";
+    endGameModal.style.borderRadius = "10px";
+    endGameModal.style.boxShadow = "0 0 10px rgba(0,0,0,0.3)";
+    endGameModal.style.textAlign = "center";
 
-    let scoreboardHTML = `
-        <div id="finalScoreboard" style="
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2);
-            text-align: center; width: 50%; font-size: 18px;
-        ">
-            <h2>Game Over!</h2>
-            <h3>Final Scores</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background: #ddd;">
-                        <th>Rank</th><th>Player</th><th>Score</th>
-                    </tr>
-                </thead>
-                <tbody id="finalScoreBody"></tbody>
-            </table>
-            <br>
-            <button onclick="startGame()" style="
-                background: green; color: white; padding: 10px; border: none; border-radius: 5px;
-                cursor: pointer; font-size: 16px; margin: 10px;
-            ">Start New Game</button>
-            <button onclick="backToWaitingRoom()" style="
-                background: blue; color: white; padding: 10px; border: none; border-radius: 5px;
-                cursor: pointer; font-size: 16px; margin: 10px;
-            ">Back to Waiting Room</button>
-        </div>
+    var sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+
+    var scoreHTML = `<h2>Game Over!</h2><h3>Final Scores</h3><table border="1" style="margin:auto;"><tr><th>Rank</th><th>Player</th><th>Score</th></tr>`;
+    sortedScores.forEach((player, index) => {
+        scoreHTML += `<tr><td>${index + 1}</td><td>${player[0]}</td><td>${player[1]}</td></tr>`;
+    });
+    scoreHTML += `</table><br>`;
+
+    endGameModal.innerHTML = scoreHTML + `
+        <button onclick="restartGame()" style="background:green;color:white;padding:10px;border:none;margin:5px;">Start New Game</button>
+        <button onclick="returnToWaitingRoom()" style="background:blue;color:white;padding:10px;border:none;margin:5px;">Back to Waiting Room</button>
+        <button onclick="returnToMainMenu()" style="background:red;color:white;padding:10px;border:none;margin:5px;">Back to Main Menu</button>
     `;
 
-    gameScreen.innerHTML = scoreboardHTML;
-    updateFinalScoreboard();
+    document.body.appendChild(endGameModal);
 }
 
-// ✅ Populate Final Scoreboard
-function updateFinalScoreboard() {
-    db.ref("games/" + gameCode + "/scores").once("value", snapshot => {
-        const scores = snapshot.val() || {};
-        let sortedPlayers = Object.entries(scores).sort((a, b) => b[1] - a[1]);
 
-        let finalScoreBody = document.getElementById("finalScoreBody");
-        finalScoreBody.innerHTML = sortedPlayers.map((player, index) => `
-            <tr>
-                <td>${index + 1}</td>
-                <td>${player[0]}</td>
-                <td>${player[1]}</td>
-            </tr>
-        `).join("");
-    });
+
+
+function restartGame() {
+    document.getElementById("endGameModal").remove();
+    startGame();
 }
 
-// ✅ Back to Waiting Room
-function backToWaitingRoom() {
-    db.ref("games/" + gameCode).update({ status: "waiting" }).then(() => {
-        location.reload(); // Refresh page to reset to waiting room
-    });
+
+        function returnToWaitingRoom() {
+    document.getElementById("endGameModal").remove();
+    db.ref("games/" + gameCode).update({ status: "waiting" });
+
+    document.getElementById("gameScreen").classList.add("hidden");
+    document.getElementById("waitingRoom").classList.remove("hidden");
 }
+
+        function returnToMainMenu() {
+    document.getElementById("endGameModal").remove();
+    window.location.reload(); // ✅ Reloads page to go back to main menu
+}
+
 
         
     </script>
