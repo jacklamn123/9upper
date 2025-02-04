@@ -36,6 +36,7 @@
     overflow-y: auto; /* ✅ Allows scrolling */
 }
         /* ✅ Scoreboard Styling */
+/* ✅ Scoreboard Styling */
 #scoreboard {
     position: absolute;
     top: 10px;
@@ -43,24 +44,29 @@
     background-color: #ffffff;
     border: 2px solid black;
     padding: 10px;
-    width: 200px;
+    width: 220px; /* ✅ Slightly wider for better alignment */
     font-size: 14px;
+    text-align: center;
 }
 
 #scoreboard table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed; /* ✅ Ensure equal column width */
 }
 
 #scoreboard th, #scoreboard td {
     border: 1px solid black;
     padding: 5px;
     text-align: center;
+    width: 33.33%; /* ✅ Make sure all columns have the same width */
+    word-break: break-word; /* ✅ Prevent long names from breaking layout */
 }
 
 #scoreboard th {
     background-color: #f2f2f2;
 }
+
 
 
     </style>
@@ -488,7 +494,7 @@ function updateTime() {
     document.getElementById("timeValue").innerText = document.getElementById("timeSlider").value;
 }
 
-        function updateScoreboard(scores) {
+   function updateScoreboard(scores) {
     var scoreboardBody = document.getElementById("scoreboardBody");
     scoreboardBody.innerHTML = ""; // Clear current scoreboard
 
@@ -498,12 +504,13 @@ function updateTime() {
     sortedPlayers.forEach((player, index) => {
         var row = `<tr>
             <td>${index + 1}</td>
-            <td>${player[0]}</td>
+            <td style="max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${player[0]}</td>
             <td>${player[1]}</td>
         </tr>`;
         scoreboardBody.innerHTML += row;
     });
 }
+
 
     </script>
 </head>
