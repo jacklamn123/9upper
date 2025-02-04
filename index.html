@@ -247,23 +247,24 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
             document.getElementById("timeLeftDisplay").innerText = "Time's up!";
 
             if (round >= totalRounds) {
-                // ✅ If it's the last round, end the game
+                // ✅ End the game if it's the last round
                 db.ref("games/" + gameCode).update({ status: "finished" }).then(() => {
-                    console.log("Game Over!");
+                    console.log("Game Over! No more rounds.");
                 });
             } else {
-                // ✅ Automatically start the next round without requiring user input
-                console.log("Time's up! Automatically starting the next round...");
+                // ✅ Mark the round as timed out in Firebase & trigger next round
+                console.log("Time's up! Moving to the next round...");
 
-                fetch("9upper_terms.json")
-                    .then(response => response.json())
-                    .then(terms => {
-                        db.ref("games/" + gameCode).update({
-                            winner: "timeout", // ✅ Mark the round as timed out
-                        }).then(() => {
+                db.ref("games/" + gameCode).update({
+                    winner: "timeout",  // ✅ Mark that nobody was selected
+                }).then(() => {
+                    // ✅ Now, call startNewRound() after Firebase update completes
+                    fetch("9upper_terms.json")
+                        .then(response => response.json())
+                        .then(terms => {
                             startNewRound(terms, round + 1, totalRounds, roundTime);
                         });
-                    });
+                });
             }
         } else {
             document.getElementById("timeLeftDisplay").innerText = timeLeft + " seconds";
@@ -271,6 +272,7 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
         }
     }, 1000); // ✅ Update every second
 }
+
 
 
         
