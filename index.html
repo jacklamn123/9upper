@@ -486,6 +486,7 @@ function startRoundTimer(roundTime, round, totalRounds) {
 
 
 
+
 function endRound(round, totalRounds) {
     if (round >= totalRounds) {
         db.ref("games/" + gameCode).update({
@@ -507,6 +508,7 @@ function endRound(round, totalRounds) {
         });
     }
 }
+
 
 
 
