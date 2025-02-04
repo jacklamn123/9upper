@@ -247,22 +247,23 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
             document.getElementById("timeLeftDisplay").innerText = "Time's up!";
 
             if (round >= totalRounds) {
-                // ✅ End the game if it's the last round
-                db.ref("games/" + gameCode).update({ status: "finished" }).then(() => {
-                    console.log("Game Over! No more rounds.");
-                });
+                // ✅ If it's the last round, end the game
+                db.ref("games/" + gameCode).update({ status: "finished" });
+                alert("Game Over!");
             } else {
-                // ✅ Mark the round as timed out in Firebase & trigger next round
-                console.log("Time's up! Moving to the next round...");
+                // ✅ Move to the next round
+                alert("Time's up! Moving to the next round...");
 
-                db.ref("games/" + gameCode).update({
-                    winner: "timeout",  // ✅ Mark that nobody was selected
-                }).then(() => {
-                    // ✅ Now, call startNewRound() after Firebase update completes
+                db.ref("games/" + gameCode).once("value", snapshot => {
+                    var gameData = snapshot.val();
+                    if (!gameData) return;
+
+                    var nextRound = (gameData.currentRound || 0) + 1;  // ✅ Ensure it is always a valid number
+
                     fetch("9upper_terms.json")
                         .then(response => response.json())
                         .then(terms => {
-                            startNewRound(terms, round + 1, totalRounds, roundTime);
+                            startNewRound(terms, nextRound, totalRounds, roundTime);
                         });
                 });
             }
@@ -272,6 +273,7 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
         }
     }, 1000); // ✅ Update every second
 }
+
 
 
 
@@ -428,8 +430,14 @@ function startGame() {
           var roundTimer;
 
 function startNewRound(terms, round, totalRounds, roundTime) {
+    // ✅ Ensure round is a valid number
+    if (isNaN(round) || round === undefined) {
+        console.error("Error: round is NaN or undefined, resetting to 1");
+        round = 1;  // ✅ Default to 1 if undefined
+    }
+
     db.ref("games/" + gameCode + "/players").once("value", snapshot => {
-        var players = Object.keys(snapshot.val());
+        var players = Object.keys(snapshot.val() || {});
         if (players.length < 3) return;
 
         var thinker = players[Math.floor(Math.random() * players.length)];
@@ -445,7 +453,7 @@ function startNewRound(terms, round, totalRounds, roundTime) {
         var correctDefinition = terms[randomIndex].definition;
 
         db.ref("games/" + gameCode).update({
-            currentRound: round,
+            currentRound: round,  // ✅ Ensure it's always a valid number
             term: randomTerm,
             correctDefinition: "",  // ✅ Reset before assigning a new value
             roles: roles,
@@ -464,6 +472,7 @@ function startNewRound(terms, round, totalRounds, roundTime) {
         startRoundTimer(roundTime, round, totalRounds);
     });
 }
+
 
 
 
