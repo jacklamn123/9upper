@@ -109,7 +109,8 @@ function createGame() {
 
     db.ref("games/" + gameCode).set({
         status: "waiting",
-        players: {},
+        players: {},  // ✅ Will only be populated when game starts
+        waitingPlayers: {}, // ✅ Waiting players list
         host: playerName,
         chat: {},
         totalRounds: totalRounds,  // ✅ Store total rounds
@@ -118,30 +119,37 @@ function createGame() {
         document.getElementById("gameCodeDisplay").innerText = gameCode;
         document.getElementById("setupArea").classList.add("hidden");
         document.getElementById("gameArea").classList.remove("hidden");
-        db.ref("games/" + gameCode + "/players/" + playerName).set(true);
+
+        // ✅ Add player to waiting list instead of players
+        db.ref("games/" + gameCode + "/waitingPlayers/" + playerName).set(true);
+
         listenForUpdates();
     });
 }
 
 
-        function joinGame() {
-            gameCode = document.getElementById("gameCodeInput").value.toUpperCase();
-            if (!gameCode) {
-                alert("Please enter a valid game code!");
-                return;
-            }
-            db.ref("games/" + gameCode).get().then(snapshot => {
-                if (snapshot.exists()) {
-                    document.getElementById("gameCodeDisplay").innerText = gameCode;
-                    document.getElementById("setupArea").classList.add("hidden");
-                    document.getElementById("gameArea").classList.remove("hidden");
-                    db.ref("games/" + gameCode + "/players/" + playerName).set(true);
-                    listenForUpdates();
-                } else {
-                    alert("Game not found!");
-                }
-            });
+
+      function joinGame() {
+    gameCode = document.getElementById("gameCodeInput").value.toUpperCase();
+    if (!gameCode) {
+        alert("Please enter a valid game code!");
+        return;
+    }
+    db.ref("games/" + gameCode).get().then(snapshot => {
+        if (snapshot.exists()) {
+            document.getElementById("gameCodeDisplay").innerText = gameCode;
+            document.getElementById("setupArea").classList.add("hidden");
+            document.getElementById("gameArea").classList.remove("hidden");
+
+            // ✅ Add player to waiting list instead of players
+            db.ref("games/" + gameCode + "/waitingPlayers/" + playerName).set(true);
+
+            listenForUpdates();
+        } else {
+            alert("Game not found!");
         }
+    });
+}
 
 function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", snapshot => {
