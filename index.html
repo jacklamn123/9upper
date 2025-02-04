@@ -426,19 +426,31 @@ function startNewRound(terms, round, totalRounds, roundTime) {
             var gameData = gameSnapshot.val();
             var updatedRoundTime = gameData.roundTime || 60;  // Default to 60 seconds if undefined
 
+            // ✅ Reset the correct definition at the start of the round
             db.ref("games/" + gameCode).update({
                 currentRound: round,
                 term: randomTerm,
-                correctDefinition: correctDefinition,
+                correctDefinition: "",  // ✅ Reset first
                 roles: roles,
-                timeLeft: updatedRoundTime  // ✅ Corrected round time
+                timeLeft: updatedRoundTime
+            }).then(() => {
+                // ✅ Now set the correct definition for the new REALUPPER
+                db.ref("games/" + gameCode).update({
+                    correctDefinition: correctDefinition
+                });
             });
 
-            document.getElementById("currentRound").innerText = round;  // ✅ Update UI
+            // ✅ Ensure the element exists before modifying
+            var roundDisplay = document.getElementById("currentRoundDisplay");
+            if (roundDisplay) {
+                roundDisplay.innerText = round;
+            }
+
             startRoundTimer(updatedRoundTime, round, totalRounds);
         });
     });
 }
+
 
 
 function startRoundTimer(roundTime, round, totalRounds) {
