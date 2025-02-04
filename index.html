@@ -156,29 +156,41 @@ function listenForUpdates() {
         var gameData = snapshot.val();
         if (!gameData) return;
 
-        // ✅ Fix: Convert waitingPlayers object to an array before mapping
-        if (gameData.waitingPlayers) {
-            var waitingPlayersArray = Object.keys(gameData.waitingPlayers); // Convert object keys to an array
-            var waitingListHTML = waitingPlayersArray.map(name => `<li>${name}</li>`).join("");
-            document.getElementById("waitingPlayerList").innerHTML = `<ul>${waitingListHTML}</ul>`;
-        } else {
-            document.getElementById("waitingPlayerList").innerHTML = `<ul><li>No players in waiting room</li></ul>`;
+        // ✅ Ensure waitingPlayerList element exists before modifying it
+        var waitingPlayerListElement = document.getElementById("waitingPlayerList");
+        if (waitingPlayerListElement) {
+            if (gameData.waitingPlayers) {
+                var waitingPlayersArray = Object.keys(gameData.waitingPlayers); // Convert object keys to an array
+                var waitingListHTML = waitingPlayersArray.map(name => `<li>${name}</li>`).join("");
+                waitingPlayerListElement.innerHTML = `<ul>${waitingListHTML}</ul>`;
+            } else {
+                waitingPlayerListElement.innerHTML = `<ul><li>No players in waiting room</li></ul>`;
+            }
         }
 
-        // ✅ Update the main player list (players currently in the game)
-        if (gameData.players) {
-            var playerListHTML = Object.keys(gameData.players)
-                .map(name => `<li>${name}</li>`).join("");
-            document.getElementById("playerList").innerHTML = `<ul>${playerListHTML}</ul>`;
+        // ✅ Ensure playerList element exists before modifying it
+        var playerListElement = document.getElementById("playerList");
+        if (playerListElement) {
+            if (gameData.players) {
+                var playerListHTML = Object.keys(gameData.players)
+                    .map(name => `<li>${name}</li>`).join("");
+                playerListElement.innerHTML = `<ul>${playerListHTML}</ul>`;
+            } else {
+                playerListElement.innerHTML = `<ul><li>No players in game</li></ul>`;
+            }
         }
 
         // ✅ Ensure the game settings & start button are only visible to the host
-        if (gameData.host === playerName && gameData.status === "waiting") {
-            document.getElementById("gameSettings").classList.remove("hidden");
-            document.getElementById("startGameButton").classList.remove("hidden");
-        } else {
-            document.getElementById("gameSettings").classList.add("hidden");
-            document.getElementById("startGameButton").classList.add("hidden");
+        var gameSettingsElement = document.getElementById("gameSettings");
+        var startGameButtonElement = document.getElementById("startGameButton");
+        if (gameSettingsElement && startGameButtonElement) {
+            if (gameData.host === playerName && gameData.status === "waiting") {
+                gameSettingsElement.classList.remove("hidden");
+                startGameButtonElement.classList.remove("hidden");
+            } else {
+                gameSettingsElement.classList.add("hidden");
+                startGameButtonElement.classList.add("hidden");
+            }
         }
 
         // ✅ Auto-update scoreboard for all players
@@ -187,34 +199,40 @@ function listenForUpdates() {
         }
 
         // ✅ Handle chatbox auto-scrolling
-        if (gameData.chat) {
-            const chatBox = document.querySelector(".chatbox");
+        var chatBox = document.querySelector(".chatbox");
+        if (chatBox) {
             chatBox.innerHTML = "";
 
-            Object.values(gameData.chat).forEach(msg => {
-                chatBox.innerHTML += `<p>${msg}</p>`;
-            });
+            if (gameData.chat) {
+                Object.values(gameData.chat).forEach(msg => {
+                    chatBox.innerHTML += `<p>${msg}</p>`;
+                });
 
-            // ✅ Ensure chatbox is visible and scrolls properly
-            chatBox.style.display = "block";
-            setTimeout(() => {
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }, 100);
+                chatBox.style.display = "block";
+                setTimeout(() => {
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }, 100);
+            }
         }
 
         // ✅ If game is in progress, hide waiting room and show game screen
-        if (gameData.status === "playing") {
-            document.getElementById("waitingRoom").classList.add("hidden");
-            document.getElementById("gameScreen").classList.remove("hidden");
+        var waitingRoomElement = document.getElementById("waitingRoom");
+        var gameScreenElement = document.getElementById("gameScreen");
 
-            document.getElementById("gameTerm").innerText = gameData.term || "";
-            document.getElementById("playerRole").innerText = gameData.roles?.[playerName] || "Unknown";
+        if (gameData.status === "playing") {
+            if (waitingRoomElement) waitingRoomElement.classList.add("hidden");
+            if (gameScreenElement) gameScreenElement.classList.remove("hidden");
+
+            document.getElementById("gameTerm").innerText = gameData.term;
+            document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
             document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
             document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
-            // ✅ Sync countdown across all players (only host updates Firebase, all see updates)
+            // ✅ Ensure all players see the correct countdown time from Firebase
             document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
+
+            // ✅ Only the host controls the countdown timer, but all players see the updated time
             if (gameData.host === playerName) {
                 startCountdown(gameData.timeLeft, gameData.currentRound, gameData.totalRounds, gameData.roundTime);
             }
@@ -250,12 +268,11 @@ function listenForUpdates() {
 
         // ✅ If game has ended, show final scoreboard to ALL players
         if (gameData.status === "finished") {
-            document.getElementById("gameScreen").classList.add("hidden");
-            document.getElementById("waitingRoom").classList.add("hidden"); // Ensure waiting room is hidden
             showEndgameScreen(gameData.scores);
         }
     });
 }
+
 
 
 
