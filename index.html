@@ -198,7 +198,12 @@ function listenForUpdates() {
             document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
             document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
-            startCountdown(gameData.timeLeft);
+            // ✅ Only the host starts the countdown timer
+            if (gameData.host === playerName) {
+                startCountdown(gameData.timeLeft, gameData.currentRound, gameData.totalRounds, gameData.roundTime);
+            }
+
+            // ✅ All players should read time from Firebase instead of running their own timers
             document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft || "N/A";
 
             document.getElementById("thinkerPanel").classList.add("hidden");
@@ -231,6 +236,7 @@ function listenForUpdates() {
         }
     });
 }
+
 
 
 
@@ -490,39 +496,37 @@ function startNewRound(terms, round, totalRounds, roundTime) {
 
 
 function startRoundTimer(roundTime, round, totalRounds) {
-    clearInterval(roundTimer); // ✅ Clear any existing timer to prevent duplicates
+    clearInterval(roundTimer); // ✅ Stop any existing timer
 
-    db.ref("games/" + gameCode).update({ timeLeft: roundTime }); // ✅ Reset the time at the start
+    db.ref("games/" + gameCode).update({ timeLeft: roundTime }); // ✅ Ensure Firebase starts at the right time
 
-    roundTimer = setInterval(() => {
-        db.ref("games/" + gameCode).once("value", snapshot => {
-            var gameData = snapshot.val();
-            if (!gameData) return;
+    db.ref("games/" + gameCode).once("value", snapshot => {
+        var gameData = snapshot.val();
+        if (!gameData) return;
 
-            var timeLeft = gameData.timeLeft || 0;
+        if (playerName === gameData.host) {  // ✅ Only the host updates Firebase
+            roundTimer = setInterval(() => {
+                db.ref("games/" + gameCode).once("value", snapshot => {
+                    var gameData = snapshot.val();
+                    if (!gameData) return;
 
-            if (timeLeft <= 0) {  // ✅ Stop timer and start new round when time runs out
-                clearInterval(roundTimer);
+                    var timeLeft = gameData.timeLeft || 0;
 
-                if (!gameData.winner) {  // ✅ If no winner was chosen, trigger timeout logic
-                    alert("Time's up! Starting next round...");
-                    db.ref("games/" + gameCode).update({ winner: "timeout" }); // Mark timeout
-                }
-
-                endRound(round, totalRounds); // ✅ Restart the game
-            } else {
-                db.ref("games/" + gameCode).update({
-                    timeLeft: timeLeft - 1
+                    if (timeLeft <= 0) {  
+                        clearInterval(roundTimer);
+                        if (!gameData.winner) {  
+                            db.ref("games/" + gameCode).update({ winner: "timeout" }); // ✅ Mark timeout
+                        }
+                        endRound(round, totalRounds); // ✅ Start next round
+                    } else {
+                        db.ref("games/" + gameCode).update({ timeLeft: timeLeft - 1 });
+                    }
                 });
-
-                var timeLeftDisplay = document.getElementById("timeLeftDisplay");
-                if (timeLeftDisplay) {
-                    timeLeftDisplay.innerText = timeLeft - 1;  // ✅ Update UI
-                }
-            }
-        });
-    }, 1000);
+            }, 1000);
+        }
+    });
 }
+
 
 
 
