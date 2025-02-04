@@ -461,40 +461,51 @@ function startRoundTimer(roundTime, round, totalRounds) {
 
             var timeLeft = gameData.timeLeft;
 
-            if (timeLeft <= 0 || gameData.winner) {  // ✅ Stop if time runs out OR if thinker picked a player
+            if (timeLeft <= 0 || gameData.winner) {  // ✅ Stop if time runs out OR thinker picked a player
                 clearInterval(roundTimer);
+
+                if (!gameData.winner) {  // ✅ If no one was selected, start new round due to timeout
+                    alert("Time's up! Starting next round...");
+                }
+
                 endRound(round, totalRounds);
             } else {
                 db.ref("games/" + gameCode).update({
                     timeLeft: timeLeft - 1
                 });
-                document.getElementById("timeLeft").innerText = timeLeft - 1;  // ✅ Update UI
+
+                var timeLeftDisplay = document.getElementById("timeLeftDisplay");
+                if (timeLeftDisplay) {
+                    timeLeftDisplay.innerText = timeLeft - 1;  // ✅ Update UI
+                }
             }
         });
     }, 1000);
 }
 
-    function endRound(round, totalRounds) {
-        if (round >= totalRounds) {
-            db.ref("games/" + gameCode).update({
-                status: "finished"
-            });
-            alert("Game Over!");
-        } else {
-            db.ref("games/" + gameCode).once("value", snapshot => {
-                var gameData = snapshot.val();
-                if (!gameData) return;
 
-                var roundTime = gameData.roundTime;  // ✅ Fetch roundTime before calling startNewRound()
+function endRound(round, totalRounds) {
+    if (round >= totalRounds) {
+        db.ref("games/" + gameCode).update({
+            status: "finished"
+        });
+        alert("Game Over!");
+    } else {
+        db.ref("games/" + gameCode).once("value", snapshot => {
+            var gameData = snapshot.val();
+            if (!gameData) return;
 
-                fetch("9upper_terms.json")
-                    .then(response => response.json())
-                    .then(terms => {
-                        startNewRound(terms, round + 1, totalRounds, roundTime);
-                    });
-            });
-        }
+            var roundTime = gameData.roundTime;  // ✅ Fetch roundTime before calling startNewRound()
+
+            fetch("9upper_terms.json")
+                .then(response => response.json())
+                .then(terms => {
+                    startNewRound(terms, round + 1, totalRounds, roundTime);
+                });
+        });
     }
+}
+
 
 
 function sendChatMessage() {
