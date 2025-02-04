@@ -421,45 +421,41 @@ function startNewRound(terms, round, totalRounds, roundTime) {
         var randomTerm = terms[randomIndex].term;
         var correctDefinition = terms[randomIndex].definition;
 
-        // ✅ Fetch roundTime to ensure it exists before calling timer
-        db.ref("games/" + gameCode).once("value", gameSnapshot => {
-            var gameData = gameSnapshot.val();
-            var updatedRoundTime = gameData.roundTime || 60;  // Default to 60 seconds if undefined
-
-            // ✅ Reset the correct definition at the start of the round
+        db.ref("games/" + gameCode).update({
+            currentRound: round,
+            term: randomTerm,
+            correctDefinition: "",  // ✅ Reset before assigning a new value
+            roles: roles,
+            timeLeft: roundTime
+        }).then(() => {
             db.ref("games/" + gameCode).update({
-                currentRound: round,
-                term: randomTerm,
-                correctDefinition: "",  // ✅ Reset first
-                roles: roles,
-                timeLeft: updatedRoundTime
-            }).then(() => {
-                // ✅ Now set the correct definition for the new REALUPPER
-                db.ref("games/" + gameCode).update({
-                    correctDefinition: correctDefinition
-                });
+                correctDefinition: correctDefinition // ✅ Now set the correct definition for the new REALUPPER
             });
-
-            // ✅ Ensure the element exists before modifying
-            var roundDisplay = document.getElementById("currentRoundDisplay");
-            if (roundDisplay) {
-                roundDisplay.innerText = round;
-            }
-
-            startRoundTimer(updatedRoundTime, round, totalRounds);
         });
+
+        var roundDisplay = document.getElementById("currentRoundDisplay");
+        if (roundDisplay) {
+            roundDisplay.innerText = round;
+        }
+
+        startRoundTimer(roundTime, round, totalRounds);
     });
 }
 
 
 
+
 function startRoundTimer(roundTime, round, totalRounds) {
+    clearInterval(roundTimer); // ✅ Clear any existing timer to prevent duplicates
+
+    db.ref("games/" + gameCode).update({ timeLeft: roundTime }); // ✅ Reset the time at the start
+
     roundTimer = setInterval(() => {
         db.ref("games/" + gameCode).once("value", snapshot => {
             var gameData = snapshot.val();
             if (!gameData) return;
 
-            var timeLeft = gameData.timeLeft;
+            var timeLeft = gameData.timeLeft || 0;
 
             if (timeLeft <= 0) {  // ✅ Stop timer and start new round when time runs out
                 clearInterval(roundTimer);
@@ -487,11 +483,12 @@ function startRoundTimer(roundTime, round, totalRounds) {
 
 
 
+
 function endRound(round, totalRounds) {
+    clearInterval(roundTimer); // ✅ Stop any running timer
+
     if (round >= totalRounds) {
-        db.ref("games/" + gameCode).update({
-            status: "finished"
-        });
+        db.ref("games/" + gameCode).update({ status: "finished" });
         alert("Game Over!");
     } else {
         db.ref("games/" + gameCode).once("value", snapshot => {
@@ -503,11 +500,21 @@ function endRound(round, totalRounds) {
             fetch("9upper_terms.json")
                 .then(response => response.json())
                 .then(terms => {
-                    startNewRound(terms, round + 1, totalRounds, roundTime);
+                    // ✅ Reset round-related values
+                    db.ref("games/" + gameCode).update({
+                        term: "",
+                        correctDefinition: "",
+                        roles: {},
+                        winner: null,
+                        timeLeft: roundTime  // ✅ Reset timeLeft to default for next round
+                    }).then(() => {
+                        startNewRound(terms, round + 1, totalRounds, roundTime);
+                    });
                 });
         });
     }
 }
+
 
 
 
