@@ -137,7 +137,7 @@ function createGame() {
             });
         }
 
-      function listenForUpdates() {
+  function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
@@ -154,6 +154,11 @@ function createGame() {
                 document.getElementById("gameSettings").classList.remove("hidden");
                 document.getElementById("startGameButton").classList.remove("hidden");
             }
+        }
+
+        // ✅ Auto-update scoreboard when scores change
+        if (gameData.scores) {
+            updateScoreboard(gameData.scores);
         }
 
         // ✅ Chatbox Auto-Scrolling
@@ -205,6 +210,7 @@ function createGame() {
 }
 
 
+
         var roundTimer; // ✅ Global timer variable
 
 function startCountdown(timeLeft) {
@@ -253,45 +259,68 @@ function displaythinkerOptions(gameData) {
 
 
 // ✅ thinker selects a player
-
 function thinkerSelectPlayer(selectedPlayer) {
     // Stop the timer immediately
     clearInterval(roundTimer);
 
-    db.ref("games/" + gameCode).update({
-        winner: selectedPlayer,
-        timeLeft: 0
-    });
+    db.ref("games/" + gameCode).once("value", snapshot => {
+        var gameData = snapshot.val();
+        if (!gameData) return;
 
-    alert(`thinker selected ${selectedPlayer} as the REALUPPER!`);
+        var scores = gameData.scores || {}; // ✅ Fetch current scores
+        var roles = gameData.roles || {};
+        var thinker = Object.keys(roles).find(p => roles[p] === "thinker");
+        var realUpper = Object.keys(roles).find(p => roles[p] === "REALUPPER");
 
-    // Fetch current round number
-    db.ref("games/" + gameCode + "/currentRound").once("value", snapshot => {
-        var round = snapshot.val();
+        // ✅ Update scores based on selection
+        if (selectedPlayer === realUpper) {
+            // Thinker and REALUPPER both get 1 point
+            scores[thinker] = (scores[thinker] || 0) + 1;
+            scores[realUpper] = (scores[realUpper] || 0) + 1;
+        } else {
+            // Selected 9UPPER gets 1 point
+            scores[selectedPlayer] = (scores[selectedPlayer] || 0) + 1;
+        }
 
-        // Fetch total rounds
-        db.ref("games/" + gameCode + "/totalRounds").once("value", totalSnapshot => {
-            var totalRounds = totalSnapshot.val();
+        // ✅ Save updated scores in Firebase
+        db.ref("games/" + gameCode).update({
+            scores: scores,
+            winner: selectedPlayer,
+            timeLeft: 0
+        }).then(() => {
+            alert(`thinker selected ${selectedPlayer}`);
+            updateScoreboard(scores); // ✅ Refresh scoreboard UI
+        });
 
-            // Fetch roundTime ✅ FIXED
-            db.ref("games/" + gameCode).once("value", gameSnapshot => {
-                var gameData = gameSnapshot.val();
-                var roundTime = gameData.roundTime || 60;  // Default to 60 seconds if missing
+        // Fetch current round number
+        db.ref("games/" + gameCode + "/currentRound").once("value", snapshot => {
+            var round = snapshot.val();
 
-                if (round >= totalRounds) {
-                    db.ref("games/" + gameCode).update({ status: "finished" });
-                    alert("Game Over!");
-                } else {
-                    fetch("9upper_terms.json")
-                        .then(response => response.json())
-                        .then(terms => {
-                            startNewRound(terms, round + 1, totalRounds, roundTime);
-                        });
-                }
+            // Fetch total rounds
+            db.ref("games/" + gameCode + "/totalRounds").once("value", totalSnapshot => {
+                var totalRounds = totalSnapshot.val();
+
+                // Fetch roundTime ✅ FIXED
+                db.ref("games/" + gameCode).once("value", gameSnapshot => {
+                    var gameData = gameSnapshot.val();
+                    var roundTime = gameData.roundTime || 60;  // Default to 60 seconds if missing
+
+                    if (round >= totalRounds) {
+                        db.ref("games/" + gameCode).update({ status: "finished" });
+                        alert("Game Over!");
+                    } else {
+                        fetch("9upper_terms.json")
+                            .then(response => response.json())
+                            .then(terms => {
+                                startNewRound(terms, round + 1, totalRounds, roundTime);
+                            });
+                    }
+                });
             });
         });
     });
 }
+
 
 
 
@@ -327,6 +356,10 @@ function startGame() {
                     var randomTerm = terms[randomIndex].term;
                     var correctDefinition = terms[randomIndex].definition;
 
+                    // ✅ Initialize scores for all players
+                    var initialScores = {};
+                    players.forEach(p => initialScores[p] = 0); 
+
                     db.ref("games/" + gameCode).update({
                         status: "playing",
                         term: randomTerm,
@@ -334,7 +367,8 @@ function startGame() {
                         roles: roles,
                         currentRound: 1,
                         totalRounds: totalRounds,
-                        roundTime: roundTime
+                        roundTime: roundTime,
+                        scores: initialScores // ✅ Store initial scores in Firebase
                     });
 
                     startNewRound(terms, 1, totalRounds, roundTime);
@@ -343,6 +377,7 @@ function startGame() {
             .catch(error => console.error("Error loading terms:", error));
     });
 }
+
           var roundTimer;
 
 function startNewRound(terms, round, totalRounds, roundTime) {
