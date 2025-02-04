@@ -237,7 +237,7 @@ function listenForUpdates() {
 
         var roundTimer; // ✅ Global timer variable
 
-function startCountdown(timeLeft) {
+function startCountdown(timeLeft, round, totalRounds, roundTime) {
     // ✅ Ensure any existing timer is cleared before starting a new one
     clearInterval(roundTimer);
 
@@ -245,6 +245,21 @@ function startCountdown(timeLeft) {
         if (timeLeft <= 0) {
             clearInterval(roundTimer); // ✅ Stop the timer when it reaches zero
             document.getElementById("timeLeftDisplay").innerText = "Time's up!";
+
+            if (round >= totalRounds) {
+                // ✅ If it's the last round, end the game
+                db.ref("games/" + gameCode).update({ status: "finished" });
+                alert("Game Over!");
+            } else {
+                // ✅ Otherwise, start the next round
+                alert("Time's up! Moving to the next round...");
+
+                fetch("9upper_terms.json")
+                    .then(response => response.json())
+                    .then(terms => {
+                        startNewRound(terms, round + 1, totalRounds, roundTime);
+                    });
+            }
         } else {
             document.getElementById("timeLeftDisplay").innerText = timeLeft + " seconds";
             timeLeft--; // ✅ Decrement time left
