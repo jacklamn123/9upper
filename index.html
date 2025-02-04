@@ -156,10 +156,13 @@ function listenForUpdates() {
         var gameData = snapshot.val();
         if (!gameData) return;
 
-        // ✅ Update the player list in the waiting room
+        // ✅ Fix: Convert waitingPlayers object to an array before mapping
         if (gameData.waitingPlayers) {
-            var waitingListHTML = gameData.waitingPlayers.map(name => `<li>${name}</li>`).join("");
+            var waitingPlayersArray = Object.keys(gameData.waitingPlayers); // Convert object keys to an array
+            var waitingListHTML = waitingPlayersArray.map(name => `<li>${name}</li>`).join("");
             document.getElementById("waitingPlayerList").innerHTML = `<ul>${waitingListHTML}</ul>`;
+        } else {
+            document.getElementById("waitingPlayerList").innerHTML = `<ul><li>No players in waiting room</li></ul>`;
         }
 
         // ✅ Update the main player list (players currently in the game)
@@ -170,7 +173,7 @@ function listenForUpdates() {
         }
 
         // ✅ Ensure the game settings & start button are only visible to the host
-        if (gameData.host === playerName) {
+        if (gameData.host === playerName && gameData.status === "waiting") {
             document.getElementById("gameSettings").classList.remove("hidden");
             document.getElementById("startGameButton").classList.remove("hidden");
         } else {
@@ -204,16 +207,14 @@ function listenForUpdates() {
             document.getElementById("waitingRoom").classList.add("hidden");
             document.getElementById("gameScreen").classList.remove("hidden");
 
-            document.getElementById("gameTerm").innerText = gameData.term;
-            document.getElementById("playerRole").innerText = gameData.roles[playerName];
+            document.getElementById("gameTerm").innerText = gameData.term || "";
+            document.getElementById("playerRole").innerText = gameData.roles?.[playerName] || "Unknown";
 
             document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
             document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
-            // ✅ Ensure all players see the correct countdown time from Firebase
+            // ✅ Sync countdown across all players (only host updates Firebase, all see updates)
             document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
-
-            // ✅ Only the host controls the countdown timer, but all players see the updated time
             if (gameData.host === playerName) {
                 startCountdown(gameData.timeLeft, gameData.currentRound, gameData.totalRounds, gameData.roundTime);
             }
@@ -249,10 +250,13 @@ function listenForUpdates() {
 
         // ✅ If game has ended, show final scoreboard to ALL players
         if (gameData.status === "finished") {
+            document.getElementById("gameScreen").classList.add("hidden");
+            document.getElementById("waitingRoom").classList.add("hidden"); // Ensure waiting room is hidden
             showEndgameScreen(gameData.scores);
         }
     });
 }
+
 
 
 
