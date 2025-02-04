@@ -109,90 +109,65 @@ function createGame() {
 
     db.ref("games/" + gameCode).set({
         status: "waiting",
-        players: {}, // No players at start
-        waitingPlayers: { [playerName]: true }, // Add host to waiting room
+        players: {},
         host: playerName,
         chat: {},
-        totalRounds: totalRounds,
-        roundTime: roundTime
+        totalRounds: totalRounds,  // ✅ Store total rounds
+        roundTime: roundTime       // ✅ Store time per round
     }).then(() => {
         document.getElementById("gameCodeDisplay").innerText = gameCode;
         document.getElementById("setupArea").classList.add("hidden");
         document.getElementById("gameArea").classList.remove("hidden");
+        db.ref("games/" + gameCode + "/players/" + playerName).set(true);
         listenForUpdates();
     });
 }
 
 
-
-
-function joinGame() {
-    gameCode = document.getElementById("gameCodeInput").value.toUpperCase();
-    if (!gameCode) {
-        alert("Please enter a valid game code!");
-        return;
-    }
-
-    db.ref("games/" + gameCode).get().then(snapshot => {
-        if (snapshot.exists()) {
-            document.getElementById("gameCodeDisplay").innerText = gameCode;
-            document.getElementById("setupArea").classList.add("hidden");
-            document.getElementById("gameArea").classList.remove("hidden");
-
-            // ✅ Add player to `waitingPlayers` instead of `players`
-            db.ref("games/" + gameCode + "/waitingPlayers/" + playerName).set(true);
-
-            listenForUpdates();
-        } else {
-            alert("Game not found!");
+        function joinGame() {
+            gameCode = document.getElementById("gameCodeInput").value.toUpperCase();
+            if (!gameCode) {
+                alert("Please enter a valid game code!");
+                return;
+            }
+            db.ref("games/" + gameCode).get().then(snapshot => {
+                if (snapshot.exists()) {
+                    document.getElementById("gameCodeDisplay").innerText = gameCode;
+                    document.getElementById("setupArea").classList.add("hidden");
+                    document.getElementById("gameArea").classList.remove("hidden");
+                    db.ref("games/" + gameCode + "/players/" + playerName).set(true);
+                    listenForUpdates();
+                } else {
+                    alert("Game not found!");
+                }
+            });
         }
-    });
-}
-
-
 
 function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
 
-        console.log("Game Data Updated:", gameData);
-
-        // ✅ Ensure waitingPlayerList element exists before modifying it
-        var waitingPlayerListElement = document.getElementById("waitingPlayerList");
-        if (waitingPlayerListElement) {
-            if (gameData.waitingPlayers && Object.keys(gameData.waitingPlayers).length > 0) {
-                var waitingPlayersArray = Object.keys(gameData.waitingPlayers);
-                var waitingListHTML = waitingPlayersArray.map(name => `<li>${name}</li>`).join("");
-                waitingPlayerListElement.innerHTML = `<ul>${waitingListHTML}</ul>`;
-            } else {
-                waitingPlayerListElement.innerHTML = `<ul><li>No players in waiting room</li></ul>`;
-            }
+        // ✅ Update the player list in the waiting room
+        if (gameData.waitingPlayers) {
+            var waitingListHTML = gameData.waitingPlayers.map(name => `<li>${name}</li>`).join("");
+            document.getElementById("waitingPlayerList").innerHTML = `<ul>${waitingListHTML}</ul>`;
         }
 
-        // ✅ Ensure playerList element exists before modifying it
-        var playerListElement = document.getElementById("playerList");
-        if (playerListElement) {
-            if (gameData.players && Object.keys(gameData.players).length > 0) {
-                var playerListHTML = Object.keys(gameData.players)
-                    .map(name => `<li>${name}</li>`).join("");
-                playerListElement.innerHTML = `<ul>${playerListHTML}</ul>`;
-            } else {
-                playerListElement.innerHTML = `<ul><li>No players in game</li></ul>`;
-            }
+        // ✅ Update the main player list (players currently in the game)
+        if (gameData.players) {
+            var playerListHTML = Object.keys(gameData.players)
+                .map(name => `<li>${name}</li>`).join("");
+            document.getElementById("playerList").innerHTML = `<ul>${playerListHTML}</ul>`;
         }
 
         // ✅ Ensure the game settings & start button are only visible to the host
-        var gameSettingsElement = document.getElementById("gameSettings");
-        var startGameButtonElement = document.getElementById("startGameButton");
-        if (gameSettingsElement && startGameButtonElement) {
-            if (gameData.host === playerName && gameData.status === "waiting") {
-                gameSettingsElement.classList.remove("hidden");
-                startGameButtonElement.classList.remove("hidden");
-            } else {
-                gameSettingsElement.classList.add("hidden");
-                startGameButtonElement.classList.add("hidden");
-            }
+        if (gameData.host === playerName) {
+            document.getElementById("gameSettings").classList.remove("hidden");
+            document.getElementById("startGameButton").classList.remove("hidden");
+        } else {
+            document.getElementById("gameSettings").classList.add("hidden");
+            document.getElementById("startGameButton").classList.add("hidden");
         }
 
         // ✅ Auto-update scoreboard for all players
@@ -201,37 +176,34 @@ function listenForUpdates() {
         }
 
         // ✅ Handle chatbox auto-scrolling
-        var chatBox = document.querySelector(".chatbox");
-        if (chatBox) {
+        if (gameData.chat) {
+            const chatBox = document.querySelector(".chatbox");
             chatBox.innerHTML = "";
 
-            if (gameData.chat) {
-                Object.values(gameData.chat).forEach(msg => {
-                    chatBox.innerHTML += `<p>${msg}</p>`;
-                });
+            Object.values(gameData.chat).forEach(msg => {
+                chatBox.innerHTML += `<p>${msg}</p>`;
+            });
 
-                chatBox.style.display = "block";
-                setTimeout(() => {
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                }, 100);
-            }
+            // ✅ Ensure chatbox is visible and scrolls properly
+            chatBox.style.display = "block";
+            setTimeout(() => {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 100);
         }
 
         // ✅ If game is in progress, hide waiting room and show game screen
-        var waitingRoomElement = document.getElementById("waitingRoom");
-        var gameScreenElement = document.getElementById("gameScreen");
-
         if (gameData.status === "playing") {
-            if (waitingRoomElement) waitingRoomElement.classList.add("hidden");
-            if (gameScreenElement) gameScreenElement.classList.remove("hidden");
+            document.getElementById("waitingRoom").classList.add("hidden");
+            document.getElementById("gameScreen").classList.remove("hidden");
 
-            document.getElementById("gameTerm").innerText = gameData.term || "N/A";
-            document.getElementById("playerRole").innerText = gameData.roles[playerName] || "N/A";
-            document.getElementById("currentRoundDisplay").innerText = gameData.currentRound || "N/A";
-            document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds || "N/A";
+            document.getElementById("gameTerm").innerText = gameData.term;
+            document.getElementById("playerRole").innerText = gameData.roles[playerName];
+
+            document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
+            document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
             // ✅ Ensure all players see the correct countdown time from Firebase
-            document.getElementById("timeLeftDisplay").innerText = (gameData.timeLeft || 0) + " seconds";
+            document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
 
             // ✅ Only the host controls the countdown timer, but all players see the updated time
             if (gameData.host === playerName) {
@@ -246,7 +218,7 @@ function listenForUpdates() {
 
             if (definitionBox && definitionText) {
                 if (gameData.roles[playerName] === "REALUPPER") {
-                    definitionText.innerText = gameData.correctDefinition || "";
+                    definitionText.innerText = gameData.correctDefinition;
                     definitionBox.classList.remove("hidden");
                 } else {
                     definitionBox.classList.add("hidden");
@@ -273,10 +245,6 @@ function listenForUpdates() {
         }
     });
 }
-
-
-
-
 
 
 
@@ -415,70 +383,57 @@ function startGame() {
         var totalRounds = gameData.totalRounds || 5;  // ✅ Ensure totalRounds has a fallback
         var roundTime = gameData.roundTime || 60;     // ✅ Ensure roundTime has a fallback
 
-        db.ref("games/" + gameCode + "/waitingPlayers").once("value", playerSnapshot => {
-            var waitingPlayers = playerSnapshot.val() || {};
-            var players = Object.keys(waitingPlayers);  // ✅ Use only players who are in waiting room
+        fetch("9upper_terms.json")
+            .then(response => response.json())
+            .then(terms => {
+                db.ref("games/" + gameCode + "/waitingPlayers").once("value", playerSnapshot => {
+                    var waitingPlayers = playerSnapshot.val() || {};
+                    var players = Object.keys(waitingPlayers);  // ✅ Use only players who are in waiting room
 
-            console.log("Players in waiting room:", players);  // ✅ Debugging log
+                    if (players.length < 3) {
+                        alert("At least 3 players are needed to start the game!");
+                        return;
+                    }
 
-            if (players.length < 3) {
-                alert("At least 3 players are needed to start the game!");
-                return;
-            }
+                    // ✅ Randomly assign roles
+                    var thinker = players[Math.floor(Math.random() * players.length)];
+                    var correctPlayer = players.filter(p => p !== thinker)[Math.floor(Math.random() * (players.length - 1))];
 
-            // ✅ Get previous scores (if any)
-            var currentScores = gameData.scores || {};
+                    var roles = {};
+                    players.forEach(p => roles[p] = "9UPPER");
+                    roles[thinker] = "thinker";
+                    roles[correctPlayer] = "REALUPPER";
 
-            // ✅ Randomly assign roles
-            var thinker = players[Math.floor(Math.random() * players.length)];
-            var correctPlayer = players.filter(p => p !== thinker)[Math.floor(Math.random() * (players.length - 1))];
-
-            var roles = {};
-            players.forEach(p => roles[p] = "9UPPER");
-            roles[thinker] = "thinker";
-            roles[correctPlayer] = "REALUPPER";
-
-            // ✅ Pick a random term for the round
-            fetch("9upper_terms.json")
-                .then(response => response.json())
-                .then(terms => {
+                    // ✅ Pick a random term for the round
                     var randomIndex = Math.floor(Math.random() * terms.length);
                     var randomTerm = terms[randomIndex].term;
                     var correctDefinition = terms[randomIndex].definition;
 
-                    // ✅ Keep old scores, but initialize new players
-                    players.forEach(p => {
-                        if (!(p in currentScores)) currentScores[p] = 0; // Only reset new players
-                    });
+                    // ✅ Initialize scores for all active players
+                    var initialScores = {};
+                    players.forEach(p => initialScores[p] = 0);
 
-                    // ✅ Move selected players to active game, but keep waiting room players who didn’t join
-                    var updatedWaitingPlayers = { ...waitingPlayers };
-                    players.forEach(p => delete updatedWaitingPlayers[p]);  // Remove active players
-
-                    // ✅ Start the game
+                    // ✅ Clear previous game data & start new game
                     db.ref("games/" + gameCode).update({
                         status: "playing",
-                        players: Object.fromEntries(players.map(p => [p, true])),  // ✅ Store players correctly
+                        players: waitingPlayers,  // ✅ Move waiting players to active game
                         term: randomTerm,
                         correctDefinition: correctDefinition,
                         roles: roles,
                         currentRound: 1,
                         totalRounds: totalRounds,
                         roundTime: roundTime,
-                        scores: currentScores,  // ✅ Keep scores instead of resetting
-                        waitingPlayers: updatedWaitingPlayers  // ✅ Keep non-participating players
+                        scores: initialScores,
+                        waitingPlayers: {}  // ✅ Clear waiting room once game starts
                     });
-
-                    console.log("Game started with players:", players);
 
                     // ✅ Start the first round
                     startNewRound(terms, 1, totalRounds, roundTime);
-                })
-                .catch(error => console.error("Error loading terms:", error));
-        });
+                });
+            })
+            .catch(error => console.error("Error loading terms:", error));
     });
 }
-
 
 
         
