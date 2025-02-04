@@ -383,30 +383,28 @@ function startGame() {
         var totalRounds = gameData.totalRounds || 5;  // ✅ Ensure totalRounds has a fallback
         var roundTime = gameData.roundTime || 60;     // ✅ Ensure roundTime has a fallback
 
-        db.ref("games/" + gameCode + "/waitingPlayers").once("value", playerSnapshot => {
-            var waitingPlayers = playerSnapshot.val() || {};
-            var players = Object.keys(waitingPlayers);  // ✅ Use only players who are in waiting room
+        fetch("9upper_terms.json")
+            .then(response => response.json())
+            .then(terms => {
+                db.ref("games/" + gameCode + "/waitingPlayers").once("value", playerSnapshot => {
+                    var waitingPlayers = playerSnapshot.val() || {};
+                    var players = Object.keys(waitingPlayers);  // ✅ Use only players who are in waiting room
 
-            console.log("Players in waiting room:", players);  // ✅ Debugging log
+                    if (players.length < 3) {
+                        alert("At least 3 players are needed to start the game!");
+                        return;
+                    }
 
-            if (players.length < 3) {
-                alert("At least 3 players are needed to start the game!");
-                return;
-            }
+                    // ✅ Randomly assign roles
+                    var thinker = players[Math.floor(Math.random() * players.length)];
+                    var correctPlayer = players.filter(p => p !== thinker)[Math.floor(Math.random() * (players.length - 1))];
 
-            // ✅ Randomly assign roles
-            var thinker = players[Math.floor(Math.random() * players.length)];
-            var correctPlayer = players.filter(p => p !== thinker)[Math.floor(Math.random() * (players.length - 1))];
+                    var roles = {};
+                    players.forEach(p => roles[p] = "9UPPER");
+                    roles[thinker] = "thinker";
+                    roles[correctPlayer] = "REALUPPER";
 
-            var roles = {};
-            players.forEach(p => roles[p] = "9UPPER");
-            roles[thinker] = "thinker";
-            roles[correctPlayer] = "REALUPPER";
-
-            // ✅ Pick a random term for the round
-            fetch("9upper_terms.json")
-                .then(response => response.json())
-                .then(terms => {
+                    // ✅ Pick a random term for the round
                     var randomIndex = Math.floor(Math.random() * terms.length);
                     var randomTerm = terms[randomIndex].term;
                     var correctDefinition = terms[randomIndex].definition;
@@ -431,9 +429,9 @@ function startGame() {
 
                     // ✅ Start the first round
                     startNewRound(terms, 1, totalRounds, roundTime);
-                })
-                .catch(error => console.error("Error loading terms:", error));
-        });
+                });
+            })
+            .catch(error => console.error("Error loading terms:", error));
     });
 }
 
