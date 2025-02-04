@@ -248,16 +248,21 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
 
             if (round >= totalRounds) {
                 // ✅ If it's the last round, end the game
-                db.ref("games/" + gameCode).update({ status: "finished" });
-                alert("Game Over!");
+                db.ref("games/" + gameCode).update({ status: "finished" }).then(() => {
+                    console.log("Game Over!");
+                });
             } else {
-                // ✅ Otherwise, start the next round
-                alert("Time's up! Moving to the next round...");
+                // ✅ Automatically start the next round without requiring user input
+                console.log("Time's up! Automatically starting the next round...");
 
                 fetch("9upper_terms.json")
                     .then(response => response.json())
                     .then(terms => {
-                        startNewRound(terms, round + 1, totalRounds, roundTime);
+                        db.ref("games/" + gameCode).update({
+                            winner: "timeout", // ✅ Mark the round as timed out
+                        }).then(() => {
+                            startNewRound(terms, round + 1, totalRounds, roundTime);
+                        });
                     });
             }
         } else {
@@ -266,6 +271,7 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
         }
     }, 1000); // ✅ Update every second
 }
+
 
         
 function displaythinkerOptions(gameData) {
