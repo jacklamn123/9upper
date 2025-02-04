@@ -241,33 +241,24 @@ function listenForUpdates() {
 
 
 
-
         var roundTimer; // ✅ Global timer variable
 
+// ✅ Start countdown timer
 function startCountdown(timeLeft, round, totalRounds, roundTime) {
-    if (isNaN(timeLeft) || timeLeft === undefined) {
-        console.error("Error: timeLeft is NaN or undefined, resetting to 60");
-        timeLeft = 60;
-    }
-
-    clearInterval(roundTimer); // ✅ Clear any existing timer
+    clearInterval(roundTimer);
 
     roundTimer = setInterval(() => {
         if (timeLeft <= 0) {
-            clearInterval(roundTimer); // ✅ Stop the timer when it reaches zero
+            clearInterval(roundTimer);
             db.ref("games/" + gameCode).update({ timeLeft: 0 });
 
             if (round >= totalRounds) {
-                db.ref("games/" + gameCode).update({ status: "finished" });
-                alert("Game Over!");
+                handleGameEnd(); // ✅ Centralized game-end logic
             } else {
-                alert("Time's up! Moving to the next round...");
-
                 db.ref("games/" + gameCode).once("value", snapshot => {
                     var gameData = snapshot.val();
                     if (!gameData) return;
-
-                    var nextRound = (gameData.currentRound || 0) + 1;  // ✅ Ensure it is always a valid number
+                    var nextRound = (gameData.currentRound || 0) + 1;
 
                     fetch("9upper_terms.json")
                         .then(response => response.json())
@@ -277,9 +268,8 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
                 });
             }
         } else {
-            timeLeft--; // ✅ Decrement time left
-            db.ref("games/" + gameCode).update({ timeLeft: timeLeft }); // ✅ Update Firebase
-
+            timeLeft--;
+            db.ref("games/" + gameCode).update({ timeLeft });
             document.getElementById("timeLeftDisplay").innerText = timeLeft + " seconds";
         }
     }, 1000);
@@ -319,68 +309,51 @@ function displaythinkerOptions(gameData) {
 
 
 
-// ✅ thinker selects a player
+// ✅ Thinker selects a player
 function thinkerSelectPlayer(selectedPlayer) {
-    // Stop the timer immediately
     clearInterval(roundTimer);
 
     db.ref("games/" + gameCode).once("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
 
-        var scores = gameData.scores || {}; // ✅ Fetch current scores
+        var scores = gameData.scores || {};
         var roles = gameData.roles || {};
         var thinker = Object.keys(roles).find(p => roles[p] === "thinker");
         var realUpper = Object.keys(roles).find(p => roles[p] === "REALUPPER");
 
-        // ✅ Update scores based on selection
         if (selectedPlayer === realUpper) {
-            // Thinker and REALUPPER both get 1 point
             scores[thinker] = (scores[thinker] || 0) + 1;
             scores[realUpper] = (scores[realUpper] || 0) + 1;
         } else {
-            // Selected 9UPPER gets 1 point
             scores[selectedPlayer] = (scores[selectedPlayer] || 0) + 1;
         }
 
-        // ✅ Save updated scores in Firebase
-        db.ref("games/" + gameCode).update({
-            scores: scores,
-            winner: selectedPlayer,
-            timeLeft: 0
-        }).then(() => {
-            alert(`thinker selected ${selectedPlayer}`);
-            updateScoreboard(scores); // ✅ Refresh scoreboard UI
-        });
+        db.ref("games/" + gameCode).update({ scores, winner: selectedPlayer, timeLeft: 0 })
+            .then(() => {
+                alert(`Thinker selected ${selectedPlayer}`);
+                updateScoreboard(scores);
+            });
 
-        // Fetch current round number
         db.ref("games/" + gameCode + "/currentRound").once("value", snapshot => {
             var round = snapshot.val();
-
-            // Fetch total rounds
             db.ref("games/" + gameCode + "/totalRounds").once("value", totalSnapshot => {
                 var totalRounds = totalSnapshot.val();
 
-                // Fetch roundTime ✅ FIXED
-                db.ref("games/" + gameCode).once("value", gameSnapshot => {
-                    var gameData = gameSnapshot.val();
-                    var roundTime = gameData.roundTime || 60;  // Default to 60 seconds if missing
-
-                    if (round >= totalRounds) {
-                        db.ref("games/" + gameCode).update({ status: "finished" });
-                        alert("Game Over!");
-                    } else {
-                        fetch("9upper_terms.json")
-                            .then(response => response.json())
-                            .then(terms => {
-                                startNewRound(terms, round + 1, totalRounds, roundTime);
-                            });
-                    }
-                });
+                if (round >= totalRounds) {
+                    handleGameEnd(); // ✅ Use the centralized handler
+                } else {
+                    fetch("9upper_terms.json")
+                        .then(response => response.json())
+                        .then(terms => {
+                            startNewRound(terms, round + 1, totalRounds, gameData.roundTime || 60);
+                        });
+                }
             });
         });
     });
 }
+
 
 
 
@@ -533,29 +506,27 @@ function startRoundTimer(roundTime, round, totalRounds) {
 
 
 
+// ✅ End round and move to next or end game
 function endRound(round, totalRounds) {
-    clearInterval(roundTimer); // ✅ Stop any running timer
+    clearInterval(roundTimer);
 
     if (round >= totalRounds) {
-        db.ref("games/" + gameCode).update({ status: "finished" });
-        alert("Game Over!");
+        handleGameEnd(); // ✅ Call centralized game-end handler
     } else {
         db.ref("games/" + gameCode).once("value", snapshot => {
             var gameData = snapshot.val();
             if (!gameData) return;
 
-            var roundTime = gameData.roundTime;  // ✅ Fetch roundTime before calling startNewRound()
-
+            var roundTime = gameData.roundTime;
             fetch("9upper_terms.json")
                 .then(response => response.json())
                 .then(terms => {
-                    // ✅ Reset round-related values
                     db.ref("games/" + gameCode).update({
                         term: "",
                         correctDefinition: "",
                         roles: {},
                         winner: null,
-                        timeLeft: roundTime  // ✅ Reset timeLeft to default for next round
+                        timeLeft: roundTime
                     }).then(() => {
                         startNewRound(terms, round + 1, totalRounds, roundTime);
                     });
@@ -563,6 +534,7 @@ function endRound(round, totalRounds) {
         });
     }
 }
+
 
 
 
@@ -614,6 +586,78 @@ function updateTime() {
 }
 
 
+  // ✅ Global timer variable
+var roundTimer;
+
+// ✅ Function to handle when the game is over
+function handleGameEnd() {
+    db.ref("games/" + gameCode).update({ status: "finished" }).then(() => {
+        showFinalScoreboard();
+    });
+}
+
+// ✅ Show Final Scoreboard & Options
+function showFinalScoreboard() {
+    const gameScreen = document.getElementById("gameScreen");
+    gameScreen.innerHTML = ""; // Clear the game screen
+
+    let scoreboardHTML = `
+        <div id="finalScoreboard" style="
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            text-align: center; width: 50%; font-size: 18px;
+        ">
+            <h2>Game Over!</h2>
+            <h3>Final Scores</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #ddd;">
+                        <th>Rank</th><th>Player</th><th>Score</th>
+                    </tr>
+                </thead>
+                <tbody id="finalScoreBody"></tbody>
+            </table>
+            <br>
+            <button onclick="startGame()" style="
+                background: green; color: white; padding: 10px; border: none; border-radius: 5px;
+                cursor: pointer; font-size: 16px; margin: 10px;
+            ">Start New Game</button>
+            <button onclick="backToWaitingRoom()" style="
+                background: blue; color: white; padding: 10px; border: none; border-radius: 5px;
+                cursor: pointer; font-size: 16px; margin: 10px;
+            ">Back to Waiting Room</button>
+        </div>
+    `;
+
+    gameScreen.innerHTML = scoreboardHTML;
+    updateFinalScoreboard();
+}
+
+// ✅ Populate Final Scoreboard
+function updateFinalScoreboard() {
+    db.ref("games/" + gameCode + "/scores").once("value", snapshot => {
+        const scores = snapshot.val() || {};
+        let sortedPlayers = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+
+        let finalScoreBody = document.getElementById("finalScoreBody");
+        finalScoreBody.innerHTML = sortedPlayers.map((player, index) => `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${player[0]}</td>
+                <td>${player[1]}</td>
+            </tr>
+        `).join("");
+    });
+}
+
+// ✅ Back to Waiting Room
+function backToWaitingRoom() {
+    db.ref("games/" + gameCode).update({ status: "waiting" }).then(() => {
+        location.reload(); // Refresh page to reset to waiting room
+    });
+}
+
+        
     </script>
 </head>
 <body>
