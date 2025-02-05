@@ -593,7 +593,7 @@ function endRound(round, totalRounds) {
             db.ref("games/" + gameCode).update({ status: "finished" });
 
             // ✅ Ensure all players receive the endgame screen
-            /showEndgameScreen(gameData.scores);
+            //showEndgameScreen(gameData.scores);
         } else {
             fetch("9upper_terms.json")
                 .then(response => response.json())
