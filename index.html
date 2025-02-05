@@ -766,13 +766,19 @@ function returnToWaitingRoom() {
 
 
 function returnToMainMenu() {
-    document.getElementById("endGameModal").remove();
+    // If the endGameModal is on the screen, remove it.
+    const endGameModal = document.getElementById("endGameModal");
+    if (endGameModal) {
+        endGameModal.remove();
+    }
 
-    // ✅ Remove player from database (ensuring they don’t stay in the waiting room)
+    // Remove the current player from the game so they don’t stay in the “players” list.
     db.ref("games/" + gameCode + "/players/" + playerName).remove();
 
-    window.location.reload(); // ✅ Reloads page to go back to the main menu
+    // Reload the page to show the main menu (index.html, for instance).
+    window.location.reload();
 }
+
 
 function forceReturnToWaitingRoom() {
   console.log("Forcing all players back to the waiting room...");
