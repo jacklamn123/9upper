@@ -285,7 +285,7 @@ function listenForUpdates() {
             returnToMainMenuBtn.classList.remove("hidden");
         }
 
-        ✅ Handle game end
+        // ✅ Handle game end
        if (gameData.status === "finished") {
     // ✅ Immediately set status to something else (like "post-finished")
     db.ref("games/" + gameCode).update({ status: "post-finished" });
