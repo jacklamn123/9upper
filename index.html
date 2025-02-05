@@ -729,26 +729,7 @@ function returnToMainMenu() {
     window.location.reload(); // ✅ Reloads page to go back to the main menu
 }
 
-// ✅ This should NOT be inside listenForUpdates()
-function forceReturnToWaitingRoom() {
-    console.log("Forcing game to return to waiting room...");
 
-    db.ref("games/" + gameCode).update({ status: "waiting" });
-
-    db.ref("games/" + gameCode + "/players").once("value", snapshot => {
-        var players = snapshot.val();
-        if (players) {
-            Object.keys(players).forEach(player => {
-                db.ref("games/" + gameCode + "/players/" + player).remove();
-            });
-        }
-    });
-
-    document.getElementById("gameScreen").classList.add("hidden");
-    document.getElementById("waitingRoom").classList.remove("hidden");
-
-    document.getElementById("forceReturnToWaitingRoom").classList.add("hidden");
-}
 
 
         
