@@ -234,6 +234,11 @@ function listenForUpdates() {
 
             displaythinkerOptions(gameData);
         }
+
+        // ✅ STEP 1: Listen for game end and show final scoreboard to everyone
+        if (gameData.status === "finished") {
+            showEndgameScreen(gameData.scores);
+        }
     });
 }
 
@@ -600,12 +605,11 @@ function updateTime() {
   // ✅ Global timer variable
 var roundTimer;
 
-// ✅ Function to handle when the game is over
-function handleGameEnd() {
-    db.ref("games/" + gameCode).update({ status: "finished" }).then(() => {
-        showFinalScoreboard();
-    });
+
+        function handleGameEnd() {
+    db.ref("games/" + gameCode).update({ status: "finished" });
 }
+
 
 function showEndgameScreen(scores) {
     var endGameModal = document.createElement("div");
