@@ -66,6 +66,29 @@
 #scoreboard th {
     background-color: #f2f2f2;
 }
+        /* ✅ Positioning Buttons Near the Scoreboard */
+#returnToMainMenu {
+    position: absolute;
+    top: 10px;
+    left: 250px; /* ✅ Adjusted next to the scoreboard */
+    background-color: red;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
+}
+
+#forceReturnToWaitingRoom {
+    position: absolute;
+    top: 50px;
+    left: 250px;
+    background-color: blue;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
+}
+
 
 
 
@@ -231,6 +254,29 @@ function listenForUpdates() {
                     definitionInputBox.classList.add("hidden");
                 }
             }
+
+            displaythinkerOptions(gameData);
+
+            // ✅ Show "Return to Waiting Room" for host (only during game)
+            if (gameData.host === playerName) {
+                document.getElementById("forceReturnToWaitingRoom").classList.remove("hidden");
+            } else {
+                document.getElementById("forceReturnToWaitingRoom").classList.add("hidden");
+            }
+        } else {
+            // ✅ Hide "Return to Waiting Room" button when game is not playing
+            document.getElementById("forceReturnToWaitingRoom").classList.add("hidden");
+        }
+
+        // ✅ Always show "Return to Main Menu" button
+        document.getElementById("returnToMainMenu").classList.remove("hidden");
+
+        // ✅ Listen for game end and show final scoreboard to everyone
+        if (gameData.status === "finished") {
+            showEndgameScreen(gameData.scores);
+        }
+    });
+}
 
             displaythinkerOptions(gameData);
         }
@@ -665,17 +711,20 @@ function returnToWaitingRoom() {
     // ✅ Check if the modal exists before removing
     var endGameModal = document.getElementById("endGameModal");
     if (endGameModal) {
-        endGameModal.remove(); // ✅ Remove the scoreboard
+        document.body.removeChild(endGameModal); // ✅ Ensures removal from DOM
     }
 
+    // ✅ Hide Game Screen & Show Waiting Room
+    document.getElementById("gameScreen").classList.add("hidden");
+    document.getElementById("waitingRoom").classList.remove("hidden");
+
+    // ✅ Update Firebase: Set game status to "waiting"
     db.ref("games/" + gameCode).update({ status: "waiting" });
 
     // ✅ Re-add the player to the waiting room
     db.ref("games/" + gameCode + "/players/" + playerName).set(true);
-
-    document.getElementById("gameScreen").classList.add("hidden");
-    document.getElementById("waitingRoom").classList.remove("hidden");
 }
+
 
 
 
@@ -775,6 +824,32 @@ function returnToMainMenu() {
         <input type="text" id="chatInput" placeholder="Type a message">
         <button onclick="sendChatMessage()">Send</button>
 
+        <!-- ✅ Scoreboard Display with New Buttons -->
+<div id="scoreboard">
+    <h3>Scoreboard</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody id="scoreboardBody">
+            <!-- Scores will be dynamically inserted here -->
+        </tbody>
+    </table>
+</div>
+
+<!-- ✅ Return to Main Menu Button (Visible to Everyone) -->
+<button id="returnToMainMenu" onclick="returnToMainMenu()">Return to Main Menu</button>
+
+<!-- ✅ Force Return to Waiting Room (Only for Host) -->
+<button id="forceReturnToWaitingRoom" class="hidden" onclick="forceReturnToWaitingRoom()">Return to Waiting Room</button>
+
+
     </div>
+
+    
 </body>
 </html>
