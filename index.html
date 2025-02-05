@@ -174,142 +174,87 @@ function listenForUpdates() {
         var gameData = snapshot.val();
         if (!gameData) return;
 
-        // ✅ Fix: Update waiting room with waiting players
-        if (gameData.status === "waiting") {
-            if (document.getElementById("gameScreen")) {
-                document.getElementById("gameScreen").classList.add("hidden");
-            }
-            if (document.getElementById("waitingRoom")) {
-                document.getElementById("waitingRoom").classList.remove("hidden");
-            }
+        // ✅ Update player list in the waiting room
+        if (gameData.players) {
+            var playerList = Object.keys(gameData.players)
+                .map(name => `<li>${name}</li>`).join("");
+            document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
 
-            // ✅ Show all players in the waiting room
-            let playerListHTML = "";
-            if (gameData.waitingPlayers) {
-                playerListHTML = Object.keys(gameData.waitingPlayers)
-                    .map(name => `<li>${name}</li>`)
-                    .join("");
-            }
-            document.getElementById("playerList").innerHTML = `<ul>${playerListHTML}</ul>`;
+            document.getElementById("roundsValue").innerText = gameData.totalRounds;
+            document.getElementById("timeValue").innerText = gameData.roundTime;
 
-            // ✅ Hide "Return to Waiting Room" button
-            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
-            if (returnToWaitingRoomBtn) {
-                returnToWaitingRoomBtn.classList.add("hidden");
-            }
-        }
-
-        // ✅ Handle game start and ensure players move back from `waitingPlayers` to `players`
-        if (gameData.status === "playing") {
-            if (document.getElementById("waitingRoom")) {
-                document.getElementById("waitingRoom").classList.add("hidden");
-            }
-            if (document.getElementById("gameScreen")) {
-                document.getElementById("gameScreen").classList.remove("hidden");
-            }
-
-            // ✅ Move players back to "players" if they are still in `waitingPlayers`
-            db.ref("games/" + gameCode + "/waitingPlayers").once("value", snapshot => {
-                var waitingPlayers = snapshot.val();
-                if (waitingPlayers) {
-                    var updates = {};
-                    Object.keys(waitingPlayers).forEach(player => {
-                        updates["/players/" + player] = true;
-                    });
-
-                    // ✅ Move waiting players to "players" and remove `waitingPlayers`
-                    db.ref("games/" + gameCode).update(updates).then(() => {
-                        db.ref("games/" + gameCode + "/waitingPlayers").remove();
-                    });
-                }
-            });
-        }
-
-        // ✅ Ensure game settings update
-        if (document.getElementById("roundsValue")) {
-            document.getElementById("roundsValue").innerText = gameData.totalRounds || 5;
-        }
-        if (document.getElementById("timeValue")) {
-            document.getElementById("timeValue").innerText = gameData.roundTime || 60;
-        }
-
-        if (gameData.host === playerName) {
-            if (document.getElementById("gameSettings")) {
+            if (gameData.host === playerName) {
                 document.getElementById("gameSettings").classList.remove("hidden");
-            }
-            if (document.getElementById("startGameButton")) {
                 document.getElementById("startGameButton").classList.remove("hidden");
             }
         }
 
-        // ✅ Auto-update scoreboard
+        // ✅ Auto-update scoreboard when scores change
         if (gameData.scores) {
             updateScoreboard(gameData.scores);
         }
 
-        // ✅ Handle chat updates
+        // ✅ Chatbox Auto-Scrolling
         if (gameData.chat) {
             const chatBox = document.querySelector(".chatbox");
-            if (chatBox) {
-                chatBox.innerHTML = ""; // Clear existing messages
-                Object.values(gameData.chat).forEach(msg => {
-                    chatBox.innerHTML += `<p>${msg}</p>`;
-                });
 
-                chatBox.style.display = "block";
+            // Clear existing messages
+            chatBox.innerHTML = "";
 
-                // ✅ Force scroll to the bottom
-                setTimeout(() => {
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                }, 100);
-            }
+            // Add all messages
+            Object.values(gameData.chat).forEach(msg => {
+                chatBox.innerHTML += `<p>${msg}</p>`;
+            });
+
+            // ✅ Ensure chatbox is visible
+            chatBox.style.display = "block";
+
+            // ✅ Force scroll to the bottom
+            setTimeout(() => {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 100);
         }
 
         // ✅ Handle game state: Playing
         if (gameData.status === "playing") {
-            if (document.getElementById("gameTerm")) {
-                document.getElementById("gameTerm").innerText = gameData.term || "N/A";
-            }
-            if (document.getElementById("playerRole")) {
-                document.getElementById("playerRole").innerText = gameData.roles?.[playerName] || "N/A";
-            }
-            if (document.getElementById("currentRoundDisplay")) {
-                document.getElementById("currentRoundDisplay").innerText = gameData.currentRound || 1;
-            }
-            if (document.getElementById("totalRoundsDisplay")) {
-                document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds || 5;
-            }
+            document.getElementById("waitingRoom").classList.add("hidden");
+            document.getElementById("gameScreen").classList.remove("hidden");
 
+            document.getElementById("gameTerm").innerText = gameData.term;
+            document.getElementById("playerRole").innerText = gameData.roles[playerName];
+
+            document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
+            document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
+
+            // ✅ Host starts the countdown timer
             if (gameData.host === playerName) {
-                startCountdown(gameData.timeLeft || 60, gameData.currentRound, gameData.totalRounds, gameData.roundTime);
+                startCountdown(gameData.timeLeft, gameData.currentRound, gameData.totalRounds, gameData.roundTime);
             }
 
-            if (document.getElementById("timeLeftDisplay")) {
-                document.getElementById("timeLeftDisplay").innerText = (gameData.timeLeft || 60) + " seconds";
-            }
+            // ✅ Update time left
+            document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
 
-            if (document.getElementById("thinkerPanel")) {
-                document.getElementById("thinkerPanel").classList.add("hidden");
-            }
+            // ✅ Hide thinker panel unless needed
+            document.getElementById("thinkerPanel").classList.add("hidden");
 
             // ✅ Show definition only for REALUPPER
             const definitionBox = document.getElementById("correctDefinitionBox");
             const definitionText = document.getElementById("correctDefinition");
 
             if (definitionBox && definitionText) {
-                if (gameData.roles?.[playerName] === "REALUPPER") {
-                    definitionText.innerText = gameData.correctDefinition || "N/A";
+                if (gameData.roles[playerName] === "REALUPPER") {
+                    definitionText.innerText = gameData.correctDefinition;
                     definitionBox.classList.remove("hidden");
                 } else {
                     definitionBox.classList.add("hidden");
-                    definitionText.innerText = "";
+                    definitionText.innerText = "";  // ✅ Clear previous round’s definition
                 }
             }
 
             // ✅ Ensure 9UPPER players don’t see the definition
             const definitionInputBox = document.getElementById("definitionInputBox");
             if (definitionInputBox) {
-                if (gameData.roles?.[playerName] === "9UPPER") {
+                if (gameData.roles[playerName] === "9UPPER") {
                     definitionInputBox.classList.remove("hidden");
                 } else {
                     definitionInputBox.classList.add("hidden");
@@ -327,6 +272,12 @@ function listenForUpdates() {
                     returnToWaitingRoomBtn.classList.add("hidden");
                 }
             }
+        } else {
+            // ✅ If game is NOT playing, ensure "Return to Waiting Room" is hidden
+            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
+            if (returnToWaitingRoomBtn) {
+                returnToWaitingRoomBtn.classList.add("hidden");
+            }
         }
 
         // ✅ Always show "Return to Main Menu" button (for all players)
@@ -341,9 +292,6 @@ function listenForUpdates() {
         }
     });
 }
-
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
@@ -489,63 +437,46 @@ function startGame() {
         fetch("9upper_terms.json")
             .then(response => response.json())
             .then(terms => {
-                db.ref("games/" + gameCode + "/waitingPlayers").once("value", playerSnapshot => {
-                    var waitingPlayers = playerSnapshot.val();
-
-                    // ✅ Fix: Ensure `waitingPlayers` is not null before using `Object.keys()`
-                    if (!waitingPlayers || Object.keys(waitingPlayers).length < 3) {
+                db.ref("games/" + gameCode + "/players").once("value", playerSnapshot => {
+                    var players = Object.keys(playerSnapshot.val());
+                    if (players.length < 3) {
                         alert("At least 3 players are needed to start the game!");
                         return;
                     }
 
-                    var players = Object.keys(waitingPlayers);
-                    var updates = {};
+                    var thinker = players[Math.floor(Math.random() * players.length)];
+                    var correctPlayer = players.filter(p => p !== thinker)[Math.floor(Math.random() * (players.length - 1))];
 
-                    // ✅ Move all waiting players back to "players"
-                    players.forEach(player => {
-                        updates["/players/" + player] = true;
+                    var roles = {};
+                    players.forEach(p => roles[p] = "9UPPER");
+                    roles[thinker] = "thinker";
+                    roles[correctPlayer] = "REALUPPER";
+
+                    var randomIndex = Math.floor(Math.random() * terms.length);
+                    var randomTerm = terms[randomIndex].term;
+                    var correctDefinition = terms[randomIndex].definition;
+
+                    // ✅ Initialize scores for all players
+                    var initialScores = {};
+                    players.forEach(p => initialScores[p] = 0); 
+
+                    db.ref("games/" + gameCode).update({
+                        status: "playing",
+                        term: randomTerm,
+                        correctDefinition: correctDefinition,
+                        roles: roles,
+                        currentRound: 1,
+                        totalRounds: totalRounds,
+                        roundTime: roundTime,
+                        scores: initialScores // ✅ Store initial scores in Firebase
                     });
 
-                    // ✅ Apply updates and remove `waitingPlayers`
-                    db.ref("games/" + gameCode).update(updates).then(() => {
-                        db.ref("games/" + gameCode + "/waitingPlayers").remove();
-
-                        // ✅ Continue game setup
-                        var thinker = players[Math.floor(Math.random() * players.length)];
-                        var correctPlayer = players.filter(p => p !== thinker)[Math.floor(Math.random() * (players.length - 1))];
-
-                        var roles = {};
-                        players.forEach(p => roles[p] = "9UPPER");
-                        roles[thinker] = "thinker";
-                        roles[correctPlayer] = "REALUPPER";
-
-                        var randomIndex = Math.floor(Math.random() * terms.length);
-                        var randomTerm = terms[randomIndex].term;
-                        var correctDefinition = terms[randomIndex].definition;
-
-                        // ✅ Initialize scores for all players
-                        var initialScores = {};
-                        players.forEach(p => initialScores[p] = 0);
-
-                        db.ref("games/" + gameCode).update({
-                            status: "playing",
-                            term: randomTerm,
-                            correctDefinition: correctDefinition,
-                            roles: roles,
-                            currentRound: 1,
-                            totalRounds: totalRounds,
-                            roundTime: roundTime,
-                            scores: initialScores // ✅ Store initial scores in Firebase
-                        });
-
-                        startNewRound(terms, 1, totalRounds, roundTime);
-                    });
+                    startNewRound(terms, 1, totalRounds, roundTime);
                 });
             })
             .catch(error => console.error("Error loading terms:", error));
     });
 }
-
 
           var roundTimer;
 
@@ -818,54 +749,26 @@ function returnToMainMenu() {
 function forceReturnToWaitingRoom() {
     console.log("Forcing all players back to the waiting room...");
 
-    // ✅ Update game status to "waiting" so everyone returns to the waiting room
+    // ✅ Update game status to waiting
     db.ref("games/" + gameCode).update({ status: "waiting" });
 
-    // ✅ Retrieve all players before making changes
+    // ✅ Remove all players from the game
     db.ref("games/" + gameCode + "/players").once("value", snapshot => {
         var players = snapshot.val();
-        
-        if (!players) {
-            console.log("No active players found to move back to the waiting room.");
-            return;
-        }
-
-        // ✅ Move each player from "players" to "waitingPlayers" in a single Firebase update
-        var updates = {};
-        Object.keys(players).forEach(player => {
-            updates["/waitingPlayers/" + player] = true;  // Move to waiting room
-            updates["/players/" + player] = null;  // Remove from active game
-        });
-
-        // ✅ Apply updates to Firebase in one request
-        db.ref("games/" + gameCode).update(updates).then(() => {
-            console.log("Players moved to waiting room successfully.");
-
-            // ✅ Ensure UI updates correctly for all players
-            db.ref("games/" + gameCode).once("value", snapshot => {
-                var gameData = snapshot.val();
-                if (!gameData) return;
-
-                // ✅ Hide the game screen and show the waiting room
-                if (document.getElementById("gameScreen")) {
-                    document.getElementById("gameScreen").classList.add("hidden");
-                }
-                if (document.getElementById("waitingRoom")) {
-                    document.getElementById("waitingRoom").classList.remove("hidden");
-                }
-
-                // ✅ Hide "Return to Waiting Room" button after use
-                const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
-                if (returnToWaitingRoomBtn) {
-                    returnToWaitingRoomBtn.classList.add("hidden");
-                }
+        if (players) {
+            Object.keys(players).forEach(player => {
+                db.ref("games/" + gameCode + "/players/" + player).remove();
             });
-        });
+        }
     });
+
+    // ✅ Hide game screen and show waiting room
+    document.getElementById("gameScreen").classList.add("hidden");
+    document.getElementById("waitingRoom").classList.remove("hidden");
+
+    // ✅ Hide the button
+    document.getElementById("forceReturnToWaitingRoom").classList.add("hidden");
 }
-
-
-
 
 
         
