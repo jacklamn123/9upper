@@ -368,28 +368,35 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
 
 
         
+
 function displaythinkerOptions(gameData) {
     var thinker = Object.keys(gameData.players).find(p => gameData.roles[p] === "thinker");
     var playerRole = gameData.roles[playerName];
 
     if (playerRole === "thinker") {
-        // ✅ Show thinker panel only if the player is the thinker
         document.getElementById("thinkerPanel").classList.remove("hidden");
 
         var selectablePlayers = Object.keys(gameData.players).filter(p => p !== thinker);
 
-        var buttonsHTML = selectablePlayers.map(player =>
-            `<button onclick="thinkerSelectPlayer('${player}')">${player}</button>`
-        ).join(" ");
+        // Create TWO buttons per player for testing:
+        //  1) "Pick"
+        //  2) "Collect Skin" (just a placeholder for now)
+        var buttonsHTML = selectablePlayers.map(player => `
+            <button onclick="thinkerSelectPlayer('${player}')">Pick: ${player}</button>
+            <button onclick="console.log('Collect Skin clicked for ${player}')">
+                Collect Skin: ${player}
+            </button>
+        `).join(" ");
 
         document.getElementById("thinkerOptions").innerHTML = buttonsHTML;
-    } 
-    else if (playerRole === "REALUPPER" || playerRole === "9UPPER") {
-        // ✅ Explicitly hide panel for REALUPPER & 9UPPER players
+    } else {
+        // Hide everything if not the thinker
         document.getElementById("thinkerPanel").classList.add("hidden");
-        document.getElementById("thinkerOptions").innerHTML = ""; // Clear buttons
+        document.getElementById("thinkerOptions").innerHTML = "";
     }
 }
+
+
 
 
 
