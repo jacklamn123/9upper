@@ -661,8 +661,13 @@ function showEndgameScreen(scores) {
 
 
 
- function returnToWaitingRoom() {
-    document.getElementById("endGameModal").remove();
+function returnToWaitingRoom() {
+    // ✅ Check if the modal exists before removing
+    var endGameModal = document.getElementById("endGameModal");
+    if (endGameModal) {
+        endGameModal.remove(); // ✅ Remove the scoreboard
+    }
+
     db.ref("games/" + gameCode).update({ status: "waiting" });
 
     // ✅ Re-add the player to the waiting room
@@ -671,6 +676,7 @@ function showEndgameScreen(scores) {
     document.getElementById("gameScreen").classList.add("hidden");
     document.getElementById("waitingRoom").classList.remove("hidden");
 }
+
 
 
 function returnToMainMenu() {
