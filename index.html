@@ -215,6 +215,23 @@ function listenForUpdates() {
             }, 100);
         }
 
+        // ✅ Handle game state: Waiting
+        if (gameData.status === "waiting") {
+            // ✅ Ensure all players return to the waiting room
+            if (document.getElementById("gameScreen")) {
+                document.getElementById("gameScreen").classList.add("hidden");
+            }
+            if (document.getElementById("waitingRoom")) {
+                document.getElementById("waitingRoom").classList.remove("hidden");
+            }
+
+            // ✅ Ensure "Return to Waiting Room" button is hidden
+            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
+            if (returnToWaitingRoomBtn) {
+                returnToWaitingRoomBtn.classList.add("hidden");
+            }
+        }
+
         // ✅ Handle game state: Playing
         if (gameData.status === "playing") {
             document.getElementById("waitingRoom").classList.add("hidden");
@@ -271,12 +288,6 @@ function listenForUpdates() {
                 } else {
                     returnToWaitingRoomBtn.classList.add("hidden");
                 }
-            }
-        } else {
-            // ✅ If game is NOT playing, ensure "Return to Waiting Room" is hidden
-            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
-            if (returnToWaitingRoomBtn) {
-                returnToWaitingRoomBtn.classList.add("hidden");
             }
         }
 
@@ -749,10 +760,10 @@ function returnToMainMenu() {
 function forceReturnToWaitingRoom() {
     console.log("Forcing all players back to the waiting room...");
 
-    // ✅ Update game status to waiting
+    // ✅ Update game status to waiting (this will trigger updates for all players)
     db.ref("games/" + gameCode).update({ status: "waiting" });
 
-    // ✅ Remove all players from the game
+    // ✅ Remove all players from the game list
     db.ref("games/" + gameCode + "/players").once("value", snapshot => {
         var players = snapshot.val();
         if (players) {
@@ -762,13 +773,27 @@ function forceReturnToWaitingRoom() {
         }
     });
 
-    // ✅ Hide game screen and show waiting room
-    document.getElementById("gameScreen").classList.add("hidden");
-    document.getElementById("waitingRoom").classList.remove("hidden");
+    // ✅ Ensure UI updates for all players
+    db.ref("games/" + gameCode).once("value", snapshot => {
+        var gameData = snapshot.val();
+        if (!gameData) return;
 
-    // ✅ Hide the button
-    document.getElementById("forceReturnToWaitingRoom").classList.add("hidden");
+        // ✅ Hide the game screen and show waiting room
+        if (document.getElementById("gameScreen")) {
+            document.getElementById("gameScreen").classList.add("hidden");
+        }
+        if (document.getElementById("waitingRoom")) {
+            document.getElementById("waitingRoom").classList.remove("hidden");
+        }
+
+        // ✅ Hide "Return to Waiting Room" button after use
+        const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
+        if (returnToWaitingRoomBtn) {
+            returnToWaitingRoomBtn.classList.add("hidden");
+        }
+    });
 }
+
 
 
         
