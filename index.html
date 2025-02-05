@@ -761,14 +761,14 @@ function forceReturnToWaitingRoom() {
     // ✅ Update game status to "waiting"
     db.ref("games/" + gameCode).update({ status: "waiting" });
 
-    // ✅ Move all players to waitingPlayers and keep them in players list
+    // ✅ Move all players to waitingPlayers
     db.ref("games/" + gameCode + "/players").once("value", snapshot => {
         var players = snapshot.val();
         if (players) {
             var updates = {};
             Object.keys(players).forEach(player => {
                 updates["/waitingPlayers/" + player] = true; // Move to waitingPlayers
-                updates["/players/" + player] = true; // Keep in players so game can restart
+                updates["/players/" + player] = null; // Remove from players
             });
 
             db.ref("games/" + gameCode).update(updates);
@@ -776,17 +776,21 @@ function forceReturnToWaitingRoom() {
     });
 
     // ✅ Hide game screen and show waiting room for everyone
-    if (document.getElementById("gameScreen")) {
-        document.getElementById("gameScreen").classList.add("hidden");
-    }
-    if (document.getElementById("waitingRoom")) {
-        document.getElementById("waitingRoom").classList.remove("hidden");
-    }
+    db.ref("games/" + gameCode).once("value", snapshot => {
+        var gameData = snapshot.val();
+        if (!gameData) return;
 
-    // ✅ Hide the button
-    document.getElementById("forceReturnToWaitingRoom").classList.add("hidden");
+        if (document.getElementById("gameScreen")) {
+            document.getElementById("gameScreen").classList.add("hidden");
+        }
+        if (document.getElementById("waitingRoom")) {
+            document.getElementById("waitingRoom").classList.remove("hidden");
+        }
+
+        // ✅ Hide the button
+        document.getElementById("forceReturnToWaitingRoom").classList.add("hidden");
+    });
 }
-
 
 
         
