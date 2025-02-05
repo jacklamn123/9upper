@@ -725,11 +725,7 @@ function showEndgameScreen(scores) {
 
 function returnToWaitingRoom() {
     // ✅ Check if the modal exists before removing
-    var endGameModal = document.getElementById("endGameModal");
-    if (endGameModal) {
-        // Removes the final scoreboard (central modal)
-        document.body.removeChild(endGameModal);
-    }
+    document.getElementById("endGameModal").remove();
 
     // ✅ Hide Game Screen & Show Waiting Room
     document.getElementById("gameScreen").classList.add("hidden");
