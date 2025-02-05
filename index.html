@@ -724,28 +724,18 @@ function returnToWaitingRoom() {
     // ✅ Check if the modal exists before removing
     var endGameModal = document.getElementById("endGameModal");
     if (endGameModal) {
-        document.body.removeChild(endGameModal); // ✅ Removes Final Scores modal
+        document.body.removeChild(endGameModal); // ✅ Ensures removal from DOM
     }
 
     // ✅ Hide Game Screen & Show Waiting Room
     document.getElementById("gameScreen").classList.add("hidden");
     document.getElementById("waitingRoom").classList.remove("hidden");
 
-    // ✅ Ensure the scoreboard is cleared (fix duplication issue)
-    var scoreboard = document.getElementById("scoreboardBody");
-    if (scoreboard) {
-        scoreboard.innerHTML = ""; // ✅ Clears the final scoreboard
-    }
-
-    // ✅ Update Firebase: Move player to `waitingPlayers` and reset game status
+    // ✅ Update Firebase: Set game status to "waiting"
     db.ref("games/" + gameCode).update({ status: "waiting" });
 
-    // ✅ Move the player from `players` to `waitingPlayers`
-    db.ref("games/" + gameCode + "/waitingPlayers/" + playerName).set(true)
-        .then(() => {
-            // ✅ Remove player from `players` to prevent duplicate listings
-            db.ref("games/" + gameCode + "/players/" + playerName).remove();
-        });
+    // ✅ Re-add the player to the waiting room
+    db.ref("games/" + gameCode + "/players/" + playerName).set(true);
 }
 
 
