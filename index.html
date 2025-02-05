@@ -721,22 +721,32 @@ function showEndgameScreen(scores) {
 
 
 function returnToWaitingRoom() {
-    // ✅ Check if the modal exists before removing
+    // ✅ Remove the endgame modal
     var endGameModal = document.getElementById("endGameModal");
     if (endGameModal) {
-        document.body.removeChild(endGameModal); // ✅ Ensures removal from DOM
+        document.body.removeChild(endGameModal);
     }
 
-    // ✅ Hide Game Screen & Show Waiting Room
+    // ✅ Ensure the scoreboard is cleared
+    var scoreboard = document.getElementById("scoreboard");
+    if (scoreboard) {
+        scoreboard.innerHTML = ""; // Clears the final scoreboard
+    }
+
+    // ✅ Hide the game screen and show the waiting room
     document.getElementById("gameScreen").classList.add("hidden");
     document.getElementById("waitingRoom").classList.remove("hidden");
 
     // ✅ Update Firebase: Set game status to "waiting"
     db.ref("games/" + gameCode).update({ status: "waiting" });
 
-    // ✅ Re-add the player to the waiting room
-    db.ref("games/" + gameCode + "/players/" + playerName).set(true);
+    // ✅ Move player from `players` to `waitingPlayers`
+    db.ref("games/" + gameCode + "/waitingPlayers/" + playerName).set(true);
+
+    // ✅ Remove the player from the game room to reset for a new game
+    db.ref("games/" + gameCode + "/players/" + playerName).remove();
 }
+
 
 
 
