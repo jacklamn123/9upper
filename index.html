@@ -215,69 +215,85 @@ function listenForUpdates() {
         }
 
         // ✅ Handle game state: Playing
-        if (gameData.status === "playing") {
-            document.getElementById("waitingRoom").classList.add("hidden");
-            document.getElementById("gameScreen").classList.remove("hidden");
+if (gameData.status === "playing") {
+    document.getElementById("waitingRoom").classList.add("hidden");
+    document.getElementById("gameScreen").classList.remove("hidden");
 
-            document.getElementById("gameTerm").innerText = gameData.term;
-            document.getElementById("playerRole").innerText = gameData.roles[playerName];
+    document.getElementById("gameTerm").innerText = gameData.term;
+    document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
-            document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
-            document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
+    document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
+    document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
-            // ✅ Host starts the countdown timer
-            if (gameData.host === playerName) {
-                startCountdown(gameData.timeLeft, gameData.currentRound, gameData.totalRounds, gameData.roundTime);
-            }
+    // ✅ Host starts the countdown timer
+    if (gameData.host === playerName) {
+        startCountdown(gameData.timeLeft, gameData.currentRound, gameData.totalRounds, gameData.roundTime);
+    }
 
-            // ✅ Update time left
-            document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
+    // ✅ Update time left
+    document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
 
-            // ✅ Hide thinker panel unless needed
-            document.getElementById("thinkerPanel").classList.add("hidden");
+    // ✅ Hide thinker panel unless needed
+    document.getElementById("thinkerPanel").classList.add("hidden");
 
-            // ✅ Show definition only for REALUPPER
-            const definitionBox = document.getElementById("correctDefinitionBox");
-            const definitionText = document.getElementById("correctDefinition");
+    // ✅ Show definition only for REALUPPER
+    const definitionBox = document.getElementById("correctDefinitionBox");
+    const definitionText = document.getElementById("correctDefinition");
 
-            if (definitionBox && definitionText) {
-                if (gameData.roles[playerName] === "REALUPPER") {
-                    definitionText.innerText = gameData.correctDefinition;
-                    definitionBox.classList.remove("hidden");
-                } else {
-                    definitionBox.classList.add("hidden");
-                    definitionText.innerText = "";  // ✅ Clear previous round’s definition
-                }
-            }
-
-            // ✅ Ensure 9UPPER players don’t see the definition
-            const definitionInputBox = document.getElementById("definitionInputBox");
-            if (definitionInputBox) {
-                if (gameData.roles[playerName] === "9UPPER") {
-                    definitionInputBox.classList.remove("hidden");
-                } else {
-                    definitionInputBox.classList.add("hidden");
-                }
-            }
-
-            displaythinkerOptions(gameData);
-
-            // ✅ Show "Return to Waiting Room" only for the host (during gameplay)
-            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
-            if (returnToWaitingRoomBtn) {
-                if (gameData.host === playerName) {
-                    returnToWaitingRoomBtn.classList.remove("hidden");
-                } else {
-                    returnToWaitingRoomBtn.classList.add("hidden");
-                }
-            }
+    if (definitionBox && definitionText) {
+        if (gameData.roles[playerName] === "REALUPPER") {
+            definitionText.innerText = gameData.correctDefinition;
+            definitionBox.classList.remove("hidden");
         } else {
-            // ✅ If game is NOT playing, ensure "Return to Waiting Room" is hidden
-            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
-            if (returnToWaitingRoomBtn) {
-                returnToWaitingRoomBtn.classList.add("hidden");
-            }
+            definitionBox.classList.add("hidden");
+            definitionText.innerText = "";  // ✅ Clear previous round’s definition
         }
+    }
+
+    // ✅ Ensure 9UPPER players don’t see the definition
+    const definitionInputBox = document.getElementById("definitionInputBox");
+    if (definitionInputBox) {
+        if (gameData.roles[playerName] === "9UPPER") {
+            definitionInputBox.classList.remove("hidden");
+        } else {
+            definitionInputBox.classList.add("hidden");
+        }
+    }
+
+    displaythinkerOptions(gameData);
+
+    // ✅ Show "Return to Waiting Room" only for the host
+    const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
+    if (returnToWaitingRoomBtn) {
+        if (gameData.host === playerName) {
+            returnToWaitingRoomBtn.classList.remove("hidden");
+        } else {
+            returnToWaitingRoomBtn.classList.add("hidden");
+        }
+    }
+
+}
+// ✅ Add this new block for status === "waiting"
+else if (gameData.status === "waiting") {
+    // Hide the game screen, show the waiting room
+    document.getElementById("gameScreen").classList.add("hidden");
+    document.getElementById("waitingRoom").classList.remove("hidden");
+
+    // Hide the "Return to Waiting Room" button for everyone
+    const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
+    if (returnToWaitingRoomBtn) {
+        returnToWaitingRoomBtn.classList.add("hidden");
+    }
+}
+// Anything else (not playing, not waiting)
+else {
+    // If game is NOT playing or waiting, ensure "Return to Waiting Room" is hidden
+    const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
+    if (returnToWaitingRoomBtn) {
+        returnToWaitingRoomBtn.classList.add("hidden");
+    }
+}
+
 
         // ✅ Always show "Return to Main Menu" button (for all players)
         const returnToMainMenuBtn = document.getElementById("returnToMainMenu");
@@ -758,28 +774,19 @@ function returnToMainMenu() {
     window.location.reload(); // ✅ Reloads page to go back to the main menu
 }
 
-        function forceReturnToWaitingRoom() {
-    console.log("Forcing all players back to the waiting room...");
+function forceReturnToWaitingRoom() {
+  console.log("Forcing all players back to the waiting room...");
 
-    // ✅ Update game status to waiting
-    db.ref("games/" + gameCode).update({ status: "waiting" });
+  // Update game status to waiting
+  db.ref("games/" + gameCode).update({ status: "waiting" });
 
-    // ✅ Remove all players from the game
-    db.ref("games/" + gameCode + "/players").once("value", snapshot => {
-        var players = snapshot.val();
-        if (players) {
-            Object.keys(players).forEach(player => {
-                db.ref("games/" + gameCode + "/players/" + player).remove();
-            });
-        }
-    });
 
-    // ✅ Hide game screen and show waiting room
-    document.getElementById("gameScreen").classList.add("hidden");
-    document.getElementById("waitingRoom").classList.remove("hidden");
+  // Host immediately hides the game UI
+  document.getElementById("gameScreen").classList.add("hidden");
+  document.getElementById("waitingRoom").classList.remove("hidden");
 
-    // ✅ Hide the button
-    document.getElementById("forceReturnToWaitingRoom").classList.add("hidden");
+  // Hide the button
+  document.getElementById("forceReturnToWaitingRoom").classList.add("hidden");
 }
 
 
