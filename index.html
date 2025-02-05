@@ -626,42 +626,62 @@ function showEndgameScreen(scores) {
 
     var sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
 
-    var scoreHTML = `<h2>Game Over!</h2><h3>Final Scores</h3><table border="1" style="margin:auto;"><tr><th>Rank</th><th>Player</th><th>Score</th></tr>`;
+    var scoreHTML = `<h2>Game Over!</h2><h3>Final Scores</h3>
+        <table border="1" style="margin:auto;">
+        <tr><th>Rank</th><th>Player</th><th>Score</th></tr>`;
+
     sortedScores.forEach((player, index) => {
         scoreHTML += `<tr><td>${index + 1}</td><td>${player[0]}</td><td>${player[1]}</td></tr>`;
     });
+
     scoreHTML += `</table><br>`;
 
+    // ✅ Remove "Start New Game" button
     endGameModal.innerHTML = scoreHTML + `
-        <button onclick="restartGame()" style="background:green;color:white;padding:10px;border:none;margin:5px;">Start New Game</button>
         <button onclick="returnToWaitingRoom()" style="background:blue;color:white;padding:10px;border:none;margin:5px;">Back to Waiting Room</button>
         <button onclick="returnToMainMenu()" style="background:red;color:white;padding:10px;border:none;margin:5px;">Back to Main Menu</button>
     `;
 
     document.body.appendChild(endGameModal);
+
+    // ✅ Remove players from the waiting room when the game ends
+    db.ref("games/" + gameCode + "/players").once("value", snapshot => {
+        var players = snapshot.val();
+        if (players) {
+            Object.keys(players).forEach(player => {
+                db.ref("games/" + gameCode + "/players/" + player).remove();
+            });
+        }
+    });
 }
 
 
 
 
-function restartGame() {
-    document.getElementById("endGameModal").remove();
-    startGame();
-}
 
 
-        function returnToWaitingRoom() {
+
+ function returnToWaitingRoom() {
     document.getElementById("endGameModal").remove();
     db.ref("games/" + gameCode).update({ status: "waiting" });
+
+    // ✅ Re-add the player to the waiting room
+    db.ref("games/" + gameCode + "/players/" + playerName).set(true);
 
     document.getElementById("gameScreen").classList.add("hidden");
     document.getElementById("waitingRoom").classList.remove("hidden");
 }
 
-        function returnToMainMenu() {
+
+function returnToMainMenu() {
     document.getElementById("endGameModal").remove();
-    window.location.reload(); // ✅ Reloads page to go back to main menu
+
+    // ✅ Remove player from database (ensuring they don’t stay in the waiting room)
+    db.ref("games/" + gameCode + "/players/" + playerName).remove();
+
+    window.location.reload(); // ✅ Reloads page to go back to the main menu
 }
+
 
 
         
