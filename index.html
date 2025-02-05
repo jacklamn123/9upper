@@ -674,6 +674,12 @@ var roundTimer;
 
 
 function showEndgameScreen(scores) {
+    // ✅ If the endGameModal already exists, do nothing
+    if (document.getElementById("endGameModal")) {
+        console.log("Endgame screen already shown. Not firing again.");
+        return;
+    }
+
     var endGameModal = document.createElement("div");
     endGameModal.id = "endGameModal";
     endGameModal.style.position = "fixed";
@@ -698,7 +704,6 @@ function showEndgameScreen(scores) {
 
     scoreHTML += `</table><br>`;
 
-    // ✅ Remove "Start New Game" button
     endGameModal.innerHTML = scoreHTML + `
         <button onclick="returnToWaitingRoom()" style="background:blue;color:white;padding:10px;border:none;margin:5px;">Back to Waiting Room</button>
         <button onclick="returnToMainMenu()" style="background:red;color:white;padding:10px;border:none;margin:5px;">Back to Main Menu</button>
@@ -706,7 +711,7 @@ function showEndgameScreen(scores) {
 
     document.body.appendChild(endGameModal);
 
-    // ✅ Remove players from the waiting room when the game ends
+    // Remove players from the waiting room when the game ends
     db.ref("games/" + gameCode + "/players").once("value", snapshot => {
         var players = snapshot.val();
         if (players) {
@@ -716,6 +721,7 @@ function showEndgameScreen(scores) {
         }
     });
 }
+
 
 
 
