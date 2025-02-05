@@ -721,26 +721,21 @@ function showEndgameScreen(scores) {
 
 
 function returnToWaitingRoom() {
-    // Remove endgame modal
+    // ✅ Check if the modal exists before removing
     var endGameModal = document.getElementById("endGameModal");
     if (endGameModal) {
+        // Removes the final scoreboard (central modal)
         document.body.removeChild(endGameModal);
     }
 
-    // Hide game screen & show waiting room
+    // ✅ Hide Game Screen & Show Waiting Room
     document.getElementById("gameScreen").classList.add("hidden");
     document.getElementById("waitingRoom").classList.remove("hidden");
 
-    // Update Firebase: set status to waiting
+    // ✅ Update Firebase: Set game status to "waiting"
     db.ref("games/" + gameCode).update({ status: "waiting" });
 
-    // Hide the entire scoreboard
-    var scoreboard = document.getElementById("scoreboard");
-    if (scoreboard) {
-        scoreboard.style.display = "none"; // or scoreboard.classList.add("hidden");
-    }
-
-    // Re-add player to waiting room
+    // ✅ Re-add the player to the waiting room
     db.ref("games/" + gameCode + "/players/" + playerName).set(true);
 }
 
