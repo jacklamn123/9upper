@@ -166,11 +166,14 @@ function createGame() {
             });
         }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
 
+        // ✅ Update player list in the waiting room
         if (gameData.players) {
             var playerList = Object.keys(gameData.players)
                 .map(name => `<li>${name}</li>`).join("");
@@ -211,6 +214,7 @@ function listenForUpdates() {
             }, 100);
         }
 
+        // ✅ Handle game state: Playing
         if (gameData.status === "playing") {
             document.getElementById("waitingRoom").classList.add("hidden");
             document.getElementById("gameScreen").classList.remove("hidden");
@@ -226,12 +230,13 @@ function listenForUpdates() {
                 startCountdown(gameData.timeLeft, gameData.currentRound, gameData.totalRounds, gameData.roundTime);
             }
 
-            // ✅ All players (including host) update UI with the correct time from Firebase
+            // ✅ Update time left
             document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
 
+            // ✅ Hide thinker panel unless needed
             document.getElementById("thinkerPanel").classList.add("hidden");
 
-            // ✅ Fix: Show definition only for REALUPPER
+            // ✅ Show definition only for REALUPPER
             const definitionBox = document.getElementById("correctDefinitionBox");
             const definitionText = document.getElementById("correctDefinition");
 
@@ -257,26 +262,42 @@ function listenForUpdates() {
 
             displaythinkerOptions(gameData);
 
-            // ✅ Show "Return to Waiting Room" for host (only during game)
-            if (gameData.host === playerName) {
-                document.getElementById("forceReturnToWaitingRoom").classList.remove("hidden");
-            } else {
-                document.getElementById("forceReturnToWaitingRoom").classList.add("hidden");
+            // ✅ Show "Return to Waiting Room" only for the host (during gameplay)
+            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
+            if (returnToWaitingRoomBtn) {
+                if (gameData.host === playerName) {
+                    returnToWaitingRoomBtn.classList.remove("hidden");
+                } else {
+                    returnToWaitingRoomBtn.classList.add("hidden");
+                }
             }
         } else {
-            // ✅ Hide "Return to Waiting Room" button when game is not playing
-            document.getElementById("forceReturnToWaitingRoom").classList.add("hidden");
+            // ✅ If game is NOT playing, ensure "Return to Waiting Room" is hidden
+            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
+            if (returnToWaitingRoomBtn) {
+                returnToWaitingRoomBtn.classList.add("hidden");
+            }
         }
 
-        // ✅ Always show "Return to Main Menu" button
-        document.getElementById("returnToMainMenu").classList.remove("hidden");
+        // ✅ Always show "Return to Main Menu" button (for all players)
+        const returnToMainMenuBtn = document.getElementById("returnToMainMenu");
+        if (returnToMainMenuBtn) {
+            returnToMainMenuBtn.classList.remove("hidden");
+        }
 
-        // ✅ Listen for game end and show final scoreboard to everyone
+        // ✅ Handle game end
         if (gameData.status === "finished") {
             showEndgameScreen(gameData.scores);
         }
     });
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        
+
+
+
+
 
         
 
@@ -729,6 +750,29 @@ function returnToMainMenu() {
     window.location.reload(); // ✅ Reloads page to go back to the main menu
 }
 
+        function forceReturnToWaitingRoom() {
+    console.log("Forcing all players back to the waiting room...");
+
+    // ✅ Update game status to waiting
+    db.ref("games/" + gameCode).update({ status: "waiting" });
+
+    // ✅ Remove all players from the game
+    db.ref("games/" + gameCode + "/players").once("value", snapshot => {
+        var players = snapshot.val();
+        if (players) {
+            Object.keys(players).forEach(player => {
+                db.ref("games/" + gameCode + "/players/" + player).remove();
+            });
+        }
+    });
+
+    // ✅ Hide game screen and show waiting room
+    document.getElementById("gameScreen").classList.add("hidden");
+    document.getElementById("waitingRoom").classList.remove("hidden");
+
+    // ✅ Hide the button
+    document.getElementById("forceReturnToWaitingRoom").classList.add("hidden");
+}
 
 
         
