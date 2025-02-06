@@ -378,23 +378,36 @@ function displaythinkerOptions(gameData) {
 
         var selectablePlayers = Object.keys(gameData.players).filter(p => p !== thinker);
 
-        // Create TWO buttons per player for testing:
-        //  1) "Pick"
-        //  2) "Collect Skin" (just a placeholder for now)
-        var buttonsHTML = selectablePlayers.map(player => `
-            <button onclick="thinkerSelectPlayer('${player}')">Pick: ${player}</button>
-            <button onclick="console.log('Collect Skin clicked for ${player}')">
-                Collect Skin: ${player}
-            </button>
-        `).join(" ");
+        // Row 1: "Pick: [player1] [player2] ..."
+        const pickButtons = selectablePlayers.map(player => {
+            return `<button onclick="thinkerSelectPlayer('${player}')">
+                        ${player}
+                    </button>`;
+        }).join(" ");
 
-        document.getElementById("thinkerOptions").innerHTML = buttonsHTML;
+        // Row 2: "Collect Skin: [player1] [player2] ..."
+        const collectSkinButtons = selectablePlayers.map(player => {
+            return `<button onclick="thinkerCollectSkin('${player}')">
+                        ${player}
+                    </button>`;
+        }).join(" ");
+
+        // Add them to thinkerOptions in two distinct lines/rows
+        document.getElementById("thinkerOptions").innerHTML = `
+            <div style="margin-bottom: 8px;">
+                <strong>Pick:</strong> ${pickButtons}
+            </div>
+            <div>
+                <strong>Collect Skin:</strong> ${collectSkinButtons}
+            </div>
+        `;
     } else {
-        // Hide everything if not the thinker
+        // Hide panel if not thinker
         document.getElementById("thinkerPanel").classList.add("hidden");
         document.getElementById("thinkerOptions").innerHTML = "";
     }
 }
+
 
 
 
