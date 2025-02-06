@@ -420,7 +420,6 @@ function displaythinkerOptions(gameData) {
 function thinkerSelectPlayer(selectedPlayer) {
     clearInterval(roundTimer);
 
-    // Grab the entire game data so we can read roles, scores, and collectSkins
     db.ref("games/" + gameCode).once("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
@@ -429,12 +428,12 @@ function thinkerSelectPlayer(selectedPlayer) {
         var roles = gameData.roles || {};
         var thinker = Object.keys(roles).find(p => roles[p] === "thinker");
         var realUpper = Object.keys(roles).find(p => roles[p] === "REALUPPER");
+        var collectSkins = gameData.collectSkins || [];
 
-        // 1) Apply all "Collect Skin" attempts first
-        var collectSkins = gameData.collectSkins || []; // array of player names
+        // 1) Apply any collected-skin logic
         collectSkins.forEach(target => {
             if (target === realUpper) {
-                // If the thinker tried to collect skin from the REALUPPER
+                // If the thinker tried to collect from the REALUPPER
                 scores[thinker] = (scores[thinker] || 0) - 1;
             } else {
                 // Otherwise, target is presumably a 9UPPER
@@ -443,28 +442,31 @@ function thinkerSelectPlayer(selectedPlayer) {
             }
         });
 
-        // 2) Now apply the final "pick the correct player" logic
+        // 2) Apply the final pick logic
+        let message = "";
         if (selectedPlayer === realUpper) {
-            // Thinker and REALUPPER both get +1
             scores[thinker]   = (scores[thinker]   || 0) + 1;
             scores[realUpper] = (scores[realUpper] || 0) + 1;
+            message = `Thinker picked ${realUpper}, which is correct! (Thinker & REALUPPER both +1)`;
         } else {
-            // If they picked a 9UPPER, that 9UPPER gets +1
             scores[selectedPlayer] = (scores[selectedPlayer] || 0) + 1;
+            message = `Thinker guessed wrong! REALUPPER was "${realUpper}".`;
         }
 
-        // 3) Write the final scores & set the winner
+        // 3) Push the final pick message to chat so everyone sees it
+        db.ref("games/" + gameCode + "/chat").push(message);
+
+        // 4) Update DB: new scores, set winner, clear collectSkins, end the round
         db.ref("games/" + gameCode).update({
             scores: scores,
             winner: selectedPlayer,
             timeLeft: 0,
-            collectSkins: [] // Clear out collectSkins so it doesn’t carry over
+            collectSkins: [] // Clear for next round
         }).then(() => {
-            // Refresh scoreboard
             updateScoreboard(scores);
         });
 
-        // 4) Proceed to next round or end game
+        // 5) Either move to next round or end game
         db.ref("games/" + gameCode + "/currentRound").once("value", roundSnapshot => {
             var round = roundSnapshot.val();
             db.ref("games/" + gameCode + "/totalRounds").once("value", totalSnapshot => {
@@ -483,6 +485,7 @@ function thinkerSelectPlayer(selectedPlayer) {
         });
     });
 }
+
 
 
 
@@ -639,19 +642,48 @@ function startRoundTimer(roundTime, round, totalRounds) {
 
 
 function endRound(round, totalRounds) {
-    clearInterval(roundTimer); // ✅ Stop any running timer
+    clearInterval(roundTimer);
 
     db.ref("games/" + gameCode).once("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
 
-        var roundTime = gameData.roundTime; // ✅ Fetch roundTime before calling startNewRound()
+        var roundTime = gameData.roundTime;
+        var roles = gameData.roles || {};
+        var winner = gameData.winner || null;  // Might be null if no final pick
+        var collectSkins = gameData.collectSkins || [];
+        var scores = gameData.scores || {};
+        var thinker = Object.keys(roles).find(p => roles[p] === "thinker");
+        var realUpper = Object.keys(roles).find(p => roles[p] === "REALUPPER");
 
+        // 1) If the thinker did NOT pick anyone, apply partial collect-skin logic
+        if (!winner && thinker && realUpper) {
+            collectSkins.forEach(target => {
+                if (target === realUpper) {
+                    scores[thinker] = (scores[thinker] || 0) - 1;
+                } else {
+                    scores[thinker] = (scores[thinker] || 0) + 1;
+                    scores[target]   = (scores[target]   || 0) - 1;
+                }
+            });
+
+            // Push a chat message revealing the realUpper
+            db.ref("games/" + gameCode + "/chat").push(
+                `Time's up! Thinker did not pick anyone. REALUPPER was "${realUpper}".`
+            );
+
+            // Overwrite the updated scores + clear collectSkins
+            db.ref("games/" + gameCode).update({
+                scores: scores,
+                collectSkins: []
+            }).then(() => {
+                updateScoreboard(scores);
+            });
+        }
+
+        // 2) Move to next round or finish
         if (round >= totalRounds) {
             db.ref("games/" + gameCode).update({ status: "finished" });
-
-            // ✅ Ensure all players receive the endgame screen
-            // showEndgameScreen(gameData.scores);
         } else {
             fetch("9upper_terms.json")
                 .then(response => response.json())
@@ -669,6 +701,7 @@ function endRound(round, totalRounds) {
         }
     });
 }
+
 
 
 
@@ -838,24 +871,24 @@ function forceReturnToWaitingRoom() {
 }
 
 
-        function thinkerCollectSkin(selectedPlayer) {
-    // 1) Fetch the current collectSkins array from the DB
+function thinkerCollectSkin(selectedPlayer) {
+    // 1) Push a message to chat so everyone sees what's happening
+    db.ref("games/" + gameCode + "/chat").push(
+        `Thinker is collecting skin from "${selectedPlayer}" ...`
+    );
+
+    // 2) Record the selectedPlayer in collectSkins, so we apply points at round end or final pick
     db.ref("games/" + gameCode + "/collectSkins").once("value", snapshot => {
         let collectSkins = snapshot.val() || [];
-        // Make sure it's an array (if for some reason it’s stored differently)
-        if (!Array.isArray(collectSkins)) {
-            collectSkins = [];
-        }
-
-        // 2) Add the new attempt
+        if (!Array.isArray(collectSkins)) collectSkins = [];
         collectSkins.push(selectedPlayer);
 
-        // 3) Put the updated array back to Firebase
         db.ref("games/" + gameCode).update({
             collectSkins: collectSkins
         });
     });
 }
+
 
 
     </script>
