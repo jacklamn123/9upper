@@ -420,6 +420,7 @@ function displaythinkerOptions(gameData) {
 function thinkerSelectPlayer(selectedPlayer) {
     clearInterval(roundTimer);
 
+    // Grab the entire game data so we can read roles, scores, and collectSkins
     db.ref("games/" + gameCode).once("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
@@ -429,23 +430,43 @@ function thinkerSelectPlayer(selectedPlayer) {
         var thinker = Object.keys(roles).find(p => roles[p] === "thinker");
         var realUpper = Object.keys(roles).find(p => roles[p] === "REALUPPER");
 
+        // 1) Apply all "Collect Skin" attempts first
+        var collectSkins = gameData.collectSkins || []; // array of player names
+        collectSkins.forEach(target => {
+            if (target === realUpper) {
+                // If the thinker tried to collect skin from the REALUPPER
+                scores[thinker] = (scores[thinker] || 0) - 1;
+            } else {
+                // Otherwise, target is presumably a 9UPPER
+                scores[thinker] = (scores[thinker] || 0) + 1;
+                scores[target]   = (scores[target]   || 0) - 1;
+            }
+        });
+
+        // 2) Now apply the final "pick the correct player" logic
         if (selectedPlayer === realUpper) {
-            scores[thinker] = (scores[thinker] || 0) + 1;
+            // Thinker and REALUPPER both get +1
+            scores[thinker]   = (scores[thinker]   || 0) + 1;
             scores[realUpper] = (scores[realUpper] || 0) + 1;
         } else {
+            // If they picked a 9UPPER, that 9UPPER gets +1
             scores[selectedPlayer] = (scores[selectedPlayer] || 0) + 1;
         }
 
+        // 3) Write the final scores & set the winner
         db.ref("games/" + gameCode).update({
             scores: scores,
             winner: selectedPlayer,
-            timeLeft: 0
+            timeLeft: 0,
+            collectSkins: [] // Clear out collectSkins so it doesn’t carry over
         }).then(() => {
+            // Refresh scoreboard
             updateScoreboard(scores);
         });
 
-        db.ref("games/" + gameCode + "/currentRound").once("value", snapshot => {
-            var round = snapshot.val();
+        // 4) Proceed to next round or end game
+        db.ref("games/" + gameCode + "/currentRound").once("value", roundSnapshot => {
+            var round = roundSnapshot.val();
             db.ref("games/" + gameCode + "/totalRounds").once("value", totalSnapshot => {
                 var totalRounds = totalSnapshot.val();
 
@@ -462,6 +483,7 @@ function thinkerSelectPlayer(selectedPlayer) {
         });
     });
 }
+
 
 
 
@@ -816,7 +838,26 @@ function forceReturnToWaitingRoom() {
 }
 
 
-        
+        function thinkerCollectSkin(selectedPlayer) {
+    // 1) Fetch the current collectSkins array from the DB
+    db.ref("games/" + gameCode + "/collectSkins").once("value", snapshot => {
+        let collectSkins = snapshot.val() || [];
+        // Make sure it's an array (if for some reason it’s stored differently)
+        if (!Array.isArray(collectSkins)) {
+            collectSkins = [];
+        }
+
+        // 2) Add the new attempt
+        collectSkins.push(selectedPlayer);
+
+        // 3) Put the updated array back to Firebase
+        db.ref("games/" + gameCode).update({
+            collectSkins: collectSkins
+        });
+    });
+}
+
+
     </script>
 </head>
 <body>
