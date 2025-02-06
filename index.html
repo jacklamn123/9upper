@@ -642,53 +642,78 @@ function startRoundTimer(roundTime, round, totalRounds) {
 
 
 function endRound(round, totalRounds) {
-    clearInterval(roundTimer);
+    clearInterval(roundTimer); // Stop any running timer
 
     db.ref("games/" + gameCode).once("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
 
+        // 1) Copy the old round data so we can apply partial scoring correctly
+        var oldRoles = { ...gameData.roles };
+        var oldCollectSkins = Array.isArray(gameData.collectSkins) ? [...gameData.collectSkins] : [];
+        var oldScores = { ...gameData.scores };
+        var winner = gameData.winner || null; 
         var roundTime = gameData.roundTime;
-        var roles = gameData.roles || {};
-        var winner = gameData.winner || null;  // Might be null if no final pick
-        var collectSkins = gameData.collectSkins || [];
-        var scores = gameData.scores || {};
-        var thinker = Object.keys(roles).find(p => roles[p] === "thinker");
-        var realUpper = Object.keys(roles).find(p => roles[p] === "REALUPPER");
 
-        // 1) If the thinker did NOT pick anyone, apply partial collect-skin logic
-        if (!winner && thinker && realUpper) {
-            collectSkins.forEach(target => {
+        // Identify the roles in the old data (not the new round!)
+        var thinker = Object.keys(oldRoles).find(p => oldRoles[p] === "thinker");
+        var realUpper = Object.keys(oldRoles).find(p => oldRoles[p] === "REALUPPER");
+
+        // 2) If the thinker never picked (time ran out), apply partial scoring from collectSkin
+        if (!winner && thinker && realUpper && oldCollectSkins.length > 0) {
+            // We'll build up a small summary to push to chat
+            let collectSkinMessages = [];
+
+            oldCollectSkins.forEach(target => {
                 if (target === realUpper) {
-                    scores[thinker] = (scores[thinker] || 0) - 1;
+                    // The thinker tried to collect from REALUPPER
+                    oldScores[thinker] = (oldScores[thinker] || 0) - 1;
+                    collectSkinMessages.push(
+                        `Thinker tried to collect from REALUPPER (${target}) ⇒ Thinker -1`
+                    );
                 } else {
-                    scores[thinker] = (scores[thinker] || 0) + 1;
-                    scores[target]   = (scores[target]   || 0) - 1;
+                    // The target is presumably a 9UPPER
+                    oldScores[thinker] = (oldScores[thinker] || 0) + 1;
+                    oldScores[target] = (oldScores[target] || 0) - 1;
+                    collectSkinMessages.push(
+                        `Thinker collected skin from 9UPPER (${target}) ⇒ Thinker +1, ${target} -1`
+                    );
                 }
             });
 
-            // Push a chat message revealing the realUpper
-            db.ref("games/" + gameCode + "/chat").push(
+            // Push the detailed breakdown to chat
+            collectSkinMessages.forEach(msg => {
+                db.ref(`games/${gameCode}/chat`).push(msg);
+            });
+
+            // Finally, push a "time's up" reveal message
+            db.ref(`games/${gameCode}/chat`).push(
                 `Time's up! Thinker did not pick anyone. REALUPPER was "${realUpper}".`
             );
 
-            // Overwrite the updated scores + clear collectSkins
-            db.ref("games/" + gameCode).update({
-                scores: scores,
+            // Apply updated scores & clear collectSkins
+            db.ref(`games/${gameCode}`).update({
+                scores: oldScores,
                 collectSkins: []
-            }).then(() => {
-                updateScoreboard(scores);
             });
+        } 
+        else if (!winner && thinker && realUpper) {
+            // If there's no winner but also no collectSkins, just reveal the REALUPPER
+            db.ref(`games/${gameCode}/chat`).push(
+                `Time's up! No pick made. REALUPPER was "${realUpper}".`
+            );
         }
 
-        // 2) Move to next round or finish
+        // 3) Move to next round or finish
         if (round >= totalRounds) {
-            db.ref("games/" + gameCode).update({ status: "finished" });
+            // Mark the game as finished
+            db.ref(`games/${gameCode}`).update({ status: "finished" });
         } else {
             fetch("9upper_terms.json")
                 .then(response => response.json())
                 .then(terms => {
-                    db.ref("games/" + gameCode).update({
+                    // IMPORTANT: only now do we reset roles/winner for the new round
+                    db.ref(`games/${gameCode}`).update({
                         term: "",
                         correctDefinition: "",
                         roles: {},
@@ -701,6 +726,7 @@ function endRound(round, totalRounds) {
         }
     });
 }
+
 
 
 
