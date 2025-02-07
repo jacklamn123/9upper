@@ -167,38 +167,66 @@ function createGame() {
         }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Keep track of which round we’ve already started a timer for
 let lastKnownRound = 0;
-
+        
 function listenForUpdates() {
-    db.ref("games/" + gameCode).on("value", (snapshot) => {
-        const gameData = snapshot.val();
+    db.ref("games/" + gameCode).on("value", snapshot => {
+        var gameData = snapshot.val();
         if (!gameData) return;
 
-        // 1) Update waiting-room UI, scoreboard, chat, etc. (unchanged)
+        // ✅ Update player list in the waiting room
         if (gameData.players) {
-            // ...
+            var playerList = Object.keys(gameData.players)
+                .map(name => `<li>${name}</li>`).join("");
+            document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
+
+            document.getElementById("roundsValue").innerText = gameData.totalRounds;
+            document.getElementById("timeValue").innerText = gameData.roundTime;
+
+            if (gameData.host === playerName) {
+                document.getElementById("gameSettings").classList.remove("hidden");
+                document.getElementById("startGameButton").classList.remove("hidden");
+            }
         }
+
+        // ✅ Auto-update scoreboard when scores change
         if (gameData.scores) {
             updateScoreboard(gameData.scores);
         }
+
+        // ✅ Chatbox Auto-Scrolling
         if (gameData.chat) {
-            // ...
+            const chatBox = document.querySelector(".chatbox");
+
+            // Clear existing messages
+            chatBox.innerHTML = "";
+
+            // Add all messages
+            Object.values(gameData.chat).forEach(msg => {
+                chatBox.innerHTML += `<p>${msg}</p>`;
+            });
+
+            // ✅ Ensure chatbox is visible
+            chatBox.style.display = "block";
+
+            // ✅ Force scroll to the bottom
+            setTimeout(() => {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 100);
         }
 
-        // 2) Handle game states
-        if (gameData.status === "playing") {
-            document.getElementById("waitingRoom").classList.add("hidden");
-            document.getElementById("gameScreen").classList.remove("hidden");
+        // ✅ Handle game state: Playing
+if (gameData.status === "playing") {
+    document.getElementById("waitingRoom").classList.add("hidden");
+    document.getElementById("gameScreen").classList.remove("hidden");
 
-            document.getElementById("gameTerm").innerText = gameData.term;
-            document.getElementById("playerRole").innerText = gameData.roles[playerName];
+    document.getElementById("gameTerm").innerText = gameData.term;
+    document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
-            document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
-            document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
+    document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
+    document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
-            // ✅ Compare rounds to decide if we need to start/restart countdown
+   // ✅ Compare rounds to decide if we need to start/restart countdown
             if (gameData.currentRound !== lastKnownRound) {
                 // It's a NEW round; start a new countdown
                 lastKnownRound = gameData.currentRound; 
@@ -210,80 +238,86 @@ function listenForUpdates() {
                 );
             }
 
-            // Always update the local display of timeLeft, even if we don’t restart countdown
-            document.getElementById("timeLeftDisplay").innerText = `${gameData.timeLeft} seconds`;
+    // ✅ Update time left
+    document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
 
-            // Hide thinker panel unless needed
-            document.getElementById("thinkerPanel").classList.add("hidden");
+    // ✅ Hide thinker panel unless needed
+    document.getElementById("thinkerPanel").classList.add("hidden");
 
-            // Show definition only for REALUPPER
-            const definitionBox = document.getElementById("correctDefinitionBox");
-            const definitionText = document.getElementById("correctDefinition");
-            if (definitionBox && definitionText) {
-                if (gameData.roles[playerName] === "REALUPPER") {
-                    definitionText.innerText = gameData.correctDefinition;
-                    definitionBox.classList.remove("hidden");
-                } else {
-                    definitionBox.classList.add("hidden");
-                    definitionText.innerText = "";
-                }
-            }
+    // ✅ Show definition only for REALUPPER
+    const definitionBox = document.getElementById("correctDefinitionBox");
+    const definitionText = document.getElementById("correctDefinition");
 
-            // Ensure 9UPPER players don’t see the definition
-            const definitionInputBox = document.getElementById("definitionInputBox");
-            if (definitionInputBox) {
-                if (gameData.roles[playerName] === "9UPPER") {
-                    definitionInputBox.classList.remove("hidden");
-                } else {
-                    definitionInputBox.classList.add("hidden");
-                }
-            }
-
-            displaythinkerOptions(gameData);
-
-            // Show "Return to Waiting Room" only for the host
-            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
-            if (returnToWaitingRoomBtn) {
-                if (gameData.host === playerName) {
-                    returnToWaitingRoomBtn.classList.remove("hidden");
-                } else {
-                    returnToWaitingRoomBtn.classList.add("hidden");
-                }
-            }
-
-        } else if (gameData.status === "waiting") {
-            // Hide the game screen, show waiting room
-            document.getElementById("gameScreen").classList.add("hidden");
-            document.getElementById("waitingRoom").classList.remove("hidden");
-
-            // Hide the "Return to Waiting Room" button
-            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
-            if (returnToWaitingRoomBtn) {
-                returnToWaitingRoomBtn.classList.add("hidden");
-            }
-
+    if (definitionBox && definitionText) {
+        if (gameData.roles[playerName] === "REALUPPER") {
+            definitionText.innerText = gameData.correctDefinition;
+            definitionBox.classList.remove("hidden");
         } else {
-            // For any other status (like finished, post-finished, etc.)
-            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
-            if (returnToWaitingRoomBtn) {
-                returnToWaitingRoomBtn.classList.add("hidden");
-            }
+            definitionBox.classList.add("hidden");
+            definitionText.innerText = "";  // ✅ Clear previous round’s definition
         }
+    }
 
-        // Always show "Return to Main Menu" button (for all players)
+    // ✅ Ensure 9UPPER players don’t see the definition
+    const definitionInputBox = document.getElementById("definitionInputBox");
+    if (definitionInputBox) {
+        if (gameData.roles[playerName] === "9UPPER") {
+            definitionInputBox.classList.remove("hidden");
+        } else {
+            definitionInputBox.classList.add("hidden");
+        }
+    }
+
+    displaythinkerOptions(gameData);
+
+    // ✅ Show "Return to Waiting Room" only for the host
+    const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
+    if (returnToWaitingRoomBtn) {
+        if (gameData.host === playerName) {
+            returnToWaitingRoomBtn.classList.remove("hidden");
+        } else {
+            returnToWaitingRoomBtn.classList.add("hidden");
+        }
+    }
+
+}
+// ✅ Add this new block for status === "waiting"
+else if (gameData.status === "waiting") {
+    // Hide the game screen, show the waiting room
+    document.getElementById("gameScreen").classList.add("hidden");
+    document.getElementById("waitingRoom").classList.remove("hidden");
+
+    // Hide the "Return to Waiting Room" button for everyone
+    const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
+    if (returnToWaitingRoomBtn) {
+        returnToWaitingRoomBtn.classList.add("hidden");
+    }
+}
+// Anything else (not playing, not waiting)
+else {
+    // If game is NOT playing or waiting, ensure "Return to Waiting Room" is hidden
+    const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
+    if (returnToWaitingRoomBtn) {
+        returnToWaitingRoomBtn.classList.add("hidden");
+    }
+}
+
+
+        // ✅ Always show "Return to Main Menu" button (for all players)
         const returnToMainMenuBtn = document.getElementById("returnToMainMenu");
         if (returnToMainMenuBtn) {
             returnToMainMenuBtn.classList.remove("hidden");
         }
 
-        // Handle game end
-        if (gameData.status === "finished") {
-            db.ref(`games/${gameCode}`).update({ status: "post-finished" });
-            showEndgameScreen(gameData.scores);
-        }
-    });
+        // ✅ Handle game end
+       if (gameData.status === "finished") {
+    // ✅ Immediately set status to something else (like "post-finished")
+    db.ref("games/" + gameCode).update({ status: "post-finished" });
+    showEndgameScreen(gameData.scores);
 }
 
+    });
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
