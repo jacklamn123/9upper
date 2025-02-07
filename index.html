@@ -923,6 +923,9 @@ function showEndgameScreen(scores) {
 
     document.body.appendChild(endGameModal);
 
+     // Clear the host so it doesn't point to a non-existent player
+  db.ref(`games/${gameCode}`).update({ host: null });
+    
     // Remove players from the waiting room when the game ends
     db.ref("games/" + gameCode + "/players").once("value", snapshot => {
         var players = snapshot.val();
