@@ -911,7 +911,16 @@ function showEndgameScreen(scores) {
         console.log("Endgame screen already shown. Not firing again.");
         return;
     }
-
+  // ✅ Hide Game Settings & Start Game button for everyone
+    const gameSettingsDiv = document.getElementById("gameSettings");
+    const startGameBtn = document.getElementById("startGameButton");
+    if (gameSettingsDiv) {
+        gameSettingsDiv.classList.add("hidden");
+    }
+    if (startGameBtn) {
+        startGameBtn.classList.add("hidden");
+    }
+    
     var endGameModal = document.createElement("div");
     endGameModal.id = "endGameModal";
     endGameModal.style.position = "fixed";
