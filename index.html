@@ -225,10 +225,14 @@ if (gameData.status === "playing") {
     document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
     document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
-    // ✅ Host starts the countdown timer
-    if (gameData.host === playerName) {
-        startCountdown(gameData.timeLeft, gameData.currentRound, gameData.totalRounds, gameData.roundTime);
-    }
+  // ❌ REMOVE this "if host === playerName" check
+    // ✅ Now *everyone* starts the countdown
+    startCountdown(
+        gameData.timeLeft,
+        gameData.currentRound,
+        gameData.totalRounds,
+        gameData.roundTime
+    );
 
     // ✅ Update time left
     document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
