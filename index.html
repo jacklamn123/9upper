@@ -176,9 +176,29 @@ function listenForUpdates() {
 
         // 1) Reassign host if the current one is missing
         checkAndReassignHost(gameData);
+
+console.log("DEBUG: Current host is:", gameData.host);
         
         // ✅ Update player list in the waiting room
         if (gameData.players) {
+
+
+ Object.keys(gameData.players).forEach((player) => {
+                // Is this player the current host?
+                const isHost = (player === gameData.host);
+
+                // If your roles are stored in gameData.roles[player], fetch them safely:
+                let role = "unknown";
+                if (gameData.roles && gameData.roles[player]) {
+                    role = gameData.roles[player];
+                }
+
+                console.log(
+                    `DEBUG: Player "${player}", role: "${role}", isHost: ${isHost}`
+                );
+            });
+
+            
             var playerList = Object.keys(gameData.players)
                 .map(name => `<li>${name}</li>`).join("");
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
