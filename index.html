@@ -174,6 +174,9 @@ function listenForUpdates() {
         var gameData = snapshot.val();
         if (!gameData) return;
 
+        // 1) Reassign host if the current one is missing
+        checkAndReassignHost(gameData);
+        
         // ✅ Update player list in the waiting room
         if (gameData.players) {
             var playerList = Object.keys(gameData.players)
@@ -226,18 +229,19 @@ if (gameData.status === "playing") {
     document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
     document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
-   // ✅ Compare rounds to decide if we need to start/restart countdown
-            if (gameData.currentRound !== lastKnownRound) {
-                // It's a NEW round; start a new countdown
-                lastKnownRound = gameData.currentRound; 
-                startCountdown(
-                    gameData.timeLeft,
-                    gameData.currentRound,
-                    gameData.totalRounds,
-                    gameData.roundTime
-                );
-            }
-
+  // Compare rounds to see if we've started a *new* round
+  if (gameData.currentRound !== lastKnownRound) {
+    lastKnownRound = gameData.currentRound;
+    // ✅ Only the host does startCountdown
+    if (gameData.host === playerName) {
+      startCountdown(
+        gameData.timeLeft,
+        gameData.currentRound,
+        gameData.totalRounds,
+        gameData.roundTime
+      );
+    }
+  }
     // ✅ Update time left
     document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
 
@@ -1004,6 +1008,31 @@ function thinkerCollectSkin(selectedPlayer) {
             collectSkins: collectSkins
         });
     });
+}
+
+    function checkAndReassignHost(gameData) {
+    // 1) If there are no players, do nothing
+    if (!gameData.players) return;
+    const allPlayers = Object.keys(gameData.players);
+    if (allPlayers.length === 0) return;
+
+    // 2) If the current host is still in the players list, do nothing
+    if (allPlayers.includes(gameData.host)) {
+        // The old host rejoined or never left; keep them
+        return;
+    }
+
+    // 3) Otherwise, the old host is gone. Pick a new host (e.g., first alphabetical).
+    allPlayers.sort();
+    const newHost = allPlayers[0];
+
+    // 4) Update the 'host' field in the DB
+    db.ref(`games/${gameCode}`).update({ host: newHost });
+
+    // 5) (Optional) Announce in chat
+    db.ref(`games/${gameCode}/chat`).push(
+        `The old host "${gameData.host}" is gone. "${newHost}" is now the new host.`
+    );
 }
 
 
