@@ -367,6 +367,14 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
                     const thinker = Object.keys(roles).find(p => roles[p] === "thinker");
                     const realUpper = Object.keys(roles).find(p => roles[p] === "REALUPPER");
 
+                    console.log("DEBUG partial scoring:", {
+  winner, 
+  thinker,
+  realUpper,
+  collectSkins
+});
+
+
                     // 3) If there's no winner yet, apply partial scoring for Collect Skin
                     if (!winner && thinker && realUpper && collectSkins.length > 0) {
                         const collectSkinMessages = [];
