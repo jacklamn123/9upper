@@ -332,6 +332,7 @@ else {
 
 
 function startCountdown(timeLeft, round, totalRounds, roundTime) {
+    // Safeguard against invalid timeLeft
     if (isNaN(timeLeft) || timeLeft === undefined) {
         console.error("Error: timeLeft is NaN or undefined, resetting to 60");
         timeLeft = 60;
@@ -339,39 +340,42 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
 
     clearInterval(roundTimer);
 
+    // Start a new interval timer for this round
     roundTimer = setInterval(() => {
         if (timeLeft <= 0) {
+            // Time’s up—stop the timer
             clearInterval(roundTimer);
 
-            // 1) Set timeLeft = 0 in DB
-            db.ref("games/" + gameCode).update({ timeLeft: 0 })
-            .then(() => {
-                // 2) Now fetch the game data to see if the thinker picked a winner
-                db.ref("games/" + gameCode).once("value", snapshot => {
-                    var gameData = snapshot.val();
+            // 1) Set timeLeft = 0 in the database
+            db.ref(`games/${gameCode}`).update({ timeLeft: 0 }).then(() => {
+                // 2) Fetch the latest game data to see if the thinker picked a winner
+                db.ref(`games/${gameCode}`).once("value", snapshot => {
+                    const gameData = snapshot.val();
                     if (!gameData) return;
 
-                    var winner = gameData.winner || null;
-                    var roles = gameData.roles || {};
-                    var collectSkins = Array.isArray(gameData.collectSkins) ? gameData.collectSkins : [];
-                    var scores = gameData.scores || {};
+                    const winner = gameData.winner || null;
+                    const roles = gameData.roles || {};
+                    const collectSkins = Array.isArray(gameData.collectSkins) 
+                        ? gameData.collectSkins 
+                        : [];
+                    const scores = gameData.scores || {};
 
-                    var thinker = Object.keys(roles).find(p => roles[p] === "thinker");
-                    var realUpper = Object.keys(roles).find(p => roles[p] === "REALUPPER");
+                    const thinker = Object.keys(roles).find(p => roles[p] === "thinker");
+                    const realUpper = Object.keys(roles).find(p => roles[p] === "REALUPPER");
 
-                    // 3) If there's no winner yet, apply partial scoring from collectSkins
+                    // 3) If there's no winner yet, apply partial scoring for Collect Skin
                     if (!winner && thinker && realUpper && collectSkins.length > 0) {
-                        let collectSkinMessages = [];
+                        const collectSkinMessages = [];
 
                         collectSkins.forEach(target => {
                             if (target === realUpper) {
-                                // The thinker tried to collect from REALUPPER
+                                // The thinker collected from REALUPPER by mistake
                                 scores[thinker] = (scores[thinker] || 0) - 1;
                                 collectSkinMessages.push(
                                     `Thinker tried to collect from REALUPPER (${target}) ⇒ Thinker -1`
                                 );
                             } else {
-                                // The target is presumably a 9UPPER
+                                // Target is presumably a 9UPPER
                                 scores[thinker] = (scores[thinker] || 0) + 1;
                                 scores[target] = (scores[target] || 0) - 1;
                                 collectSkinMessages.push(
@@ -380,41 +384,46 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
                             }
                         });
 
-                        // Push messages to chat
+                        // Push all the Collect Skin results to the chat
                         collectSkinMessages.forEach(msg => {
                             db.ref(`games/${gameCode}/chat`).push(msg);
                         });
 
-                        // Final "time's up" reveal
+                        // Final “time’s up” reveal
                         db.ref(`games/${gameCode}/chat`).push(
                             `Time's up! Thinker did not pick anyone. REALUPPER was "${realUpper}".`
                         );
 
-                        // Update DB with partial scoring
+                        // Update the DB with partial scoring and reset collectSkins
                         db.ref(`games/${gameCode}`).update({
                             scores: scores,
                             collectSkins: []
                         }).then(() => {
-                            // Local UI scoreboard refresh
+                            // Update local scoreboard
                             updateScoreboard(scores);
                         });
-                    }
+                    } 
                     else if (!winner && thinker && realUpper) {
-                        // No collectSkin attempts, but also no winner
+                        // No Collect Skin attempts, but no winner picked either
                         db.ref(`games/${gameCode}/chat`).push(
                             `Time's up! No pick made. REALUPPER was "${realUpper}".`
                         );
                     }
 
-                    // 4) Move to next round OR end game if final round
+                    // 4) Move to next round or end the game if it's the final round
                     if (round >= totalRounds) {
                         endRound(round, totalRounds);
                     } else {
-                        var nextRound = (gameData.currentRound || 0) + 1;
+                        const nextRound = (gameData.currentRound || 0) + 1;
                         fetch("9upper_terms.json")
                             .then(response => response.json())
                             .then(terms => {
-                                startNewRound(terms, nextRound, totalRounds, roundTime);
+                                startNewRound(
+                                    terms, 
+                                    nextRound, 
+                                    totalRounds, 
+                                    roundTime
+                                );
                             });
                     }
                 });
@@ -423,12 +432,14 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
         } else {
             // Decrement time and update DB
             timeLeft--;
-            db.ref("games/" + gameCode).update({ timeLeft: timeLeft });
+            db.ref(`games/${gameCode}`).update({ timeLeft });
 
-            document.getElementById("timeLeftDisplay").innerText = timeLeft + " seconds";
+            // Show updated time in the UI
+            document.getElementById("timeLeftDisplay").innerText = `${timeLeft} seconds`;
         }
     }, 1000);
 }
+
 
 
 
