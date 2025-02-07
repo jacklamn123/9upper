@@ -1010,30 +1010,36 @@ function thinkerCollectSkin(selectedPlayer) {
     });
 }
 
-    function checkAndReassignHost(gameData) {
-    // 1) If there are no players, do nothing
+   function checkAndReassignHost(gameData) {
+    // If there's no players object, can't do anything
     if (!gameData.players) return;
-    const allPlayers = Object.keys(gameData.players);
-    if (allPlayers.length === 0) return;
 
-    // 2) If the current host is still in the players list, do nothing
-    if (allPlayers.includes(gameData.host)) {
-        // The old host rejoined or never left; keep them
-        return;
+    // Get all current player names
+    const allPlayers = Object.keys(gameData.players); 
+    if (allPlayers.length === 0) {
+        return; // If no players at all, nothing to do
     }
 
-    // 3) Otherwise, the old host is gone. Pick a new host (e.g., first alphabetical).
-    allPlayers.sort();
+    // If the current host is actually in the players list, do nothing
+    if (allPlayers.includes(gameData.host)) {
+        return; 
+    }
+
+    // Otherwise, the old host is gone or invalid. Pick a new host:
+    allPlayers.sort();         // e.g. first alphabetical
     const newHost = allPlayers[0];
 
-    // 4) Update the 'host' field in the DB
-    db.ref(`games/${gameCode}`).update({ host: newHost });
+    // Update the 'host' in DB so there's exactly one
+    db.ref(`games/${gameCode}`).update({ 
+        host: newHost 
+    });
 
-    // 5) (Optional) Announce in chat
+    // (Optional) Announce in chat
     db.ref(`games/${gameCode}/chat`).push(
-        `The old host "${gameData.host}" is gone. "${newHost}" is now the new host.`
+        `The old host was missing, so "${newHost}" is now the new host.`
     );
 }
+
 
 
 
