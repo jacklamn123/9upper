@@ -742,10 +742,10 @@ function startRoundTimer(roundTime, round, totalRounds) {
                     var timeLeft = gameData.timeLeft || 0;
 
                     if (timeLeft <= 0) {  
-                        clearInterval(roundTimer);
-                        if (!gameData.winner) {  
-                            db.ref("games/" + gameCode).update({ winner: "timeout" }); // ✅ Mark timeout
-                        }
+                        // clearInterval(roundTimer);
+                        // if (!gameData.winner) {  
+                        //     db.ref("games/" + gameCode).update({ winner: "timeout" }); // ✅ Mark timeout
+                        // }
                         endRound(round, totalRounds); // ✅ Start next round
                     } else {
                         db.ref("games/" + gameCode).update({ timeLeft: timeLeft - 1 });
