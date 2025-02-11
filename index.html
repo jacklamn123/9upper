@@ -670,10 +670,10 @@ function startGame() {
                         scores: initialScores // ✅ Store initial scores in Firebase
                     });
 
-                    // ✅ Send a chat message announcing the thinker
-                    db.ref("games/" + gameCode + "/chat").push(
-                        `Round 1, player ${thinker} is the thinker.`
-                    );
+                    // // ✅ Send a chat message announcing the thinker
+                    // db.ref("games/" + gameCode + "/chat").push(
+                    //     `Round 1, player ${thinker} is the thinker.`
+                    // );
                     
                     startNewRound(terms, 1, totalRounds, roundTime);
                 });
