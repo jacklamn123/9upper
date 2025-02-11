@@ -667,7 +667,7 @@ function startGame() {
     });
 }
 
-          var roundTimer;
+        var roundTimer;
 
 function startNewRound(terms, round, totalRounds, roundTime) {
     // ✅ Ensure roundTime is always valid
@@ -703,7 +703,9 @@ function startNewRound(terms, round, totalRounds, roundTime) {
             term: randomTerm,
             correctDefinition: "",  // ✅ Reset before assigning a new value
             roles: roles,
-            timeLeft: roundTime  // ✅ Ensure it's always a number
+            timeLeft: roundTime,  // ✅ Ensure it's always a number
+            winner: null, // ✅ Reset winner for new round
+            collectSkins: [] // ✅ Always reset collectSkins at the start of a round
         }).then(() => {
             db.ref("games/" + gameCode).update({
                 correctDefinition: correctDefinition // ✅ Now set the correct definition for the new REALUPPER
