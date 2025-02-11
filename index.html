@@ -36,15 +36,22 @@
     overflow-y: auto; /* ✅ Allows scrolling */
 }
         /* ✅ Scoreboard Styling */
-/* ✅ Scoreboard Styling */
-#scoreboard {
+/* ✅ Scoreboard & Button Container */
+/* ✅ Scoreboard & Button Container */
+#scoreboardContainer {
     position: absolute;
     top: 10px;
     left: 10px;
+    width: 250px; /* Ensures the container is wide enough */
+    text-align: center;
+}
+
+/* ✅ Scoreboard Styling */
+#scoreboard {
     background-color: #ffffff;
     border: 2px solid black;
     padding: 10px;
-    width: 220px; /* ✅ Slightly wider for better alignment */
+    width: 100%; /* Use full width of container */
     font-size: 14px;
     text-align: center;
 }
@@ -52,42 +59,40 @@
 #scoreboard table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed; /* ✅ Ensure equal column width */
+    table-layout: fixed;
 }
 
 #scoreboard th, #scoreboard td {
     border: 1px solid black;
     padding: 5px;
     text-align: center;
-    width: 33.33%; /* ✅ Make sure all columns have the same width */
-    word-break: break-word; /* ✅ Prevent long names from breaking layout */
+    word-break: break-word; /* Prevents layout breaking */
 }
 
 #scoreboard th {
     background-color: #f2f2f2;
 }
-        /* ✅ Positioning Buttons Near the Scoreboard */
-#returnToMainMenu {
-    position: absolute;
-    top: 10px;
-    left: 250px; /* ✅ Adjusted next to the scoreboard */
-    background-color: red;
-    color: white;
+
+/* ✅ Positioning Buttons Below Scoreboard */
+#returnToMainMenu, #forceReturnToWaitingRoom {
+    width: 100%; /* Ensures buttons match scoreboard width */
+    display: block; /* Stacks buttons vertically */
+    margin-top: 5px;
     padding: 8px 15px;
     border: none;
     cursor: pointer;
 }
 
+#returnToMainMenu {
+    background-color: red;
+    color: white;
+}
+
 #forceReturnToWaitingRoom {
-    position: absolute;
-    top: 50px;
-    left: 250px;
     background-color: blue;
     color: white;
-    padding: 8px 15px;
-    border: none;
-    cursor: pointer;
 }
+
 
 
 
@@ -1134,21 +1139,30 @@ function thinkerCollectSkin(selectedPlayer) {
         </div>
 
 <!-- ✅ Scoreboard Display -->
-<div id="scoreboard">
-    <h3>Scoreboard</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Player</th>
-                <th>Score</th>
-            </tr>
-        </thead>
-        <tbody id="scoreboardBody">
-            <!-- Scores will be dynamically inserted here -->
-        </tbody>
-    </table>
+<!-- ✅ Scoreboard and Buttons Container -->
+<div id="scoreboardContainer">
+    <!-- ✅ Scoreboard Display -->
+    <div id="scoreboard">
+        <h3>Scoreboard</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody id="scoreboardBody">
+                <!-- Scores will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ✅ Buttons Below Scoreboard -->
+    <button id="returnToMainMenu" onclick="returnToMainMenu()">Return to Main Menu</button>
+    <button id="forceReturnToWaitingRoom" class="hidden" onclick="forceReturnToWaitingRoom()">Return to Waiting Room</button>
 </div>
+
 
         
         
@@ -1196,11 +1210,6 @@ function thinkerCollectSkin(selectedPlayer) {
     </table>
 </div>
 
-<!-- ✅ Return to Main Menu Button (Visible to Everyone) -->
-<button id="returnToMainMenu" onclick="returnToMainMenu()">Return to Main Menu</button>
-
-<!-- ✅ Force Return to Waiting Room (Only for Host) -->
-<button id="forceReturnToWaitingRoom" class="hidden" onclick="forceReturnToWaitingRoom()">Return to Waiting Room</button>
 
 
     </div>
