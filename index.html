@@ -104,6 +104,35 @@
     color: white;
 }
 
+/* ✅ GAME RULES*/
+        #gameRulesButton {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: #008CBA;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#gameRulesBox {
+    position: fixed;
+    top: 50px;
+    right: 10px;
+    width: 250px;
+    padding: 10px;
+    background-color: white;
+    border: 2px solid black;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    display: none; /* Hidden by default */
+}
+
+.hidden {
+    display: none;
+}
+
 
 
 
@@ -1036,6 +1065,14 @@ function thinkerCollectSkin(selectedPlayer) {
     }
 }
 
+function toggleGameRules() {
+    var rulesBox = document.getElementById("gameRulesBox");
+    if (rulesBox.style.display === "none" || rulesBox.style.display === "") {
+        rulesBox.style.display = "block";
+    } else {
+        rulesBox.style.display = "none";
+    }
+}
 
 
 
@@ -1050,6 +1087,33 @@ function thinkerCollectSkin(selectedPlayer) {
         <button onclick="confirmName()">Continue</button>
     </div>
 
+
+<!-- ✅ Game Rules Button -->
+<button id="gameRulesButton" onclick="toggleGameRules()">Game Rules</button>
+
+<!-- ✅ Game Rules Box (Hidden by Default) -->
+<div id="gameRulesBox" class="hidden">
+    <h3>9upper Game Rules</h3>
+    <p><strong>Objective:</strong> Identify the REALUPPER among the players.</p>
+    <p><strong>Roles:</strong></p>
+    <ul>
+        <li><strong>REALUPPER:</strong> The player with the correct definition.</li>
+        <li><strong>9UPPER:</strong> Players with fake definitions trying to fool the thinker.</li>
+        <li><strong>Thinker:</strong> The player trying to guess the REALUPPER.</li>
+    </ul>
+    <p><strong>Gameplay:</strong></p>
+    <ul>
+        <li>A word is displayed.</li>
+        <li>REALUPPER sees the correct definition.</li>
+        <li>9UPPERS make up fake definitions.</li>
+        <li>The thinker selects who they think is the REALUPPER.</li>
+        <li>Points are awarded based on selections.</li>
+    </ul>
+    <p>Good luck and have fun!</p>
+</div>
+
+
+    
     <!-- ✅ Setup Section -->
     <div id="setupArea" class="hidden">
         <button onclick="createGame()">Create Game</button>
