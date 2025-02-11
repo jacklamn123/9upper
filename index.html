@@ -286,7 +286,7 @@ function listenForUpdates() {
         }
 
         // ✅ Always show "Return to Main Menu" after game starts
-        document.getElementById("returnToMainMenu").classList.toggle("hidden", !(gameData.status === "playing" || gameData.status === "finished"));
+document.getElementById("returnToMainMenu").classList.remove("hidden");
 
         // ✅ Show "Return to Waiting Room" only for the host during gameplay
         document.getElementById("forceReturnToWaitingRoom").classList.toggle("hidden", !(gameData.host === playerName && gameData.status === "playing"));
