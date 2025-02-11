@@ -183,7 +183,7 @@ function listenForUpdates() {
         if (!gameData) return;
 
         // ✅ Ensure host reassignment only happens when necessary
-        if (!gameData.host || !gameData.players[gameData.host]) {
+        if (!gameData.host || !gameData.players || !gameData.players[gameData.host]) {
             checkAndReassignHost(gameData);
         }
 
@@ -269,54 +269,17 @@ function listenForUpdates() {
             }
 
             displaythinkerOptions(gameData);
-
-            // ✅ Show "Return to Waiting Room" for Host
-            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
-            if (gameData.host === playerName) {
-                returnToWaitingRoomBtn.classList.add("show");
-            } else {
-                returnToWaitingRoomBtn.classList.remove("show");
-            }
-        }
-
-
-// ✅ Always show "Return to Main Menu" after game starts
-const returnToMainMenuBtn = document.getElementById("returnToMainMenu");
-if (returnToMainMenuBtn) {
-    if (gameData.status === "playing" || gameData.status === "finished") {
-        returnToMainMenuBtn.classList.remove("hidden");
-    } else {
-        returnToMainMenuBtn.classList.add("hidden");
-    }
-}
-
-// ✅ Show "Return to Waiting Room" only for the host during gameplay
-const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
-if (returnToWaitingRoomBtn) {
-    if (gameData.host === playerName && gameData.status === "playing") {
-        returnToWaitingRoomBtn.classList.remove("hidden");
-    } else {
-        returnToWaitingRoomBtn.classList.add("hidden");
-    }
-}
-
-    
-
-            
-        // ✅ Game State: Waiting
-        else if (gameData.status === "waiting") {
+        } else {
+            // ✅ Hide game screen and show waiting room when not playing
             document.getElementById("gameScreen").classList.add("hidden");
             document.getElementById("waitingRoom").classList.remove("hidden");
-            document.getElementById("forceReturnToWaitingRoom").classList.remove("show");
         }
 
-        // ✅ Handle Buttons Visibility Dynamically
-        const returnToMainMenuBtn = document.getElementById("returnToMainMenu");
-        if (gameData.status === "playing" || gameData.status === "finished") {
-            returnToMainMenuBtn.classList.add("show");
-        } else {
-            returnToMainMenuBtn.classList.remove("show");
-        }
+        // ✅ Always show "Return to Main Menu" after game starts
+        document.getElementById("returnToMainMenu").classList.toggle("hidden", !(gameData.status === "playing" || gameData.status === "finished"));
+
+        // ✅ Show "Return to Waiting Room" only for the host during gameplay
+        document.getElementById("forceReturnToWaitingRoom").classList.toggle("hidden", !(gameData.host === playerName && gameData.status === "playing"));
 
         // ✅ Handle Game End
         if (gameData.status === "finished") {
@@ -325,6 +288,7 @@ if (returnToWaitingRoomBtn) {
         }
     });
 }
+
 
 
 
