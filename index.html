@@ -168,7 +168,7 @@ function createGame() {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 let lastKnownRound = 0;
-        
+
 function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", snapshot => {
         var gameData = snapshot.val();
@@ -177,13 +177,11 @@ function listenForUpdates() {
         // 1) Reassign host if the current one is missing
         checkAndReassignHost(gameData);
 
-console.log("DEBUG: Current host is:", gameData.host);
-        
+        console.log("DEBUG: Current host is:", gameData.host);
+
         // ✅ Update player list in the waiting room
         if (gameData.players) {
-
-
- Object.keys(gameData.players).forEach((player) => {
+            Object.keys(gameData.players).forEach((player) => {
                 // Is this player the current host?
                 const isHost = (player === gameData.host);
 
@@ -198,23 +196,36 @@ console.log("DEBUG: Current host is:", gameData.host);
                 );
             });
 
-            
             var playerList = Object.keys(gameData.players)
                 .map(name => `<li>${name}</li>`).join("");
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
 
-            document.getElementById("roundsValue").innerText = gameData.totalRounds;
-            document.getElementById("timeValue").innerText = gameData.roundTime;
+            // ✅ Ensure sliders are synced with Firebase values
+            if (gameData.totalRounds) {
+                document.getElementById("roundsSlider").value = gameData.totalRounds;
+                document.getElementById("roundsValue").innerText = gameData.totalRounds;
+            }
+            if (gameData.roundTime) {
+                document.getElementById("timeSlider").value = gameData.roundTime;
+                document.getElementById("timeValue").innerText = gameData.roundTime;
+            }
 
+            // ✅ Attach event listeners to update Firebase when sliders change (Only for the host)
             if (gameData.host === playerName) {
+                document.getElementById("timeSlider").addEventListener("input", function() {
+                    db.ref("games/" + gameCode).update({ roundTime: this.value });
+                });
+
+                document.getElementById("roundsSlider").addEventListener("input", function() {
+                    db.ref("games/" + gameCode).update({ totalRounds: this.value });
+                });
+
                 document.getElementById("gameSettings").classList.remove("hidden");
                 document.getElementById("startGameButton").classList.remove("hidden");
+            } else {
+                document.getElementById("gameSettings").classList.add("hidden");
+                document.getElementById("startGameButton").classList.add("hidden");
             }
-            else {
-    document.getElementById("gameSettings").classList.add("hidden");
-    document.getElementById("startGameButton").classList.add("hidden");
-}
-
         }
 
         // ✅ Auto-update scoreboard when scores change
@@ -244,93 +255,92 @@ console.log("DEBUG: Current host is:", gameData.host);
         }
 
         // ✅ Handle game state: Playing
-if (gameData.status === "playing") {
-    document.getElementById("waitingRoom").classList.add("hidden");
-    document.getElementById("gameScreen").classList.remove("hidden");
+        if (gameData.status === "playing") {
+            document.getElementById("waitingRoom").classList.add("hidden");
+            document.getElementById("gameScreen").classList.remove("hidden");
 
-    document.getElementById("gameTerm").innerText = gameData.term;
-    document.getElementById("playerRole").innerText = gameData.roles[playerName];
+            document.getElementById("gameTerm").innerText = gameData.term;
+            document.getElementById("playerRole").innerText = gameData.roles[playerName];
 
-    document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
-    document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
+            document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
+            document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
-  // Compare rounds to see if we've started a *new* round
-  if (gameData.currentRound !== lastKnownRound) {
-    lastKnownRound = gameData.currentRound;
-    // ✅ Only the host does startCountdown
-    if (gameData.host === playerName) {
-      startCountdown(
-        gameData.timeLeft,
-        gameData.currentRound,
-        gameData.totalRounds,
-        gameData.roundTime
-      );
-    }
-  }
-    // ✅ Update time left
-    document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
+            // Compare rounds to see if we've started a *new* round
+            if (gameData.currentRound !== lastKnownRound) {
+                lastKnownRound = gameData.currentRound;
+                // ✅ Only the host does startCountdown
+                if (gameData.host === playerName) {
+                    startCountdown(
+                        gameData.timeLeft,
+                        gameData.currentRound,
+                        gameData.totalRounds,
+                        gameData.roundTime
+                    );
+                }
+            }
 
-    // ✅ Hide thinker panel unless needed
-    document.getElementById("thinkerPanel").classList.add("hidden");
+            // ✅ Update time left
+            document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
 
-    // ✅ Show definition only for REALUPPER
-    const definitionBox = document.getElementById("correctDefinitionBox");
-    const definitionText = document.getElementById("correctDefinition");
+            // ✅ Hide thinker panel unless needed
+            document.getElementById("thinkerPanel").classList.add("hidden");
 
-    if (definitionBox && definitionText) {
-        if (gameData.roles[playerName] === "REALUPPER") {
-            definitionText.innerText = gameData.correctDefinition;
-            definitionBox.classList.remove("hidden");
-        } else {
-            definitionBox.classList.add("hidden");
-            definitionText.innerText = "";  // ✅ Clear previous round’s definition
+            // ✅ Show definition only for REALUPPER
+            const definitionBox = document.getElementById("correctDefinitionBox");
+            const definitionText = document.getElementById("correctDefinition");
+
+            if (definitionBox && definitionText) {
+                if (gameData.roles[playerName] === "REALUPPER") {
+                    definitionText.innerText = gameData.correctDefinition;
+                    definitionBox.classList.remove("hidden");
+                } else {
+                    definitionBox.classList.add("hidden");
+                    definitionText.innerText = "";  // ✅ Clear previous round’s definition
+                }
+            }
+
+            // ✅ Ensure 9UPPER players don’t see the definition
+            const definitionInputBox = document.getElementById("definitionInputBox");
+            if (definitionInputBox) {
+                if (gameData.roles[playerName] === "9UPPER") {
+                    definitionInputBox.classList.remove("hidden");
+                } else {
+                    definitionInputBox.classList.add("hidden");
+                }
+            }
+
+            displaythinkerOptions(gameData);
+
+            // ✅ Show "Return to Waiting Room" only for the host
+            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
+            if (returnToWaitingRoomBtn) {
+                if (gameData.host === playerName) {
+                    returnToWaitingRoomBtn.classList.remove("hidden");
+                } else {
+                    returnToWaitingRoomBtn.classList.add("hidden");
+                }
+            }
         }
-    }
+        // ✅ Add this new block for status === "waiting"
+        else if (gameData.status === "waiting") {
+            // Hide the game screen, show the waiting room
+            document.getElementById("gameScreen").classList.add("hidden");
+            document.getElementById("waitingRoom").classList.remove("hidden");
 
-    // ✅ Ensure 9UPPER players don’t see the definition
-    const definitionInputBox = document.getElementById("definitionInputBox");
-    if (definitionInputBox) {
-        if (gameData.roles[playerName] === "9UPPER") {
-            definitionInputBox.classList.remove("hidden");
-        } else {
-            definitionInputBox.classList.add("hidden");
+            // Hide the "Return to Waiting Room" button for everyone
+            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
+            if (returnToWaitingRoomBtn) {
+                returnToWaitingRoomBtn.classList.add("hidden");
+            }
         }
-    }
-
-    displaythinkerOptions(gameData);
-
-    // ✅ Show "Return to Waiting Room" only for the host
-    const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
-    if (returnToWaitingRoomBtn) {
-        if (gameData.host === playerName) {
-            returnToWaitingRoomBtn.classList.remove("hidden");
-        } else {
-            returnToWaitingRoomBtn.classList.add("hidden");
+        // Anything else (not playing, not waiting)
+        else {
+            // If game is NOT playing or waiting, ensure "Return to Waiting Room" is hidden
+            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
+            if (returnToWaitingRoomBtn) {
+                returnToWaitingRoomBtn.classList.add("hidden");
+            }
         }
-    }
-
-}
-// ✅ Add this new block for status === "waiting"
-else if (gameData.status === "waiting") {
-    // Hide the game screen, show the waiting room
-    document.getElementById("gameScreen").classList.add("hidden");
-    document.getElementById("waitingRoom").classList.remove("hidden");
-
-    // Hide the "Return to Waiting Room" button for everyone
-    const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
-    if (returnToWaitingRoomBtn) {
-        returnToWaitingRoomBtn.classList.add("hidden");
-    }
-}
-// Anything else (not playing, not waiting)
-else {
-    // If game is NOT playing or waiting, ensure "Return to Waiting Room" is hidden
-    const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
-    if (returnToWaitingRoomBtn) {
-        returnToWaitingRoomBtn.classList.add("hidden");
-    }
-}
-
 
         // ✅ Always show "Return to Main Menu" button (for all players)
         const returnToMainMenuBtn = document.getElementById("returnToMainMenu");
@@ -339,14 +349,14 @@ else {
         }
 
         // ✅ Handle game end
-       if (gameData.status === "finished") {
-    // ✅ Immediately set status to something else (like "post-finished")
-    db.ref("games/" + gameCode).update({ status: "post-finished" });
-    showEndgameScreen(gameData.scores);
-}
-
+        if (gameData.status === "finished") {
+            // ✅ Immediately set status to something else (like "post-finished")
+            db.ref("games/" + gameCode).update({ status: "post-finished" });
+            showEndgameScreen(gameData.scores);
+        }
     });
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
