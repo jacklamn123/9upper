@@ -38,16 +38,15 @@
         /* ✅ Scoreboard Styling */
 /* ✅ Scoreboard Styling */
 /* ✅ Scoreboard & Button Container */
-/* ✅ Scoreboard & Button Container */
-/* ✅ Scoreboard & Button Container */
+/* ✅ Fixed Scoreboard & Buttons Alignment */
 #scoreboardContainer {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Center items horizontally */
+    align-items: center;
     position: absolute;
     top: 10px;
     left: 10px;
-    width: 250px;
+    width: 250px; /* ✅ Adjust width to avoid stretching */
     text-align: center;
 }
 
@@ -56,7 +55,7 @@
     background-color: #ffffff;
     border: 2px solid black;
     padding: 10px;
-    width: 100%; /* Ensures it takes the full width of container */
+    width: 100%; 
     font-size: 14px;
     text-align: center;
 }
@@ -88,7 +87,7 @@
 }
 
 #returnToMainMenu, #forceReturnToWaitingRoom {
-    width: 100%; /* Ensures buttons match scoreboard width */
+    width: 100%;
     padding: 8px 15px;
     border: none;
     cursor: pointer;
@@ -1045,117 +1044,94 @@ function thinkerCollectSkin(selectedPlayer) {
 <body>
     <h1>9upper Online Multiplayer</h1>
 
+    <!-- ✅ Name Input Section -->
     <div id="nameInput">
         <input type="text" id="playerNameInput" placeholder="Enter Your Name">
         <button onclick="confirmName()">Continue</button>
     </div>
 
+    <!-- ✅ Setup Section -->
     <div id="setupArea" class="hidden">
         <button onclick="createGame()">Create Game</button>
         <input type="text" id="gameCodeInput" placeholder="Enter Game Code">
         <button onclick="joinGame()">Join Game</button>
     </div>
 
+    <!-- ✅ Main Game Area -->
     <div id="gameArea" class="hidden">
         <h2>Game Code: <span id="gameCodeDisplay"></span></h2>
 
+        <!-- ✅ Waiting Room -->
         <div id="waitingRoom">
             <h2>Players in Room</h2>
             <div id="playerList"></div>
-<!-- ✅ Game Settings for Host -->
-<div id="gameSettings" class="hidden">
-    <h3>Game Settings</h3>
 
-<label for="roundsSlider">Rounds: <span id="roundsValue">5</span></label>
-<input type="range" id="roundsSlider" min="5" max="20" step="5" value="5" oninput="updateRounds()">
+            <!-- ✅ Game Settings (Visible for Host Only) -->
+            <div id="gameSettings" class="hidden">
+                <h3>Game Settings</h3>
+                <label for="roundsSlider">Rounds: <span id="roundsValue">5</span></label>
+                <input type="range" id="roundsSlider" min="5" max="20" step="5" value="5" oninput="updateRounds()">
+                <br>
+                <label for="timeSlider">Time per Round (seconds): <span id="timeValue">60</span></label>
+                <input type="range" id="timeSlider" min="10" max="600" step="10" value="60" oninput="updateTime()">
+            </div>
 
-<br>
-
-<label for="timeSlider">Time per Round (seconds): <span id="timeValue">60</span></label>
-<input type="range" id="timeSlider" min="10" max="600" step="10" value="60" oninput="updateTime()">
-</div>
-
+            <!-- ✅ Start Game Button (Visible for Host Only) -->
             <button id="startGameButton" class="hidden" onclick="startGame()">Start Game</button>
         </div>
 
-<!-- ✅ Scoreboard Display -->
-<div id="scoreboard">
-    <h3>Scoreboard</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Player</th>
-                <th>Score</th>
-            </tr>
-        </thead>
-        <tbody id="scoreboardBody">
-            <!-- Scores will be dynamically inserted here -->
-        </tbody>
-    </table>
-</div>
+        <!-- ✅ Game Screen -->
+        <div id="gameScreen" class="hidden">
+            <h3>Round <span id="currentRoundDisplay"></span> / <span id="totalRoundsDisplay"></span></h3>
+            <h3>Time Remaining: <span id="timeLeftDisplay">--</span></h3>
+            <h3>Term: <span id="gameTerm"></span></h3>
+            <h3>Your Role: <span id="playerRole"></span></h3>
 
-        
-        
-<div id="gameScreen" class="hidden">
-    <h3>Round <span id="currentRoundDisplay"></span> / <span id="totalRoundsDisplay"></span></h3>
-    <h3>Time Remaining: <span id="timeLeftDisplay">--</span></h3>
-    <h3>Term: <span id="gameTerm"></span></h3>
-    <h3>Your Role: <span id="playerRole"></span></h3>
+            <!-- ✅ REALUPPER Definition Box -->
+            <div id="correctDefinitionBox" class="hidden">
+                <h3>REALUPPER: <span id="correctDefinition"></span></h3>
+            </div>
 
-    <div id="correctDefinitionBox" class="hidden">
-        <h3>REALUPPER: <span id="correctDefinition"></span></h3>
-    </div>
+            <!-- ✅ Thinker Panel -->
+            <div id="thinkerPanel" class="hidden">
+                <h3>Thinker: Pick the correct player</h3>
+                <div id="thinkerOptions"></div>
+            </div>
+        </div>
 
-    <div id="thinkerPanel" class="hidden">
-        <h3>thinker: Pick the correct player</h3>
-        <div id="thinkerOptions"></div>
-    </div>
-</div>
-
-
-
-
-
-        <!-- ✅ Chatbox Added -->
+        <!-- ✅ Chatbox -->
         <div class="chatbox">
             <div id="chatMessages"></div>
         </div>
         <input type="text" id="chatInput" placeholder="Type a message">
         <button onclick="sendChatMessage()">Send</button>
 
-        <!-- ✅ Scoreboard Display with New Buttons -->
-<!-- ✅ Scoreboard and Buttons Container -->
-<!-- ✅ Scoreboard and Buttons Container -->
-<!-- ✅ Scoreboard and Buttons Container -->
-<div id="scoreboardContainer">
-    <!-- ✅ Scoreboard Display -->
-    <div id="scoreboard">
-        <h3>Scoreboard</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th>Score</th>
-                </tr>
-            </thead>
-            <tbody id="scoreboardBody">
-                <!-- Scores will be dynamically inserted here -->
-            </tbody>
-        </table>
+        <!-- ✅ Scoreboard and Buttons Container -->
+        <div id="scoreboardContainer">
+            <!-- ✅ Scoreboard Display -->
+            <div id="scoreboard">
+                <h3>Scoreboard</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoreboardBody">
+                        <!-- Scores will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ✅ Button Container (Aligned with Scoreboard) -->
+            <div id="buttonContainer">
+                <button id="returnToMainMenu" onclick="returnToMainMenu()">Return to Main Menu</button>
+                <button id="forceReturnToWaitingRoom" class="hidden" onclick="forceReturnToWaitingRoom()">Return to Waiting Room</button>
+            </div>
+        </div>
     </div>
-
-    <!-- ✅ Button Container for Proper Alignment -->
-    <div id="buttonContainer">
-        <button id="returnToMainMenu" onclick="returnToMainMenu()">Return to Main Menu</button>
-        <button id="forceReturnToWaitingRoom" class="hidden" onclick="forceReturnToWaitingRoom()">Return to Waiting Room</button>
-    </div>
-</div>
-
-
-    </div>
-
-    
 </body>
+
 </html>
