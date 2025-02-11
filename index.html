@@ -720,6 +720,10 @@ function startNewRound(terms, round, totalRounds, roundTime) {
             db.ref("games/" + gameCode).update({
                 correctDefinition: correctDefinition // ✅ Now set the correct definition for the new REALUPPER
             });
+             // ✅ Send a chat message announcing the thinker
+            db.ref("games/" + gameCode + "/chat").push(
+                `Round ${round}, player ${thinker} is the thinker.`
+            );
         });
 
         var roundDisplay = document.getElementById("currentRoundDisplay");
