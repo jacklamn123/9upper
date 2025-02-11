@@ -39,14 +39,16 @@
 /* ✅ Scoreboard Styling */
 /* ✅ Scoreboard & Button Container */
 /* ✅ Scoreboard & Button Container */
+/* ✅ Scoreboard & Button Container */
 #scoreboardContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center items horizontally */
     position: absolute;
     top: 10px;
     left: 10px;
-    width: 250px; /* Ensures it has enough width */
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centers items inside */
+    width: 250px;
+    text-align: center;
 }
 
 /* ✅ Scoreboard Styling */
@@ -54,11 +56,12 @@
     background-color: #ffffff;
     border: 2px solid black;
     padding: 10px;
-    width: 100%;
+    width: 100%; /* Ensures it takes the full width of container */
     font-size: 14px;
     text-align: center;
 }
 
+/* ✅ Table Styling */
 #scoreboard table {
     width: 100%;
     border-collapse: collapse;
@@ -76,13 +79,20 @@
     background-color: #f2f2f2;
 }
 
-/* ✅ Position Buttons Below Scoreboard */
-#returnToMainMenu, #forceReturnToWaitingRoom {
+/* ✅ Buttons Below Scoreboard */
+#buttonContainer {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     margin-top: 5px;
+}
+
+#returnToMainMenu, #forceReturnToWaitingRoom {
+    width: 100%; /* Ensures buttons match scoreboard width */
     padding: 8px 15px;
     border: none;
     cursor: pointer;
+    font-weight: bold;
 }
 
 #returnToMainMenu {
@@ -94,6 +104,7 @@
     background-color: blue;
     color: white;
 }
+
 
 
 
@@ -1116,7 +1127,9 @@ function thinkerCollectSkin(selectedPlayer) {
         <!-- ✅ Scoreboard Display with New Buttons -->
 <!-- ✅ Scoreboard and Buttons Container -->
 <!-- ✅ Scoreboard and Buttons Container -->
+<!-- ✅ Scoreboard and Buttons Container -->
 <div id="scoreboardContainer">
+    <!-- ✅ Scoreboard Display -->
     <div id="scoreboard">
         <h3>Scoreboard</h3>
         <table>
@@ -1133,9 +1146,11 @@ function thinkerCollectSkin(selectedPlayer) {
         </table>
     </div>
 
-    <!-- ✅ Buttons Below Scoreboard -->
-    <button id="returnToMainMenu" onclick="returnToMainMenu()">Return to Main Menu</button>
-    <button id="forceReturnToWaitingRoom" class="hidden" onclick="forceReturnToWaitingRoom()">Return to Waiting Room</button>
+    <!-- ✅ Button Container for Proper Alignment -->
+    <div id="buttonContainer">
+        <button id="returnToMainMenu" onclick="returnToMainMenu()">Return to Main Menu</button>
+        <button id="forceReturnToWaitingRoom" class="hidden" onclick="forceReturnToWaitingRoom()">Return to Waiting Room</button>
+    </div>
 </div>
 
 
