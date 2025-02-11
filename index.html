@@ -37,14 +37,24 @@
 }
         /* ✅ Scoreboard Styling */
 /* ✅ Scoreboard Styling */
-#scoreboard {
+/* ✅ Scoreboard & Button Container */
+/* ✅ Scoreboard & Button Container */
+#scoreboardContainer {
     position: absolute;
     top: 10px;
     left: 10px;
+    width: 250px; /* Ensures it has enough width */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers items inside */
+}
+
+/* ✅ Scoreboard Styling */
+#scoreboard {
     background-color: #ffffff;
     border: 2px solid black;
     padding: 10px;
-    width: 220px; /* ✅ Slightly wider for better alignment */
+    width: 100%;
     font-size: 14px;
     text-align: center;
 }
@@ -52,42 +62,40 @@
 #scoreboard table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed; /* ✅ Ensure equal column width */
+    table-layout: fixed;
 }
 
 #scoreboard th, #scoreboard td {
     border: 1px solid black;
     padding: 5px;
     text-align: center;
-    width: 33.33%; /* ✅ Make sure all columns have the same width */
-    word-break: break-word; /* ✅ Prevent long names from breaking layout */
+    word-break: break-word;
 }
 
 #scoreboard th {
     background-color: #f2f2f2;
 }
-        /* ✅ Positioning Buttons Near the Scoreboard */
-#returnToMainMenu {
-    position: absolute;
-    top: 10px;
-    left: 250px; /* ✅ Adjusted next to the scoreboard */
-    background-color: red;
-    color: white;
+
+/* ✅ Position Buttons Below Scoreboard */
+#returnToMainMenu, #forceReturnToWaitingRoom {
+    width: 100%;
+    margin-top: 5px;
     padding: 8px 15px;
     border: none;
     cursor: pointer;
 }
 
+#returnToMainMenu {
+    background-color: red;
+    color: white;
+}
+
 #forceReturnToWaitingRoom {
-    position: absolute;
-    top: 50px;
-    left: 250px;
     background-color: blue;
     color: white;
-    padding: 8px 15px;
-    border: none;
-    cursor: pointer;
 }
+
+
 
 
 
@@ -174,61 +182,43 @@ function listenForUpdates() {
         var gameData = snapshot.val();
         if (!gameData) return;
 
-        // 1) Reassign host if the current one is missing
-        checkAndReassignHost(gameData);
+        // ✅ Ensure host reassignment only happens when necessary
+        if (!gameData.host || !gameData.players[gameData.host]) {
+            checkAndReassignHost(gameData);
+        }
 
         console.log("DEBUG: Current host is:", gameData.host);
 
-        // ✅ Update player list in the waiting room
+        // ✅ Update Player List in Waiting Room
         if (gameData.players) {
-            Object.keys(gameData.players).forEach((player) => {
-                // Is this player the current host?
-                const isHost = (player === gameData.host);
-
-                // If your roles are stored in gameData.roles[player], fetch them safely:
-                let role = "unknown";
-                if (gameData.roles && gameData.roles[player]) {
-                    role = gameData.roles[player];
-                }
-
-                console.log(
-                    `DEBUG: Player "${player}", role: "${role}", isHost: ${isHost}`
-                );
-            });
-
             var playerList = Object.keys(gameData.players)
                 .map(name => `<li>${name}</li>`).join("");
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
-
-            // ✅ Ensure sliders are synced with Firebase values
-            if (gameData.totalRounds) {
-                document.getElementById("roundsSlider").value = gameData.totalRounds;
-                document.getElementById("roundsValue").innerText = gameData.totalRounds;
-            }
-            if (gameData.roundTime) {
-                document.getElementById("timeSlider").value = gameData.roundTime;
-                document.getElementById("timeValue").innerText = gameData.roundTime;
-            }
-
-            // ✅ Attach event listeners to update Firebase when sliders change (Only for the host)
-            if (gameData.host === playerName) {
-                document.getElementById("timeSlider").addEventListener("input", function() {
-                    db.ref("games/" + gameCode).update({ roundTime: this.value });
-                });
-
-                document.getElementById("roundsSlider").addEventListener("input", function() {
-                    db.ref("games/" + gameCode).update({ totalRounds: this.value });
-                });
-
-                document.getElementById("gameSettings").classList.remove("hidden");
-                document.getElementById("startGameButton").classList.remove("hidden");
-            } else {
-                document.getElementById("gameSettings").classList.add("hidden");
-                document.getElementById("startGameButton").classList.add("hidden");
-            }
         }
 
-        // ✅ Auto-update scoreboard when scores change
+        // ✅ Sync Game Settings (For Host Only)
+        if (gameData.host === playerName) {
+            document.getElementById("gameSettings").classList.remove("hidden");
+            document.getElementById("startGameButton").classList.remove("hidden");
+
+            document.getElementById("timeSlider").value = gameData.roundTime || 60;
+            document.getElementById("timeValue").innerText = gameData.roundTime || 60;
+
+            document.getElementById("roundsSlider").value = gameData.totalRounds || 5;
+            document.getElementById("roundsValue").innerText = gameData.totalRounds || 5;
+
+            document.getElementById("timeSlider").oninput = function () {
+                db.ref("games/" + gameCode).update({ roundTime: this.value });
+            };
+            document.getElementById("roundsSlider").oninput = function () {
+                db.ref("games/" + gameCode).update({ totalRounds: this.value });
+            };
+        } else {
+            document.getElementById("gameSettings").classList.add("hidden");
+            document.getElementById("startGameButton").classList.add("hidden");
+        }
+
+        // ✅ Auto-Update Scoreboard
         if (gameData.scores) {
             updateScoreboard(gameData.scores);
         }
@@ -236,39 +226,24 @@ function listenForUpdates() {
         // ✅ Chatbox Auto-Scrolling
         if (gameData.chat) {
             const chatBox = document.querySelector(".chatbox");
-
-            // Clear existing messages
-            chatBox.innerHTML = "";
-
-            // Add all messages
-            Object.values(gameData.chat).forEach(msg => {
-                chatBox.innerHTML += `<p>${msg}</p>`;
-            });
-
-            // ✅ Ensure chatbox is visible
+            chatBox.innerHTML = Object.values(gameData.chat)
+                .map(msg => `<p>${msg}</p>`).join("");
             chatBox.style.display = "block";
-
-            // ✅ Force scroll to the bottom
-            setTimeout(() => {
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }, 100);
+            setTimeout(() => chatBox.scrollTop = chatBox.scrollHeight, 100);
         }
 
-        // ✅ Handle game state: Playing
+        // ✅ Game State: Playing
         if (gameData.status === "playing") {
             document.getElementById("waitingRoom").classList.add("hidden");
             document.getElementById("gameScreen").classList.remove("hidden");
 
             document.getElementById("gameTerm").innerText = gameData.term;
             document.getElementById("playerRole").innerText = gameData.roles[playerName];
-
             document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
             document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
-            // Compare rounds to see if we've started a *new* round
             if (gameData.currentRound !== lastKnownRound) {
                 lastKnownRound = gameData.currentRound;
-                // ✅ Only the host does startCountdown
                 if (gameData.host === playerName) {
                     startCountdown(
                         gameData.timeLeft,
@@ -279,83 +254,78 @@ function listenForUpdates() {
                 }
             }
 
-            // ✅ Update time left
             document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
-
-            // ✅ Hide thinker panel unless needed
             document.getElementById("thinkerPanel").classList.add("hidden");
 
-            // ✅ Show definition only for REALUPPER
+            // ✅ Show correct definition for REALUPPER
             const definitionBox = document.getElementById("correctDefinitionBox");
             const definitionText = document.getElementById("correctDefinition");
-
-            if (definitionBox && definitionText) {
-                if (gameData.roles[playerName] === "REALUPPER") {
-                    definitionText.innerText = gameData.correctDefinition;
-                    definitionBox.classList.remove("hidden");
-                } else {
-                    definitionBox.classList.add("hidden");
-                    definitionText.innerText = "";  // ✅ Clear previous round’s definition
-                }
-            }
-
-            // ✅ Ensure 9UPPER players don’t see the definition
-            const definitionInputBox = document.getElementById("definitionInputBox");
-            if (definitionInputBox) {
-                if (gameData.roles[playerName] === "9UPPER") {
-                    definitionInputBox.classList.remove("hidden");
-                } else {
-                    definitionInputBox.classList.add("hidden");
-                }
+            if (gameData.roles[playerName] === "REALUPPER") {
+                definitionText.innerText = gameData.correctDefinition;
+                definitionBox.classList.remove("hidden");
+            } else {
+                definitionBox.classList.add("hidden");
+                definitionText.innerText = "";
             }
 
             displaythinkerOptions(gameData);
 
-            // ✅ Show "Return to Waiting Room" only for the host
+            // ✅ Show "Return to Waiting Room" for Host
             const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
-            if (returnToWaitingRoomBtn) {
-                if (gameData.host === playerName) {
-                    returnToWaitingRoomBtn.classList.remove("hidden");
-                } else {
-                    returnToWaitingRoomBtn.classList.add("hidden");
-                }
+            if (gameData.host === playerName) {
+                returnToWaitingRoomBtn.classList.add("show");
+            } else {
+                returnToWaitingRoomBtn.classList.remove("show");
             }
         }
-        // ✅ Add this new block for status === "waiting"
+
+
+// ✅ Always show "Return to Main Menu" after game starts
+const returnToMainMenuBtn = document.getElementById("returnToMainMenu");
+if (returnToMainMenuBtn) {
+    if (gameData.status === "playing" || gameData.status === "finished") {
+        returnToMainMenuBtn.classList.remove("hidden");
+    } else {
+        returnToMainMenuBtn.classList.add("hidden");
+    }
+}
+
+// ✅ Show "Return to Waiting Room" only for the host during gameplay
+const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
+if (returnToWaitingRoomBtn) {
+    if (gameData.host === playerName && gameData.status === "playing") {
+        returnToWaitingRoomBtn.classList.remove("hidden");
+    } else {
+        returnToWaitingRoomBtn.classList.add("hidden");
+    }
+}
+
+    
+
+            
+        // ✅ Game State: Waiting
         else if (gameData.status === "waiting") {
-            // Hide the game screen, show the waiting room
             document.getElementById("gameScreen").classList.add("hidden");
             document.getElementById("waitingRoom").classList.remove("hidden");
-
-            // Hide the "Return to Waiting Room" button for everyone
-            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
-            if (returnToWaitingRoomBtn) {
-                returnToWaitingRoomBtn.classList.add("hidden");
-            }
-        }
-        // Anything else (not playing, not waiting)
-        else {
-            // If game is NOT playing or waiting, ensure "Return to Waiting Room" is hidden
-            const returnToWaitingRoomBtn = document.getElementById("forceReturnToWaitingRoom");
-            if (returnToWaitingRoomBtn) {
-                returnToWaitingRoomBtn.classList.add("hidden");
-            }
+            document.getElementById("forceReturnToWaitingRoom").classList.remove("show");
         }
 
-        // ✅ Always show "Return to Main Menu" button (for all players)
+        // ✅ Handle Buttons Visibility Dynamically
         const returnToMainMenuBtn = document.getElementById("returnToMainMenu");
-        if (returnToMainMenuBtn) {
-            returnToMainMenuBtn.classList.remove("hidden");
+        if (gameData.status === "playing" || gameData.status === "finished") {
+            returnToMainMenuBtn.classList.add("show");
+        } else {
+            returnToMainMenuBtn.classList.remove("show");
         }
 
-        // ✅ Handle game end
+        // ✅ Handle Game End
         if (gameData.status === "finished") {
-            // ✅ Immediately set status to something else (like "post-finished")
             db.ref("games/" + gameCode).update({ status: "post-finished" });
             showEndgameScreen(gameData.scores);
         }
     });
 }
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1180,27 +1150,29 @@ function thinkerCollectSkin(selectedPlayer) {
         <button onclick="sendChatMessage()">Send</button>
 
         <!-- ✅ Scoreboard Display with New Buttons -->
-<div id="scoreboard">
-    <h3>Scoreboard</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Player</th>
-                <th>Score</th>
-            </tr>
-        </thead>
-        <tbody id="scoreboardBody">
-            <!-- Scores will be dynamically inserted here -->
-        </tbody>
-    </table>
+<!-- ✅ Scoreboard and Buttons Container -->
+<!-- ✅ Scoreboard and Buttons Container -->
+<div id="scoreboardContainer">
+    <div id="scoreboard">
+        <h3>Scoreboard</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody id="scoreboardBody">
+                <!-- Scores will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ✅ Buttons Below Scoreboard -->
+    <button id="returnToMainMenu" onclick="returnToMainMenu()">Return to Main Menu</button>
+    <button id="forceReturnToWaitingRoom" class="hidden" onclick="forceReturnToWaitingRoom()">Return to Waiting Room</button>
 </div>
-
-<!-- ✅ Return to Main Menu Button (Visible to Everyone) -->
-<button id="returnToMainMenu" onclick="returnToMainMenu()">Return to Main Menu</button>
-
-<!-- ✅ Force Return to Waiting Room (Only for Host) -->
-<button id="forceReturnToWaitingRoom" class="hidden" onclick="forceReturnToWaitingRoom()">Return to Waiting Room</button>
 
 
     </div>
