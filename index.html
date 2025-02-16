@@ -1021,6 +1021,10 @@ function returnToMainMenu() {
 
             // ✅ Remove host before forcing players to the waiting room
             db.ref("games/" + gameCode + "/host").remove().then(() => {
+                
+                // ✅ Call forceReturnToWaitingRoom() to update UI immediately
+                forceReturnToWaitingRoom();
+
                 // ✅ Move all players to the waiting room
                 db.ref("games/" + gameCode + "/players").once("value", (playersSnapshot) => {
                     if (playersSnapshot.exists()) {
@@ -1052,6 +1056,7 @@ function returnToMainMenu() {
         window.location.reload();
     });
 }
+
 
 
 
