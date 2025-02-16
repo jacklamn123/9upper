@@ -1014,34 +1014,17 @@ function returnToMainMenu() {
         const gameData = gameSnapshot.val();
         if (!gameData) return;
 
-        // Check if the leaving player is the host
-        if (gameData.host === playerName) {
-            console.log("Host is leaving, forcing all players to waiting room...");
+        // Check if the leaving player is the host AND if the game is currently "playing"
+        if (gameData.host === playerName && gameData.status === "playing") {
+            console.log("Host is leaving while game is playing, forcing all players to waiting room...");
 
             // First, remove the host from the players list
-            db.ref("games/" + gameCode + "/players/" + playerName).remove().then(() => {
-                // Move all other players back to the waiting room
-                db.ref("games/" + gameCode + "/players").once("value", (playersSnapshot) => {
-                    if (playersSnapshot.exists()) {
-                        playersSnapshot.forEach((player) => {
-                            const playerKey = player.key;
-                            db.ref("games/" + gameCode + "/players/" + playerKey).set(null); // Remove from game
-                            db.ref("games/" + gameCode + "/waitingPlayers/" + playerKey).set(true); // Move to waiting room
-                        });
-                    }
-                });
-
-                // Update game status to "waiting"
-                db.ref("games/" + gameCode).update({ status: "waiting" });
-
-                // Now that the host has been removed, assign a new host
-                checkAndReassignHost(gameData);
-
+            db.ref("games/" + gameCode + "/players/" + playerName).remove():
                 // Call forceReturnToWaitingRoom to handle UI updates
                 forceReturnToWaitingRoom();
             });
         } else {
-            // If it's not the host, just remove them from the game
+            // If it's not the host OR the game is not playing, just remove them from the game
             db.ref("games/" + gameCode + "/players/" + playerName).remove();
         }
 
