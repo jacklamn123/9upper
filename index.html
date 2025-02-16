@@ -268,9 +268,9 @@ function listenForUpdates() {
         // ✅ Update Previous Host Tracker
         previousHost = gameData.host;
 
-        // ✅ If game status is "waiting", force players back to the waiting room
+        // ✅ If game status is "waiting", force all players to waiting room
         if (gameData.status === "waiting") {
-            console.log("Game status changed to waiting. Moving players back to waiting room...");
+            console.log("Game status changed to waiting. Moving players to waiting room...");
             document.getElementById("gameScreen").classList.add("hidden");
             document.getElementById("waitingRoom").classList.remove("hidden");
         }
@@ -1015,16 +1015,12 @@ function returnToMainMenu() {
         const gameData = gameSnapshot.val();
         if (!gameData) return;
 
-        // ✅ Special case: If player is the host and the game is in the middle of playing
+        // ✅ If the player is the host and the game is in progress
         if (gameData.host === playerName && gameData.status === "playing") {
-            console.log("Host is leaving in the middle of the game, forcing all players to the waiting room...");
+            console.log("Host is leaving mid-game. Moving all players to waiting room...");
 
             // ✅ Remove host before forcing players to the waiting room
             db.ref("games/" + gameCode + "/host").remove().then(() => {
-                
-                // ✅ Call forceReturnToWaitingRoom() to update UI immediately
-                forceReturnToWaitingRoom();
-
                 // ✅ Move all players to the waiting room
                 db.ref("games/" + gameCode + "/players").once("value", (playersSnapshot) => {
                     if (playersSnapshot.exists()) {
@@ -1036,26 +1032,32 @@ function returnToMainMenu() {
                     }
 
                     // ✅ Update game status to "waiting"
-                    db.ref("games/" + gameCode).update({ status: "waiting" });
+                    db.ref("games/" + gameCode).update({ status: "waiting" }).then(() => {
+                        // ✅ Call forceReturnToWaitingRoom() to update UI for all players
+                        forceReturnToWaitingRoom();
 
-                    // ✅ Reassign a new host after returning players
-                    db.ref("games/" + gameCode).once("value", (updatedSnapshot) => {
-                        const updatedGameData = updatedSnapshot.val();
-                        if (updatedGameData && updatedGameData.players) {
-                            checkAndReassignHost(updatedGameData);
-                        }
+                        // ✅ Assign a new host after returning players
+                        db.ref("games/" + gameCode).once("value", (updatedSnapshot) => {
+                            const updatedGameData = updatedSnapshot.val();
+                            if (updatedGameData && updatedGameData.players) {
+                                checkAndReassignHost(updatedGameData);
+                            }
+                        });
                     });
                 });
             });
         } else {
-            // ✅ Remove player from game (normal case when a non-host leaves)
+            // ✅ Normal case: Remove player from game if they are not the host
             db.ref("games/" + gameCode + "/players/" + playerName).remove();
         }
 
-        // ✅ Reload the page to show the main menu (index.html, for instance).
-        window.location.reload();
+        // ✅ Reload the page after database updates to reflect changes
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
     });
 }
+
 
 
 
