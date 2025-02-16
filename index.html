@@ -227,6 +227,7 @@ function createGame() {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 let lastKnownRound = 0;
+let hostAlertShown = false; // Track if host alert has been shown
 
 function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", (snapshot) => {
@@ -243,9 +244,17 @@ function listenForUpdates() {
         // ✅ Listen for host changes and update UI for the new host
         if (gameData.host === playerName) {
             console.log("DEBUG: You are now the host! UI should update.");
-            showHostOptions(); // Update UI instantly for the new host
+
+            // ✅ Only show the alert ONCE
+            if (!hostAlertShown) {
+                alert("You are now the host!");
+                hostAlertShown = true; // Prevent future alerts
+            }
+
+            showHostOptions(); // Ensure UI updates for the host
         } else {
-            hideHostOptions(); // Ensure non-host players don't see host options
+            hostAlertShown = false; // Reset flag if player is no longer host
+            hideHostOptions();
         }
 
         // ✅ Update Player List in Waiting Room
@@ -347,8 +356,6 @@ function listenForUpdates() {
         }
     });
 }
-
-
 
 
 
