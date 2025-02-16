@@ -276,6 +276,13 @@ function listenForUpdates() {
             document.getElementById("startGameButton").classList.add("hidden");
         }
 
+        // ✅ Show "Return to Waiting Room" for the host during gameplay
+        if (gameData.host === playerName && gameData.status === "playing") {
+            document.getElementById("forceReturnToWaitingRoom").classList.remove("hidden");
+        } else {
+            document.getElementById("forceReturnToWaitingRoom").classList.add("hidden");
+        }
+
         // ✅ Auto-Update Scoreboard
         if (gameData.scores) {
             updateScoreboard(gameData.scores);
@@ -339,6 +346,7 @@ function listenForUpdates() {
         }
     });
 }
+
 
 
 
