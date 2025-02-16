@@ -1003,19 +1003,34 @@ function returnToWaitingRoom() {
 
 
 
-        function returnToMainMenu() {
+    function returnToMainMenu() {
     // If the endGameModal is on the screen, remove it.
     const endGameModal = document.getElementById("endGameModal");
     if (endGameModal) {
         endGameModal.remove();
     }
 
-    // Remove the current player from the game so they don’t stay in the “players” list.
-    db.ref("games/" + gameCode + "/players/" + playerName).remove();
+    // Fetch the current game data
+    db.ref("games/" + gameCode).once("value", (gameSnapshot) => {
+        const gameData = gameSnapshot.val();
+        if (!gameData) return;
 
-    // Reload the page to show the main menu (index.html, for instance).
-    window.location.reload();
+        // Special case: If player is the host and the game is in the middle of playing
+        if (gameData.host === playerName && gameData.status === "playing") {
+            console.log("Host is leaving in the middle of the game, forcing all players to the waiting room...");
+
+            // Force all players to return to the waiting room first
+            forceReturnToWaitingRoom();
+        }
+
+        // Remove the current player from the game so they don’t stay in the “players” list.
+        db.ref("games/" + gameCode + "/players/" + playerName).remove();
+
+        // Reload the page to show the main menu (index.html, for instance).
+        window.location.reload();
+    });
 }
+
 
 
 
