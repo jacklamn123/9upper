@@ -228,9 +228,9 @@ function createGame() {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 let lastKnownRound = 0;
-let previousHost = null; // Track previous host to detect host changes
-let isFirstHostAssignment = true; // Track if it's the first time a host is assigned
-let hostAlertShown = false; // Track if the alert has been shown
+let previousHost = null;
+let isFirstHostAssignment = true;
+let hostAlertShown = false;
 
 function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", (snapshot) => {
@@ -248,19 +248,19 @@ function listenForUpdates() {
         if (gameData.host === playerName) {
             console.log("DEBUG: You are now the host! UI should update.");
 
-            // ✅ Only show alert if the player is becoming host AFTER game creation
+            // ✅ Show alert only for a new host (not the first host)
             if (previousHost !== gameData.host && !isFirstHostAssignment && !hostAlertShown) {
                 alert("You are now the host!");
-                hostAlertShown = true; // Prevent future alerts
+                hostAlertShown = true;
             }
 
-            showHostOptions(); // Ensure UI updates for the host
+            showHostOptions();
         } else {
-            resetHostAlertFlag(); // ✅ Reset flag when the player stops being the host
-            hideHostOptions(); // Hide host options for non-host players
+            resetHostAlertFlag();
+            hideHostOptions();
         }
 
-        // ✅ Mark first host assignment as complete (Original host should NOT see alert)
+        // ✅ Mark first host assignment as complete
         if (previousHost === null && gameData.host) {
             isFirstHostAssignment = false;
         }
@@ -268,33 +268,18 @@ function listenForUpdates() {
         // ✅ Update Previous Host Tracker
         previousHost = gameData.host;
 
+        // ✅ If game status is "waiting", force players back to the waiting room
+        if (gameData.status === "waiting") {
+            console.log("Game status changed to waiting. Moving players back to waiting room...");
+            document.getElementById("gameScreen").classList.add("hidden");
+            document.getElementById("waitingRoom").classList.remove("hidden");
+        }
+
         // ✅ Update Player List in Waiting Room
         if (gameData.players) {
             var playerList = Object.keys(gameData.players)
                 .map(name => `<li>${name}</li>`).join("");
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
-        }
-
-        // ✅ Sync Game Settings (For Host Only)
-        if (gameData.host === playerName) {
-            document.getElementById("gameSettings").classList.remove("hidden");
-            document.getElementById("startGameButton").classList.remove("hidden");
-
-            document.getElementById("timeSlider").value = gameData.roundTime || 60;
-            document.getElementById("timeValue").innerText = gameData.roundTime || 60;
-
-            document.getElementById("roundsSlider").value = gameData.totalRounds || 5;
-            document.getElementById("roundsValue").innerText = gameData.totalRounds || 5;
-
-            document.getElementById("timeSlider").oninput = function () {
-                db.ref("games/" + gameCode).update({ roundTime: this.value });
-            };
-            document.getElementById("roundsSlider").oninput = function () {
-                db.ref("games/" + gameCode).update({ totalRounds: this.value });
-            };
-        } else {
-            document.getElementById("gameSettings").classList.add("hidden");
-            document.getElementById("startGameButton").classList.add("hidden");
         }
 
         // ✅ Auto-Update Scoreboard
@@ -323,35 +308,10 @@ function listenForUpdates() {
 
             if (gameData.currentRound !== lastKnownRound) {
                 lastKnownRound = gameData.currentRound;
-                if (gameData.host === playerName) {
-                    startCountdown(
-                        gameData.timeLeft,
-                        gameData.currentRound,
-                        gameData.totalRounds,
-                        gameData.roundTime
-                    );
-                }
             }
 
             document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
             document.getElementById("thinkerPanel").classList.add("hidden");
-
-            // ✅ Show correct definition for REALUPPER
-            const definitionBox = document.getElementById("correctDefinitionBox");
-            const definitionText = document.getElementById("correctDefinition");
-            if (gameData.roles[playerName] === "REALUPPER") {
-                definitionText.innerText = gameData.correctDefinition;
-                definitionBox.classList.remove("hidden");
-            } else {
-                definitionBox.classList.add("hidden");
-                definitionText.innerText = "";
-            }
-
-            displaythinkerOptions(gameData);
-        } else {
-            // ✅ Hide game screen and show waiting room when not playing
-            document.getElementById("gameScreen").classList.add("hidden");
-            document.getElementById("waitingRoom").classList.remove("hidden");
         }
 
         // ✅ Always show "Return to Main Menu" after game starts
@@ -1043,7 +1003,7 @@ function returnToWaitingRoom() {
 
 
 
-    function returnToMainMenu() {
+function returnToMainMenu() {
     // If the endGameModal is on the screen, remove it.
     const endGameModal = document.getElementById("endGameModal");
     if (endGameModal) {
@@ -1059,16 +1019,28 @@ function returnToWaitingRoom() {
         if (gameData.host === playerName && gameData.status === "playing") {
             console.log("Host is leaving in the middle of the game, forcing all players to the waiting room...");
 
-            // ✅ Remove host from the game before forcing players to the waiting room
+            // ✅ Remove host before forcing players to the waiting room
             db.ref("games/" + gameCode + "/host").remove().then(() => {
-                forceReturnToWaitingRoom(); // Move players back to waiting room
-
-                // ✅ Reassign a new host after returning players
-                db.ref("games/" + gameCode).once("value", (updatedSnapshot) => {
-                    const updatedGameData = updatedSnapshot.val();
-                    if (updatedGameData && updatedGameData.players) {
-                        checkAndReassignHost(updatedGameData);
+                // ✅ Move all players to the waiting room
+                db.ref("games/" + gameCode + "/players").once("value", (playersSnapshot) => {
+                    if (playersSnapshot.exists()) {
+                        playersSnapshot.forEach((player) => {
+                            const playerKey = player.key;
+                            db.ref("games/" + gameCode + "/players/" + playerKey).set(null); // Remove from game
+                            db.ref("games/" + gameCode + "/waitingPlayers/" + playerKey).set(true); // Move to waiting room
+                        });
                     }
+
+                    // ✅ Update game status to "waiting"
+                    db.ref("games/" + gameCode).update({ status: "waiting" });
+
+                    // ✅ Reassign a new host after returning players
+                    db.ref("games/" + gameCode).once("value", (updatedSnapshot) => {
+                        const updatedGameData = updatedSnapshot.val();
+                        if (updatedGameData && updatedGameData.players) {
+                            checkAndReassignHost(updatedGameData);
+                        }
+                    });
                 });
             });
         } else {
@@ -1076,10 +1048,11 @@ function returnToWaitingRoom() {
             db.ref("games/" + gameCode + "/players/" + playerName).remove();
         }
 
-        // Reload the page to show the main menu (index.html, for instance).
+        // ✅ Reload the page to show the main menu (index.html, for instance).
         window.location.reload();
     });
 }
+
 
 
 
