@@ -229,7 +229,7 @@ function createGame() {
 let lastKnownRound = 0;
 
 function listenForUpdates() {
-    db.ref("games/" + gameCode).on("value", snapshot => {
+    db.ref("games/" + gameCode).on("value", (snapshot) => {
         var gameData = snapshot.val();
         if (!gameData) return;
 
@@ -239,6 +239,14 @@ function listenForUpdates() {
         }
 
         console.log("DEBUG: Current host is:", gameData.host);
+
+        // ✅ Listen for host changes and update UI for the new host
+        if (gameData.host === playerName) {
+            console.log("DEBUG: You are now the host! UI should update.");
+            showHostOptions(); // Update UI instantly for the new host
+        } else {
+            hideHostOptions(); // Ensure non-host players don't see host options
+        }
 
         // ✅ Update Player List in Waiting Room
         if (gameData.players) {
@@ -327,7 +335,7 @@ function listenForUpdates() {
         }
 
         // ✅ Always show "Return to Main Menu" after game starts
-document.getElementById("returnToMainMenu").classList.remove("hidden");
+        document.getElementById("returnToMainMenu").classList.remove("hidden");
 
         // ✅ Show "Return to Waiting Room" only for the host during gameplay
         document.getElementById("forceReturnToWaitingRoom").classList.toggle("hidden", !(gameData.host === playerName && gameData.status === "playing"));
@@ -343,10 +351,21 @@ document.getElementById("returnToMainMenu").classList.remove("hidden");
 
 
 
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
 
 
+function showHostOptions() {
+    document.getElementById("gameSettings").classList.remove("hidden"); // Show host settings
+    document.getElementById("startGameButton").classList.remove("hidden"); // Show start button
+    alert("You are now the host!"); // Notify the new host
+}
+
+function hideHostOptions() {
+    document.getElementById("gameSettings").classList.add("hidden");
+    document.getElementById("startGameButton").classList.add("hidden");
+}
 
 
 
