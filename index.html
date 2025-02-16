@@ -1055,21 +1055,32 @@ function returnToWaitingRoom() {
         const gameData = gameSnapshot.val();
         if (!gameData) return;
 
-        // Special case: If player is the host and the game is in the middle of playing
+        // ✅ Special case: If player is the host and the game is in the middle of playing
         if (gameData.host === playerName && gameData.status === "playing") {
             console.log("Host is leaving in the middle of the game, forcing all players to the waiting room...");
 
-            // Force all players to return to the waiting room first
-            forceReturnToWaitingRoom();
-        }
+            // ✅ Remove host from the game before forcing players to the waiting room
+            db.ref("games/" + gameCode + "/host").remove().then(() => {
+                forceReturnToWaitingRoom(); // Move players back to waiting room
 
-        // Remove the current player from the game so they don’t stay in the “players” list.
-        db.ref("games/" + gameCode + "/players/" + playerName).remove();
+                // ✅ Reassign a new host after returning players
+                db.ref("games/" + gameCode).once("value", (updatedSnapshot) => {
+                    const updatedGameData = updatedSnapshot.val();
+                    if (updatedGameData && updatedGameData.players) {
+                        checkAndReassignHost(updatedGameData);
+                    }
+                });
+            });
+        } else {
+            // ✅ Remove player from game (normal case when a non-host leaves)
+            db.ref("games/" + gameCode + "/players/" + playerName).remove();
+        }
 
         // Reload the page to show the main menu (index.html, for instance).
         window.location.reload();
     });
 }
+
 
 
 
