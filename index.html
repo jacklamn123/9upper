@@ -1019,7 +1019,7 @@ function returnToMainMenu() {
             console.log("Host is leaving while game is playing, forcing all players to waiting room...");
 
             // First, remove the host from the players list
-            db.ref("games/" + gameCode + "/players/" + playerName).remove():
+            db.ref("games/" + gameCode + "/players/" + playerName).remove().then(() => {
                 // Call forceReturnToWaitingRoom to handle UI updates
                 forceReturnToWaitingRoom();
             });
@@ -1032,6 +1032,7 @@ function returnToMainMenu() {
         window.location.reload();
     });
 }
+
 
 
 
