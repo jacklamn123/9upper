@@ -1009,12 +1009,37 @@ function returnToMainMenu() {
         endGameModal.remove();
     }
 
-    // Remove the current player from the game so they don’t stay in the “players” list.
+    // Check if the current player is the host
+    db.ref("games/" + gameCode + "/host").once("value", (hostSnapshot) => {
+        if (hostSnapshot.exists() && hostSnapshot.val() === playerName) {
+            // The player is the host, now check if the game is "playing"
+            db.ref("games/" + gameCode + "/status").once("value", (gameStatusSnapshot) => {
+                if (gameStatusSnapshot.exists() && gameStatusSnapshot.val() === "playing") {
+                    // Move all players back to the waiting room
+                    db.ref("games/" + gameCode + "/players").once("value", (playersSnapshot) => {
+                        if (playersSnapshot.exists()) {
+                            playersSnapshot.forEach((player) => {
+                                const playerKey = player.key;
+                                db.ref("games/" + gameCode + "/players/" + playerKey).set(null); // Remove from game
+                                db.ref("games/" + gameCode + "/waitingPlayers/" + playerKey).set(true); // Move to waiting room
+                            });
+                        }
+                    });
+
+                    // Update the game status to "waiting"
+                    db.ref("games/" + gameCode).update({ status: "waiting" });
+                }
+            });
+        }
+    });
+
+    // Remove the current player (any player) from the game so they don’t stay in the “players” list.
     db.ref("games/" + gameCode + "/players/" + playerName).remove();
 
     // Reload the page to show the main menu (index.html, for instance).
     window.location.reload();
 }
+
 
 
 function forceReturnToWaitingRoom() {
