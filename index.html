@@ -227,35 +227,45 @@ function createGame() {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 let lastKnownRound = 0;
-let hostAlertShown = false; // Track if host alert has been shown
+let previousHost = null; // Track previous host to detect host changes
+let isFirstHostAssignment = true; // Track if it's the first time a host is assigned
+let hostAlertShown = false; // Track if the alert has been shown
 
 function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", (snapshot) => {
         var gameData = snapshot.val();
         if (!gameData) return;
 
+        console.log("DEBUG: Current host is:", gameData.host);
+
         // ✅ Ensure host reassignment only happens when necessary
         if (!gameData.host || !gameData.players || !gameData.players[gameData.host]) {
             checkAndReassignHost(gameData);
         }
 
-        console.log("DEBUG: Current host is:", gameData.host);
-
-        // ✅ Listen for host changes and update UI for the new host
+        // ✅ Detect Host Changes & Prevent Repeated Alerts
         if (gameData.host === playerName) {
             console.log("DEBUG: You are now the host! UI should update.");
 
-            // ✅ Only show the alert ONCE
-            if (!hostAlertShown) {
+            // ✅ Only show alert if the player is becoming host AFTER game creation
+            if (previousHost !== gameData.host && !isFirstHostAssignment && !hostAlertShown) {
                 alert("You are now the host!");
                 hostAlertShown = true; // Prevent future alerts
             }
 
             showHostOptions(); // Ensure UI updates for the host
         } else {
-            hostAlertShown = false; // Reset flag if player is no longer host
-            hideHostOptions();
+            resetHostAlertFlag(); // ✅ Reset flag when the player stops being the host
+            hideHostOptions(); // Hide host options for non-host players
         }
+
+        // ✅ Mark first host assignment as complete (Original host should NOT see alert)
+        if (previousHost === null && gameData.host) {
+            isFirstHostAssignment = false;
+        }
+
+        // ✅ Update Previous Host Tracker
+        previousHost = gameData.host;
 
         // ✅ Update Player List in Waiting Room
         if (gameData.players) {
@@ -357,26 +367,50 @@ function listenForUpdates() {
     });
 }
 
+// ✅ Function to show host options
+function showHostOptions() {
+    document.getElementById("gameSettings").classList.remove("hidden");
+    document.getElementById("startGameButton").classList.remove("hidden");
+}
+
+// ✅ Function to hide host options
+function hideHostOptions() {
+    document.getElementById("gameSettings").classList.add("hidden");
+    document.getElementById("startGameButton").classList.add("hidden");
+}
+
+// ✅ Reset when the player stops being the host
+function resetHostAlertFlag() {
+    hostAlertShown = false;
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
 
 
+let hostAlertShown = false; // Track if the alert has been shown
+
 function showHostOptions() {
-    document.getElementById("gameSettings").classList.remove("hidden"); // Show host settings
-    document.getElementById("startGameButton").classList.remove("hidden"); // Show start button
-    alert("You are now the host!"); // Notify the new host
+    document.getElementById("gameSettings").classList.remove("hidden");
+    document.getElementById("startGameButton").classList.remove("hidden");
+
+    // ✅ Only show the alert if it's a new host assignment
+    if (!hostAlertShown) {
+        alert("You are now the host!"); 
+        hostAlertShown = true; // Prevent future alerts
+    }
+}
+
+// ✅ Reset when the player stops being the host
+function resetHostAlertFlag() {
+    hostAlertShown = false;
 }
 
 function hideHostOptions() {
     document.getElementById("gameSettings").classList.add("hidden");
     document.getElementById("startGameButton").classList.add("hidden");
 }
-
-
-
-        
 
 
 
