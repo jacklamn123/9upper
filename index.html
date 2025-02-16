@@ -1014,24 +1014,22 @@ function returnToMainMenu() {
         const gameData = gameSnapshot.val();
         if (!gameData) return;
 
-        // Check if the leaving player is the host AND if the game is currently "playing"
+        // Special case: If player is the host and the game is in the middle of playing
         if (gameData.host === playerName && gameData.status === "playing") {
-            console.log("Host is leaving while game is playing, forcing all players to waiting room...");
+            console.log("Host is leaving in the middle of the game, forcing all players to the waiting room...");
 
-            // First, remove the host from the players list
-            db.ref("games/" + gameCode + "/players/" + playerName).remove().then(() => {
-                // Call forceReturnToWaitingRoom to handle UI updates
-                forceReturnToWaitingRoom();
-            });
-        } else {
-            // If it's not the host OR the game is not playing, just remove them from the game
-            db.ref("games/" + gameCode + "/players/" + playerName).remove();
+            // Force all players to return to the waiting room first
+            forceReturnToWaitingRoom();
         }
+
+        // Remove the current player from the game so they don’t stay in the “players” list.
+        db.ref("games/" + gameCode + "/players/" + playerName).remove();
 
         // Reload the page to show the main menu (index.html, for instance).
         window.location.reload();
     });
 }
+
 
 
 
