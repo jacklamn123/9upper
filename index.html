@@ -1018,29 +1018,32 @@ function returnToMainMenu() {
         if (gameData.host === playerName) {
             console.log("Host is leaving, forcing all players to waiting room...");
 
-            // Move all players back to the waiting room
-            db.ref("games/" + gameCode + "/players").once("value", (playersSnapshot) => {
-                if (playersSnapshot.exists()) {
-                    playersSnapshot.forEach((player) => {
-                        const playerKey = player.key;
-                        db.ref("games/" + gameCode + "/players/" + playerKey).set(null); // Remove from game
-                        db.ref("games/" + gameCode + "/waitingPlayers/" + playerKey).set(true); // Move to waiting room
-                    });
-                }
+            // First, remove the host from the players list
+            db.ref("games/" + gameCode + "/players/" + playerName).remove().then(() => {
+                // Move all other players back to the waiting room
+                db.ref("games/" + gameCode + "/players").once("value", (playersSnapshot) => {
+                    if (playersSnapshot.exists()) {
+                        playersSnapshot.forEach((player) => {
+                            const playerKey = player.key;
+                            db.ref("games/" + gameCode + "/players/" + playerKey).set(null); // Remove from game
+                            db.ref("games/" + gameCode + "/waitingPlayers/" + playerKey).set(true); // Move to waiting room
+                        });
+                    }
+                });
+
+                // Update game status to "waiting"
+                db.ref("games/" + gameCode).update({ status: "waiting" });
+
+                // Now that the host has been removed, assign a new host
+                checkAndReassignHost(gameData);
+
+                // Call forceReturnToWaitingRoom to handle UI updates
+                forceReturnToWaitingRoom();
             });
-
-            // Update game status to "waiting"
-            db.ref("games/" + gameCode).update({ status: "waiting" });
-
-            // Call forceReturnToWaitingRoom to handle UI
-            forceReturnToWaitingRoom();
-
-            // Reassign host to a new player
-            checkAndReassignHost(gameData);
+        } else {
+            // If it's not the host, just remove them from the game
+            db.ref("games/" + gameCode + "/players/" + playerName).remove();
         }
-
-        // Remove the current player (any player) from the game so they don’t stay in the “players” list.
-        db.ref("games/" + gameCode + "/players/" + playerName).remove();
 
         // Reload the page to show the main menu (index.html, for instance).
         window.location.reload();
