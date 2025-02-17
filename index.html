@@ -570,22 +570,43 @@ function listenForUpdates() {
 
       
 
-// ✅ Chatbox Auto-Scrolling (Only if user is at the bottom)
+// ✅ Chatbox Auto-Scrolling (Scrolls only if a new message arrives or player sends a message)
 if (gameData.chat) {
     const chatBox = document.querySelector(".chatbox");
 
-    // Get scroll position before updating chatbox
-    const isAtBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 1;
+    // ✅ Store the previous height to detect new messages
+    let previousScrollHeight = chatBox.scrollHeight;
 
-    // Update chat content
+    // ✅ Check if the user is at the bottom
+    let isAtBottom = chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 5;
+
+    // ✅ Update chat content
     chatBox.innerHTML = Object.values(gameData.chat)
-        .map(msg => `<p>${msg}</p>`).join("");
+        .map(msg => `<p>${msg}</p>`)
+        .join("");
+    chatBox.style.display = "block";
 
-    // Only auto-scroll if the user was at the bottom
-    if (isAtBottom) {
-        setTimeout(() => chatBox.scrollTop = chatBox.scrollHeight, 100);
+    // ✅ Detect new message (if scrollHeight increases)
+    let hasNewMessage = chatBox.scrollHeight > previousScrollHeight;
+
+    if (hasNewMessage || isAtBottom) {
+        // ✅ Auto-scroll ONLY if a new message arrives or if user was at bottom
+        setTimeout(() => {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }, 100);
     }
 }
+
+// ✅ Detect when the player sends a message and force auto-scroll
+document.querySelector(".chatbox input").addEventListener("keypress", function (event) {
+    if (event.key === "Enter") {
+        // ✅ Auto-scroll to the bottom when sending a message
+        setTimeout(() => {
+            document.querySelector(".chatbox").scrollTop = document.querySelector(".chatbox").scrollHeight;
+        }, 100);
+    }
+});
+
 
 
         // ✅ Game State: Playing
