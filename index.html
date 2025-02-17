@@ -504,6 +504,7 @@ function joinGame() {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 let lastKnownRound = 0;
+let realUpperDefinitionShown = false; // ✅ Prevents re-showing definition
 
 function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", snapshot => {
@@ -522,7 +523,6 @@ function listenForUpdates() {
             console.log("Game is in waiting state. Moving everyone to the waiting room...");
             document.getElementById("gameScreen").classList.add("hidden");
             document.getElementById("waitingRoom").classList.remove("hidden");
-            console.log("Game is in waiting state. Hiding lobby...");
             document.getElementById("lobbyArea").style.display = "none";
         }
 
@@ -536,23 +536,8 @@ function listenForUpdates() {
         // ✅ Immediately update UI if the host has changed
         if (gameData.host === playerName) {
             console.log(`🎉 You are now the host: ${playerName}`);
-            
-            // ✅ Ensure UI updates correctly for the new host
             document.getElementById("gameSettings").classList.remove("hidden");
             document.getElementById("startGameButton").classList.remove("hidden");
-
-            document.getElementById("timeSlider").value = gameData.roundTime || 60;
-            document.getElementById("timeValue").innerText = gameData.roundTime || 60;
-
-            document.getElementById("roundsSlider").value = gameData.totalRounds || 5;
-            document.getElementById("roundsValue").innerText = gameData.totalRounds || 5;
-
-            document.getElementById("timeSlider").oninput = function () {
-                db.ref("games/" + gameCode).update({ roundTime: this.value });
-            };
-            document.getElementById("roundsSlider").oninput = function () {
-                db.ref("games/" + gameCode).update({ totalRounds: this.value });
-            };
         } else {
             document.getElementById("gameSettings").classList.add("hidden");
             document.getElementById("startGameButton").classList.add("hidden");
@@ -591,6 +576,8 @@ function listenForUpdates() {
 
             if (gameData.currentRound !== lastKnownRound) {
                 lastKnownRound = gameData.currentRound;
+                realUpperDefinitionShown = false; // ✅ Reset flag when new round starts
+
                 if (gameData.host === playerName) {
                     startCountdown(
                         gameData.timeLeft,
@@ -604,11 +591,12 @@ function listenForUpdates() {
             document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
             document.getElementById("thinkerPanel").classList.add("hidden");
 
-            // ✅ Show correct definition for REALUPPER for 10 seconds only
+            // ✅ Show correct definition for REALUPPER for 10 seconds only, once per round
             const definitionBox = document.getElementById("correctDefinitionBox");
             const definitionText = document.getElementById("correctDefinition");
 
-            if (gameData.roles[playerName] === "REALUPPER") {
+            if (gameData.roles[playerName] === "REALUPPER" && !realUpperDefinitionShown) {
+                realUpperDefinitionShown = true; // ✅ Prevents showing again in same round
                 definitionText.innerText = gameData.correctDefinition;
                 definitionBox.classList.remove("hidden");
 
@@ -616,13 +604,9 @@ function listenForUpdates() {
                 setTimeout(() => {
                     definitionBox.classList.add("hidden");
                     definitionText.innerText = "";
-                }, 10000); // 10 seconds (10,000 milliseconds)
-            } else {
-                definitionBox.classList.add("hidden");
-                definitionText.innerText = "";
+                }, 10000); // 10 seconds
             }
 
-            // ✅ Moved this line outside of the definition logic
             displaythinkerOptions(gameData);
         }
 
@@ -636,7 +620,6 @@ function listenForUpdates() {
         }
     });
 }
-
 
 
 
