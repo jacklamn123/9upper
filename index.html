@@ -143,6 +143,14 @@
 .hidden {
     display: none;
 }
+#playerNameDisplay {
+    position: fixed;
+    top: 10px;
+    right: 120px; /* Moves it to the left of Game Rules */
+    font-weight: bold;
+    font-size: 16px;
+    color: black;
+}
 
 
 
@@ -172,15 +180,24 @@
         var gameCode = ""; 
         var playerName = "";
 
-        function confirmName() {
-            playerName = document.getElementById("playerNameInput").value.trim();
-            if (playerName === "") {
-                alert("Please enter a valid name!");
-                return;
-            }
-            document.getElementById("nameInput").classList.add("hidden");
-            document.getElementById("setupArea").classList.remove("hidden");
-        }
+function confirmName() {
+    playerName = document.getElementById("playerNameInput").value.trim();
+    if (playerName === "") {
+        alert("Please enter a valid name!");
+        return;
+    }
+
+    // ✅ Hide name input and show setup area
+    document.getElementById("nameInput").classList.add("hidden");
+    document.getElementById("setupArea").classList.remove("hidden");
+
+    // ✅ Display player's name next to the Game Rules button
+    const playerNameDisplay = document.getElementById("playerNameDisplay");
+    playerNameDisplay.innerText = `👤 ${playerName}`;
+    playerNameDisplay.classList.remove("hidden");
+}
+
+
 
    
 
@@ -1133,6 +1150,8 @@ function toggleGameRules() {
         <button onclick="confirmName()">Continue</button>
     </div>
 
+<!-- ✅ Player Name Display (Added Here) -->
+<span id="playerNameDisplay" class="hidden"></span>
 
 <!-- ✅ Game Rules Button -->
 <button id="gameRulesButton" onclick="toggleGameRules()">Game Rules</button>
