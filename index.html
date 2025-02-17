@@ -647,6 +647,7 @@ function listenForUpdates() {
 
 
 
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
 
@@ -660,7 +661,7 @@ function listenForUpdates() {
 
 
 
-     var roundTimer; // ✅ Global timer variable
+        var roundTimer; // ✅ Global timer variable
 
 
 function startCountdown(timeLeft, round, totalRounds, roundTime) {
@@ -679,9 +680,9 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
             clearInterval(roundTimer);
 
             // 1) Set timeLeft = 0 in the database
-            db.ref(games/${gameCode}).update({ timeLeft: 0 }).then(() => {
+            db.ref(`games/${gameCode}`).update({ timeLeft: 0 }).then(() => {
                 // 2) Fetch the latest game data to see if the thinker picked a winner
-                db.ref(games/${gameCode}).once("value", snapshot => {
+                db.ref(`games/${gameCode}`).once("value", snapshot => {
                     const gameData = snapshot.val();
                     if (!gameData) return;
 
@@ -712,30 +713,30 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
                                 // The thinker collected from REALUPPER by mistake
                                 scores[thinker] = (scores[thinker] || 0) - 1;
                                 collectSkinMessages.push(
-                                    Thinker tried to collect from REALUPPER (${target}) ⇒ Thinker -1
+                                    `Thinker tried to collect from REALUPPER (${target}) ⇒ Thinker -1`
                                 );
                             } else {
                                 // Target is presumably a 9UPPER
                                 scores[thinker] = (scores[thinker] || 0) + 1;
                                 scores[target] = (scores[target] || 0) - 1;
                                 collectSkinMessages.push(
-                                    Thinker collected skin from 9UPPER (${target}) ⇒ Thinker +1, ${target} -1
+                                    `Thinker collected skin from 9UPPER (${target}) ⇒ Thinker +1, ${target} -1`
                                 );
                             }
                         });
 
                         // Push all the Collect Skin results to the chat
                         collectSkinMessages.forEach(msg => {
-                            db.ref(games/${gameCode}/chat).push(msg);
+                            db.ref(`games/${gameCode}/chat`).push(msg);
                         });
 
                         // Final “time’s up” reveal
-                        db.ref(games/${gameCode}/chat).push(
-                            Time's up! Thinker did not pick anyone. REALUPPER was "${realUpper}".
+                        db.ref(`games/${gameCode}/chat`).push(
+                            `Time's up! Thinker did not pick anyone. REALUPPER was "${realUpper}".`
                         );
 
                         // Update the DB with partial scoring and reset collectSkins
-                        db.ref(games/${gameCode}).update({
+                        db.ref(`games/${gameCode}`).update({
                             scores: scores,
                             collectSkins: []
                         }).then(() => {
@@ -745,8 +746,8 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
                     } 
                     else if (!winner && thinker && realUpper) {
                         // No Collect Skin attempts, but no winner picked either
-                        db.ref(games/${gameCode}/chat).push(
-                            Time's up! No pick made. REALUPPER was "${realUpper}".
+                        db.ref(`games/${gameCode}/chat`).push(
+                            `Time's up! No pick made. REALUPPER was "${realUpper}".`
                         );
                     }
 
@@ -772,10 +773,10 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
         } else {
             // Decrement time and update DB
             timeLeft--;
-            db.ref(games/${gameCode}).update({ timeLeft });
+            db.ref(`games/${gameCode}`).update({ timeLeft });
 
             // Show updated time in the UI
-            document.getElementById("timeLeftDisplay").innerText = ${timeLeft} seconds;
+            document.getElementById("timeLeftDisplay").innerText = `${timeLeft} seconds`;
         }
     }, 1000);
 }
