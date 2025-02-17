@@ -206,24 +206,36 @@ function createGame() {
 }
 
 
-        function joinGame() {
-            gameCode = document.getElementById("gameCodeInput").value.toUpperCase();
-            if (!gameCode) {
-                alert("Please enter a valid game code!");
-                return;
+ function joinGame() {
+    gameCode = document.getElementById("gameCodeInput").value.toUpperCase();
+    if (!gameCode) {
+        alert("Please enter a valid game code!");
+        return;
+    }
+
+    db.ref("games/" + gameCode).get().then(snapshot => {
+        if (snapshot.exists()) {
+            const gameData = snapshot.val();
+
+            // ✅ Check if the game is currently playing
+            if (gameData.status === "playing") {
+                alert("Game is currently in progress. Please wait for the next round.");
+                return; // Stop the function here
             }
-            db.ref("games/" + gameCode).get().then(snapshot => {
-                if (snapshot.exists()) {
-                    document.getElementById("gameCodeDisplay").innerText = gameCode;
-                    document.getElementById("setupArea").classList.add("hidden");
-                    document.getElementById("gameArea").classList.remove("hidden");
-                    db.ref("games/" + gameCode + "/players/" + playerName).set(true);
-                    listenForUpdates();
-                } else {
-                    alert("Game not found!");
-                }
-            });
+
+            // ✅ Allow the player to join
+            document.getElementById("gameCodeDisplay").innerText = gameCode;
+            document.getElementById("setupArea").classList.add("hidden");
+            document.getElementById("gameArea").classList.remove("hidden");
+
+            db.ref("games/" + gameCode + "/players/" + playerName).set(true);
+            listenForUpdates();
+        } else {
+            alert("Game not found!");
         }
+    });
+}
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 let lastKnownRound = 0;
