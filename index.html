@@ -1309,9 +1309,19 @@ function returnToMainMenu() {
         // ✅ Remove player from game
         db.ref("games/" + gameCode + "/players/" + playerName).remove();
 
+        // ✅ Move player back to the lobby instead of reloading
         setTimeout(() => {
-            window.location.reload();
-        }, 1000);
+            document.getElementById("gameArea").classList.add("hidden");  // Hide Game UI
+            document.getElementById("waitingRoom").classList.add("hidden");  // Hide Waiting Room
+            document.getElementById("setupArea").classList.remove("hidden");  // Show Create/Join Game
+            document.getElementById("lobbyArea").style.display = "block";  // Show Lobby
+
+            // ✅ Clear gameCode since they left the game
+            gameCode = "";
+
+            // ✅ Re-load the available games list
+            loadActiveGames();
+        }, 500);
     });
 }
 
