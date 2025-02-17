@@ -291,6 +291,75 @@ function confirmName() {
 
 
 
+// ✅ Function to Load Active Games into the Lobby
+function loadActiveGames() {
+    db.ref("games").on("value", snapshot => {
+        const tableBody = document.getElementById("gamesTableBody");
+        tableBody.innerHTML = ""; // Clear previous entries
+
+        snapshot.forEach(gameSnapshot => {
+            const gameCode = gameSnapshot.key;
+            const gameData = gameSnapshot.val();
+
+            if (gameData.status === "waiting" || gameData.status === "playing") {
+                const playerCount = gameData.players ? Object.keys(gameData.players).length : 0;
+                
+                // ✅ Create a row for each game
+                const row = `<tr>
+                    <td>${gameCode}</td>
+                    <td>${gameData.status}</td>
+                    <td>${playerCount}</td>
+                    <td><button onclick="joinGameFromLobby('${gameCode}')">Join</button></td>
+                </tr>`;
+
+                tableBody.innerHTML += row;
+            }
+        });
+    });
+}
+
+// ✅ Run on Page Load to Show Available Games
+window.onload = function () {
+    loadActiveGames();
+};
+
+
+
+        function joinGameFromLobby(gameCode) {
+    gameCode = gameCode.toUpperCase();
+
+    db.ref("games/" + gameCode).get().then(snapshot => {
+        if (snapshot.exists()) {
+            const gameData = snapshot.val();
+
+            if (gameData.status === "playing") {
+                alert("Game is currently in progress. Please wait for the next round.");
+                return;
+            }
+
+            // ✅ Hide Lobby and Show Game UI
+            document.getElementById("lobbyArea").classList.add("hidden");
+            document.getElementById("setupArea").classList.add("hidden");
+            document.getElementById("gameArea").classList.remove("hidden");
+
+            // ✅ Add Player to Game in Firebase
+            db.ref("games/" + gameCode + "/players/" + playerName).set(true);
+            listenForUpdates();
+        } else {
+            alert("Game not found!");
+        }
+    });
+}
+
+        function filterGames() {
+    const searchValue = document.getElementById("gameSearch").value.toUpperCase();
+    const rows = document.querySelectorAll("#gamesTable tbody tr");
+
+    rows.forEach(row => {
+        const gameCode = row.cells[0].innerText.toUpperCase();
+        row.style.display = gameCode.includes(searchValue) ? "" : "none";
+    });
+}
 
    
 
@@ -1299,6 +1368,27 @@ function toggleGameRules() {
         <input type="text" id="gameCodeInput" placeholder="Enter Game Code">
         <button onclick="joinGame()">Join Game</button>
     </div>
+
+    <!-- ✅ Lobby Section -->
+<div id="lobbyArea">
+    <h2>Available Games</h2>
+    <input type="text" id="gameSearch" placeholder="Search Game Code..." oninput="filterGames()">
+    
+    <table border="1" id="gamesTable">
+        <thead>
+            <tr>
+                <th>Game Code</th>
+                <th>Status</th>
+                <th>Players</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="gamesTableBody">
+            <!-- Games will be dynamically added here -->
+        </tbody>
+    </table>
+</div>
+
 
     <!-- ✅ Main Game Area -->
     <div id="gameArea" class="hidden">
