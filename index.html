@@ -568,14 +568,25 @@ function listenForUpdates() {
             updateScoreboard(gameData.scores);
         }
 
-        // ✅ Chatbox Auto-Scrolling
-        if (gameData.chat) {
-            const chatBox = document.querySelector(".chatbox");
-            chatBox.innerHTML = Object.values(gameData.chat)
-                .map(msg => `<p>${msg}</p>`).join("");
-            chatBox.style.display = "block";
-            setTimeout(() => chatBox.scrollTop = chatBox.scrollHeight, 100);
-        }
+      
+
+// ✅ Chatbox Auto-Scrolling (Only if user is at the bottom)
+if (gameData.chat) {
+    const chatBox = document.querySelector(".chatbox");
+
+    // Get scroll position before updating chatbox
+    const isAtBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 1;
+
+    // Update chat content
+    chatBox.innerHTML = Object.values(gameData.chat)
+        .map(msg => `<p>${msg}</p>`).join("");
+
+    // Only auto-scroll if the user was at the bottom
+    if (isAtBottom) {
+        setTimeout(() => chatBox.scrollTop = chatBox.scrollHeight, 100);
+    }
+}
+
 
         // ✅ Game State: Playing
         if (gameData.status === "playing") {
