@@ -504,6 +504,7 @@ function joinGame() {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 let lastKnownRound = 0;
+let definitionShownThisRound = false; // ✅ Track if definition has been shown this round
 
 function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", snapshot => {
@@ -522,7 +523,6 @@ function listenForUpdates() {
             console.log("Game is in waiting state. Moving everyone to the waiting room...");
             document.getElementById("gameScreen").classList.add("hidden");
             document.getElementById("waitingRoom").classList.remove("hidden");
-            console.log("Game is in waiting state. Hiding lobby...");
             document.getElementById("lobbyArea").style.display = "none";
         }
 
@@ -536,8 +536,6 @@ function listenForUpdates() {
         // ✅ Immediately update UI if the host has changed
         if (gameData.host === playerName) {
             console.log(`🎉 You are now the host: ${playerName}`);
-            
-            // ✅ Ensure UI updates correctly for the new host
             document.getElementById("gameSettings").classList.remove("hidden");
             document.getElementById("startGameButton").classList.remove("hidden");
 
@@ -589,8 +587,11 @@ function listenForUpdates() {
             document.getElementById("currentRoundDisplay").innerText = gameData.currentRound;
             document.getElementById("totalRoundsDisplay").innerText = gameData.totalRounds;
 
+            // ✅ Detect new round
             if (gameData.currentRound !== lastKnownRound) {
                 lastKnownRound = gameData.currentRound;
+                definitionShownThisRound = false; // ✅ Reset definition visibility tracking
+
                 if (gameData.host === playerName) {
                     startCountdown(
                         gameData.timeLeft,
@@ -604,19 +605,29 @@ function listenForUpdates() {
             document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
             document.getElementById("thinkerPanel").classList.add("hidden");
 
-            // // ✅ Show correct definition for REALUPPER
-            // const definitionBox = document.getElementById("correctDefinitionBox");
-            // const definitionText = document.getElementById("correctDefinition");
+            // ✅ Show correct definition for REALUPPER for 10 seconds ONLY ONCE per round
+            const definitionBox = document.getElementById("correctDefinitionBox");
+            const definitionText = document.getElementById("correctDefinition");
 
-            // if (gameData.roles[playerName] === "REALUPPER") {
-            //     definitionText.innerText = gameData.correctDefinition;
-            //     definitionBox.classList.remove("hidden");
-            // } else {
-            //     definitionBox.classList.add("hidden");
-            //     definitionText.innerText = "";
-            // }
+            if (gameData.roles[playerName] === "REALUPPER") {
+                if (!definitionShownThisRound) {
+                    definitionText.innerText = gameData.correctDefinition;
+                    definitionBox.classList.remove("hidden");
 
-            // ✅ Moved this line outside of the definition logic
+                    // ✅ Hide after 10 seconds & mark it as shown
+                    setTimeout(() => {
+                        definitionBox.classList.add("hidden");
+                        definitionText.innerText = "";
+                    }, 10000); // 10 seconds
+
+                    definitionShownThisRound = true;
+                }
+            } else {
+                definitionBox.classList.add("hidden");
+                definitionText.innerText = "";
+            }
+
+            // ✅ Display thinker options
             displaythinkerOptions(gameData);
         }
 
@@ -649,7 +660,8 @@ function listenForUpdates() {
 
 
 
-var roundTimer; // ✅ Global timer variable
+     var roundTimer; // ✅ Global timer variable
+
 
 function startCountdown(timeLeft, round, totalRounds, roundTime) {
     // Safeguard against invalid timeLeft
@@ -660,21 +672,6 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
 
     clearInterval(roundTimer);
 
-    // ✅ Handle REALUPPER definition visibility
-    const definitionBox = document.getElementById("correctDefinitionBox");
-    const definitionText = document.getElementById("correctDefinition");
-
-    if (gameData.roles[playerName] === "REALUPPER") {
-        definitionText.innerText = gameData.correctDefinition;
-        definitionBox.classList.remove("hidden");
-
-        // ✅ Hide after 10 seconds (Only executed once per round)
-        setTimeout(() => {
-            definitionBox.classList.add("hidden");
-            definitionText.innerText = "";
-        }, 10000); // 10 seconds
-    }
-
     // Start a new interval timer for this round
     roundTimer = setInterval(() => {
         if (timeLeft <= 0) {
@@ -682,9 +679,9 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
             clearInterval(roundTimer);
 
             // 1) Set timeLeft = 0 in the database
-            db.ref(`games/${gameCode}`).update({ timeLeft: 0 }).then(() => {
+            db.ref(games/${gameCode}).update({ timeLeft: 0 }).then(() => {
                 // 2) Fetch the latest game data to see if the thinker picked a winner
-                db.ref(`games/${gameCode}`).once("value", snapshot => {
+                db.ref(games/${gameCode}).once("value", snapshot => {
                     const gameData = snapshot.val();
                     if (!gameData) return;
 
@@ -699,11 +696,12 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
                     const realUpper = Object.keys(roles).find(p => roles[p] === "REALUPPER");
 
                     console.log("DEBUG partial scoring:", {
-                        winner, 
-                        thinker,
-                        realUpper,
-                        collectSkins
-                    });
+  winner, 
+  thinker,
+  realUpper,
+  collectSkins
+});
+
 
                     // 3) If there's no winner yet, apply partial scoring for Collect Skin
                     if (!winner && thinker && realUpper && collectSkins.length > 0) {
@@ -714,30 +712,30 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
                                 // The thinker collected from REALUPPER by mistake
                                 scores[thinker] = (scores[thinker] || 0) - 1;
                                 collectSkinMessages.push(
-                                    `Thinker tried to collect from REALUPPER (${target}) ⇒ Thinker -1`
+                                    Thinker tried to collect from REALUPPER (${target}) ⇒ Thinker -1
                                 );
                             } else {
                                 // Target is presumably a 9UPPER
                                 scores[thinker] = (scores[thinker] || 0) + 1;
                                 scores[target] = (scores[target] || 0) - 1;
                                 collectSkinMessages.push(
-                                    `Thinker collected skin from 9UPPER (${target}) ⇒ Thinker +1, ${target} -1`
+                                    Thinker collected skin from 9UPPER (${target}) ⇒ Thinker +1, ${target} -1
                                 );
                             }
                         });
 
                         // Push all the Collect Skin results to the chat
                         collectSkinMessages.forEach(msg => {
-                            db.ref(`games/${gameCode}/chat`).push(msg);
+                            db.ref(games/${gameCode}/chat).push(msg);
                         });
 
-                        // ✅ Final “time’s up” reveal
-                        db.ref(`games/${gameCode}/chat`).push(
-                            `Time's up! Thinker did not pick anyone. REALUPPER was "${realUpper}".`
+                        // Final “time’s up” reveal
+                        db.ref(games/${gameCode}/chat).push(
+                            Time's up! Thinker did not pick anyone. REALUPPER was "${realUpper}".
                         );
 
-                        // ✅ Update the DB with partial scoring and reset collectSkins
-                        db.ref(`games/${gameCode}`).update({
+                        // Update the DB with partial scoring and reset collectSkins
+                        db.ref(games/${gameCode}).update({
                             scores: scores,
                             collectSkins: []
                         }).then(() => {
@@ -747,8 +745,8 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
                     } 
                     else if (!winner && thinker && realUpper) {
                         // No Collect Skin attempts, but no winner picked either
-                        db.ref(`games/${gameCode}/chat`).push(
-                            `Time's up! No pick made. REALUPPER was "${realUpper}".`
+                        db.ref(games/${gameCode}/chat).push(
+                            Time's up! No pick made. REALUPPER was "${realUpper}".
                         );
                     }
 
@@ -774,14 +772,13 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
         } else {
             // Decrement time and update DB
             timeLeft--;
-            db.ref(`games/${gameCode}`).update({ timeLeft });
+            db.ref(games/${gameCode}).update({ timeLeft });
 
             // Show updated time in the UI
-            document.getElementById("timeLeftDisplay").innerText = `${timeLeft} seconds`;
+            document.getElementById("timeLeftDisplay").innerText = ${timeLeft} seconds;
         }
     }, 1000);
 }
-
 
 
 
