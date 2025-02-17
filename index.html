@@ -855,6 +855,7 @@ function thinkerSelectPlayer(selectedPlayer) {
         var thinker = Object.keys(roles).find(p => roles[p] === "thinker");
         var realUpper = Object.keys(roles).find(p => roles[p] === "REALUPPER");
         var collectSkins = gameData.collectSkins || [];
+        var correctDefinition = gameData.correctDefinition || "Definition unavailable"; // ✅ Ensure definition exists
 
         // 1) Apply any collected-skin logic
         collectSkins.forEach(target => {
@@ -879,8 +880,12 @@ function thinkerSelectPlayer(selectedPlayer) {
             message = `Thinker guessed wrong! REALUPPER was "${realUpper}".`;
         }
 
-        // 3) Push the final pick message to chat so everyone sees it
+        // ✅ Always announce the correct definition
+        let definitionMessage = `The correct definition for this round was: "${correctDefinition}"`;
+
+        // 3) Push both messages to chat so everyone sees them
         db.ref("games/" + gameCode + "/chat").push(message);
+        db.ref("games/" + gameCode + "/chat").push(definitionMessage); // ✅ New definition message
 
         // 4) Update DB: new scores, set winner, clear collectSkins, end the round
         db.ref("games/" + gameCode).update({
@@ -1092,9 +1097,15 @@ function endRound(round, totalRounds) {
         var winner = gameData.winner || null; 
         var roundTime = gameData.roundTime;
 
+        // ✅ Ensure the definition exists before sending
+        var correctDefinition = gameData.correctDefinition || "Definition unavailable";
+
         // Identify the roles in the old data (not the new round!)
         var thinker = Object.keys(oldRoles).find(p => oldRoles[p] === "thinker");
         var realUpper = Object.keys(oldRoles).find(p => oldRoles[p] === "REALUPPER");
+
+        // ✅ Message to reveal REALUPPER and the correct definition (always sent)
+        let definitionMessage = `The correct definition for this round was: "${correctDefinition}".`;
 
         // 2) If the thinker never picked (time ran out), apply partial scoring from collectSkin
         if (!winner && thinker && realUpper && oldCollectSkins.length > 0) {
@@ -1123,10 +1134,11 @@ function endRound(round, totalRounds) {
                 db.ref(`games/${gameCode}/chat`).push(msg);
             });
 
-            // Finally, push a "time's up" reveal message
+            // ✅ Push a "time's up" reveal message and definition message
             db.ref(`games/${gameCode}/chat`).push(
                 `Time's up! Thinker did not pick anyone. REALUPPER was "${realUpper}".`
             );
+            db.ref(`games/${gameCode}/chat`).push(definitionMessage); // ✅ Always announce definition
 
             // Apply updated scores & clear collectSkins
             db.ref(`games/${gameCode}`).update({
@@ -1139,6 +1151,11 @@ function endRound(round, totalRounds) {
             db.ref(`games/${gameCode}/chat`).push(
                 `Time's up! No pick made. REALUPPER was "${realUpper}".`
             );
+            db.ref(`games/${gameCode}/chat`).push(definitionMessage); // ✅ Always announce definition
+        } 
+        else {
+            // ✅ If the thinker picked someone (winner exists), still show definition
+            db.ref(`games/${gameCode}/chat`).push(definitionMessage);
         }
 
         // 3) Move to next round or finish
@@ -1163,6 +1180,7 @@ function endRound(round, totalRounds) {
         }
     });
 }
+
 
 
 
