@@ -152,6 +152,30 @@
     color: black;
 }
 
+/* ✅ Center the Lobby Table */
+#lobbyArea {
+    display: none; /* Initially hidden */
+    text-align: center;
+    margin: 20px auto;
+    width: 50%;
+}
+
+/* ✅ Style the Table */
+#gamesTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+#gamesTable th, #gamesTable td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+}
+
+#gamesTable th {
+    background-color: #f2f2f2;
+}
 
 
 
@@ -277,17 +301,21 @@ function confirmName() {
         if (nameTaken) {
             alert("This name is already taken! Please enter a different name.");
         } else {
-            // ✅ Hide name input and show setup area
+            // ✅ Hide name input and show the game selection lobby
             document.getElementById("nameInput").classList.add("hidden");
-            document.getElementById("setupArea").classList.remove("hidden");
+            document.getElementById("lobbyArea").style.display = "block";
 
-            // ✅ Display player's name next to the Game Rules button
+            // ✅ Display the player's name next to Game Rules
             const playerNameDisplay = document.getElementById("playerNameDisplay");
             playerNameDisplay.innerText = `👲 ${playerName}`;
             playerNameDisplay.classList.remove("hidden");
+
+            // ✅ Load games into the lobby
+            loadActiveGames();
         }
     });
 }
+
 
 
 
