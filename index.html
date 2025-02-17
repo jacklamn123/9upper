@@ -154,27 +154,65 @@
 
 /* ✅ Center the Lobby Table */
 #lobbyArea {
-    display: none; /* Initially hidden */
+    display: none !important; /* 🔥 Force it to be hidden when needed */
     text-align: center;
     margin: 20px auto;
-    width: 50%;
+    width: 60%; /* Slightly wider for better visibility */
+}
+
+/* ✅ Ensure the lobby becomes visible when needed */
+#lobbyArea.show {
+    display: block !important; /* 🚀 Force show when required */
 }
 
 /* ✅ Style the Table */
 #gamesTable {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
+    margin-top: 15px; /* Increased for better spacing */
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1); /* Light shadow for better look */
 }
 
-#gamesTable th, #gamesTable td {
-    border: 1px solid black;
+/* ✅ Improve Table Cell Styling */
+#gamesTable th, 
+#gamesTable td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+    font-size: 16px; /* Slightly larger text for readability */
+}
+
+/* ✅ Header Styling */
+#gamesTable th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+/* ✅ Style the Search Box */
+#gameSearch {
+    width: 80%;
     padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
     text-align: center;
 }
 
-#gamesTable th {
-    background-color: #f2f2f2;
+/* ✅ Responsive for Smaller Screens */
+@media (max-width: 768px) {
+    #lobbyArea {
+        width: 90%;
+    }
+
+    #gamesTable th, #gamesTable td {
+        font-size: 14px;
+        padding: 6px;
+    }
+
+    #gameSearch {
+        width: 90%;
+    }
 }
 
 
@@ -370,6 +408,7 @@ function joinGameFromLobby(gameCode) {
             // ✅ Hide Lobby and Show Game UI
             document.getElementById("setupArea").classList.add("hidden");
             document.getElementById("lobbyArea").classList.add("hidden"); // ✅ Hide lobby when entering the game
+            document.getElementById("lobbyArea").style.display = "none";
             document.getElementById("gameArea").classList.remove("hidden");
 
             // ✅ Add Player to Game in Firebase, then listen for updates
@@ -413,6 +452,7 @@ function createGame() {
         document.getElementById("gameCodeDisplay").innerText = gameCode;
         document.getElementById("setupArea").classList.add("hidden");
         document.getElementById("lobbyArea").classList.add("hidden"); // ✅ Hide lobby when creating a game
+        document.getElementById("lobbyArea").style.display = "none";
         document.getElementById("gameArea").classList.remove("hidden");
 
         db.ref("games/" + gameCode + "/players/" + playerName).set(true);
@@ -442,6 +482,7 @@ function joinGame() {
             // ✅ Hide lobby and show game area
             document.getElementById("setupArea").classList.add("hidden");
             document.getElementById("lobbyArea").classList.add("hidden"); // ✅ Hide lobby when joining manually
+            document.getElementById("lobbyArea").style.display = "none";
             document.getElementById("gameArea").classList.remove("hidden");
 
             // ✅ Add player to Firebase and listen for updates
