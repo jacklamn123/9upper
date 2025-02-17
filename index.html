@@ -394,8 +394,8 @@ window.onload = function () {
 };
 
 
-function joinGameFromLobby(gameCode) {
-    gameCode = gameCode.toUpperCase();
+function joinGameFromLobby(gameCodeParam) {
+    gameCode = gameCodeParam.toUpperCase(); // ✅ SET THE GLOBAL gameCode VARIABLE
 
     db.ref("games/" + gameCode).get().then(snapshot => {
         if (snapshot.exists()) {
@@ -409,20 +409,24 @@ function joinGameFromLobby(gameCode) {
 
             // ✅ Hide Lobby and Show Game UI
             document.getElementById("setupArea").classList.add("hidden");
-            document.getElementById("lobbyArea").classList.add("hidden"); // ✅ Hide lobby when entering the game
+            document.getElementById("lobbyArea").classList.add("hidden");
             document.getElementById("lobbyArea").style.display = "none";
             document.getElementById("gameArea").classList.remove("hidden");
 
             // ✅ Add Player to Game in Firebase, then listen for updates
-            db.ref("games/" + gameCode + "/players/" + playerName).set(true).then(() => {
-                listenForUpdates(); // ✅ Ensure updates trigger after joining
-            });
+            db.ref("games/" + gameCode + "/players/" + playerName).set(true)
+                .then(() => {
+                    console.log(`✅ ${playerName} joined game ${gameCode}`);
+                    listenForUpdates(); // ✅ Start listening for the correct game
+                })
+                .catch(error => console.error("Error joining game:", error));
 
         } else {
             alert("Game not found!");
         }
     });
 }
+
 
 
 
