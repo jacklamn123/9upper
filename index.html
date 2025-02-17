@@ -604,19 +604,26 @@ if (gameData.host === playerName) {
             document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
             document.getElementById("thinkerPanel").classList.add("hidden");
 
-            // ✅ Show correct definition for REALUPPER
-            const definitionBox = document.getElementById("correctDefinitionBox");
-            const definitionText = document.getElementById("correctDefinition");
-            if (gameData.roles[playerName] === "REALUPPER") {
-                definitionText.innerText = gameData.correctDefinition;
-                definitionBox.classList.remove("hidden");
-            } else {
-                definitionBox.classList.add("hidden");
-                definitionText.innerText = "";
-            }
+   // ✅ Show correct definition for REALUPPER for 10 seconds only
+const definitionBox = document.getElementById("correctDefinitionBox");
+const definitionText = document.getElementById("correctDefinition");
 
-            displaythinkerOptions(gameData);
-        }
+if (gameData.roles[playerName] === "REALUPPER") {
+    definitionText.innerText = gameData.correctDefinition;
+    definitionBox.classList.remove("hidden");
+
+    // ✅ Hide after 10 seconds
+    setTimeout(() => {
+        definitionBox.classList.add("hidden");
+        definitionText.innerText = "";
+    }, 10000); // 10 seconds (10,000 milliseconds)
+} else {
+    definitionBox.classList.add("hidden");
+    definitionText.innerText = "";
+}
+
+displaythinkerOptions(gameData);
+
 
         // ✅ Always show "Return to Main Menu"
         document.getElementById("returnToMainMenu").classList.remove("hidden");
