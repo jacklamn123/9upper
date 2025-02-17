@@ -154,11 +154,12 @@
 
 /* ✅ Center the Lobby Table */
 #lobbyArea {
-    display: none !important; /* 🔥 Force it to be hidden when needed */
+    display: none; /* Removed !important */
     text-align: center;
     margin: 20px auto;
-    width: 60%; /* Slightly wider for better visibility */
+    width: 60%;
 }
+
 
 /* ✅ Ensure the lobby becomes visible when needed */
 #lobbyArea.show {
@@ -325,7 +326,6 @@ function confirmName() {
         return;
     }
 
-    // ✅ Check Firebase for existing players with the same name
     db.ref("games").once("value", snapshot => {
         let nameTaken = false;
 
@@ -339,22 +339,23 @@ function confirmName() {
         if (nameTaken) {
             alert("This name is already taken! Please enter a different name.");
         } else {
-            // ✅ Hide name input and show both the game setup and lobby
+            // ✅ Show the lobby correctly
             document.getElementById("nameInput").classList.add("hidden");
-            document.getElementById("setupArea").classList.remove("hidden");  // ✅ Show "Create Game" and "Join Game"
-            document.getElementById("lobbyArea").style.display = "block"; 
-            document.getElementById("lobbyArea").classList.remove("hidden");
+            document.getElementById("setupArea").classList.remove("hidden"); 
+            document.getElementById("lobbyArea").style.display = "block"; // ✅ Now it works!
+            document.getElementById("lobbyArea").classList.remove("hidden"); 
 
-            // ✅ Display the player's name next to Game Rules
+            // ✅ Show player name
             const playerNameDisplay = document.getElementById("playerNameDisplay");
             playerNameDisplay.innerText = `👲 ${playerName}`;
             playerNameDisplay.classList.remove("hidden");
 
-            // ✅ Load games into the lobby
+            // ✅ Load available games
             loadActiveGames();
         }
     });
 }
+
 
 
 
@@ -518,7 +519,7 @@ function listenForUpdates() {
             document.getElementById("gameScreen").classList.add("hidden");
             document.getElementById("waitingRoom").classList.remove("hidden");
             console.log("Game is in waiting state. Hiding lobby...");
-    document.getElementById("lobbyArea").classList.add("hidden");
+   document.getElementById("lobbyArea").style.display = "none";
         }
 
         // ✅ Update Player List in Waiting Room
