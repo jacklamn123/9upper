@@ -174,8 +174,48 @@
             measurementId: "G-F348XKS47Q"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+// ✅ Firebase Initialization
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ✅ Function to Check Active Players
+function countActivePlayers() {
+    db.ref("games").once("value", snapshot => {
+        let playerSet = new Set();
+        snapshot.forEach(gameSnapshot => {
+            const gameData = gameSnapshot.val();
+            if (gameData.players) {
+                Object.keys(gameData.players).forEach(playerName => {
+                    playerSet.add(playerName);
+                });
+            }
+        });
+
+        console.log(`Total Active Players: ${playerSet.size}`);
+        alert(`Total Active Players in Server: ${playerSet.size}`);
+    });
+}
+
+// ✅ Function to Clean Up Inactive Players
+function cleanUpInactivePlayers() {
+    db.ref("activePlayers").once("value", snapshot => {
+        const now = Date.now();
+        snapshot.forEach(playerSnapshot => {
+            const playerData = playerSnapshot.val();
+            if (now - playerData.timestamp > 5 * 60 * 1000) { // 5 minutes inactivity
+                db.ref("activePlayers/" + playerSnapshot.key).remove();
+                console.log(`Removed inactive player: ${playerSnapshot.key}`);
+            }
+        });
+    });
+}
+
+// ✅ Run cleanup every 5 minutes
+setInterval(cleanUpInactivePlayers, 5 * 60 * 1000);
+
+// ✅ Optional: Add a button to manually check active players
+document.body.insertAdjacentHTML("beforeend", `<button onclick="countActivePlayers()">Check Active Players</button>`);
+
 
         var gameCode = ""; 
         var playerName = "";
