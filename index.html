@@ -1413,7 +1413,7 @@ function forceReturnToWaitingRoom() {
 function thinkerCollectSkin(selectedPlayer) {
     // 1) Push a message to chat so everyone sees what's happening
     db.ref("games/" + gameCode + "/chat").push(
-        Thinker is collecting skin from "${selectedPlayer}" ...
+        `Thinker is collecting skin from "${selectedPlayer}" ...`
     );
 
     // 2) Record the selectedPlayer in collectSkins, so we apply points at round end or final pick
@@ -1427,6 +1427,7 @@ function thinkerCollectSkin(selectedPlayer) {
         });
     });
 }
+
 
 
 function checkAndReassignHost(gameData) {
