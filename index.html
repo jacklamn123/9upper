@@ -301,9 +301,10 @@ function confirmName() {
         if (nameTaken) {
             alert("This name is already taken! Please enter a different name.");
         } else {
-            // ✅ Hide name input and show the game selection lobby
+            // ✅ Hide name input and show both the game setup and lobby
             document.getElementById("nameInput").classList.add("hidden");
-            document.getElementById("lobbyArea").style.display = "block";
+            document.getElementById("setupArea").classList.remove("hidden");  // ✅ Show "Create Game" and "Join Game"
+            document.getElementById("lobbyArea").style.display = "block"; 
 
             // ✅ Display the player's name next to Game Rules
             const playerNameDisplay = document.getElementById("playerNameDisplay");
@@ -315,6 +316,7 @@ function confirmName() {
         }
     });
 }
+
 
 
 
@@ -352,32 +354,36 @@ window.onload = function () {
 };
 
 
-
-        function joinGameFromLobby(gameCode) {
+function joinGameFromLobby(gameCode) {
     gameCode = gameCode.toUpperCase();
 
     db.ref("games/" + gameCode).get().then(snapshot => {
         if (snapshot.exists()) {
             const gameData = snapshot.val();
 
+            // ✅ Check if the game is currently playing
             if (gameData.status === "playing") {
                 alert("Game is currently in progress. Please wait for the next round.");
                 return;
             }
 
-            // ✅ Hide Lobby and Show Game UI
-            document.getElementById("lobbyArea").classList.add("hidden");
+            // ✅ Allow the player to join
+            document.getElementById("gameCodeDisplay").innerText = gameCode;
             document.getElementById("setupArea").classList.add("hidden");
+            document.getElementById("lobbyArea").classList.add("hidden");
             document.getElementById("gameArea").classList.remove("hidden");
 
             // ✅ Add Player to Game in Firebase
-            db.ref("games/" + gameCode + "/players/" + playerName).set(true);
-            listenForUpdates();
+            db.ref("games/" + gameCode + "/players/" + playerName).set(true).then(() => {
+                listenForUpdates();
+            });
+
         } else {
             alert("Game not found!");
         }
     });
 }
+
 
         function filterGames() {
     const searchValue = document.getElementById("gameSearch").value.toUpperCase();
