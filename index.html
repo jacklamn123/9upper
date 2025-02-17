@@ -187,15 +187,32 @@ function confirmName() {
         return;
     }
 
-    // ✅ Hide name input and show setup area
-    document.getElementById("nameInput").classList.add("hidden");
-    document.getElementById("setupArea").classList.remove("hidden");
+    // ✅ Check Firebase for existing players with the same name
+    db.ref("games").once("value", snapshot => {
+        let nameTaken = false;
 
-    // ✅ Display player's name next to the Game Rules button
-    const playerNameDisplay = document.getElementById("playerNameDisplay");
-    playerNameDisplay.innerText = `👤 ${playerName}`;
-    playerNameDisplay.classList.remove("hidden");
+        snapshot.forEach(gameSnapshot => {
+            const gameData = gameSnapshot.val();
+            if (gameData.players && gameData.players[playerName]) {
+                nameTaken = true;
+            }
+        });
+
+        if (nameTaken) {
+            alert("This name is already taken! Please enter a different name.");
+        } else {
+            // ✅ Hide name input and show setup area
+            document.getElementById("nameInput").classList.add("hidden");
+            document.getElementById("setupArea").classList.remove("hidden");
+
+            // ✅ Display player's name next to the Game Rules button
+            const playerNameDisplay = document.getElementById("playerNameDisplay");
+            playerNameDisplay.innerText = `👲 ${playerName}`;
+            playerNameDisplay.classList.remove("hidden");
+        }
+    });
 }
+
 
 
 
