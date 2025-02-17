@@ -343,6 +343,7 @@ function confirmName() {
             document.getElementById("nameInput").classList.add("hidden");
             document.getElementById("setupArea").classList.remove("hidden");  // ✅ Show "Create Game" and "Join Game"
             document.getElementById("lobbyArea").style.display = "block"; 
+            document.getElementById("lobbyArea").classList.remove("hidden");
 
             // ✅ Display the player's name next to Game Rules
             const playerNameDisplay = document.getElementById("playerNameDisplay");
