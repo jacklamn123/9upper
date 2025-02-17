@@ -475,6 +475,8 @@ function listenForUpdates() {
             console.log("Game is in waiting state. Moving everyone to the waiting room...");
             document.getElementById("gameScreen").classList.add("hidden");
             document.getElementById("waitingRoom").classList.remove("hidden");
+            console.log("Game is in waiting state. Hiding lobby...");
+    document.getElementById("lobbyArea").classList.add("hidden");
         }
 
         // ✅ Update Player List in Waiting Room
