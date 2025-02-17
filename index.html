@@ -829,6 +829,10 @@ function displaythinkerOptions(gameData) {
     var thinker = Object.keys(gameData.players).find(p => gameData.roles[p] === "thinker");
     var playerRole = gameData.roles[playerName];
 
+    // Track the number of times Collect Skin has been used
+    var collectSkins = gameData.collectSkins || [];
+    var collectSkinCount = collectSkins.length; // Number of times thinker has collected
+
     if (playerRole === "thinker") {
         document.getElementById("thinkerPanel").classList.remove("hidden");
 
@@ -841,9 +845,10 @@ function displaythinkerOptions(gameData) {
                     </button>`;
         }).join(" ");
 
-        // Row 2: "Collect Skin: [player1] [player2] ..."
+        // Row 2: "Collect Skin: [player1] [player2] ..." (Disable after 2 uses)
         const collectSkinButtons = selectablePlayers.map(player => {
-            return `<button onclick="thinkerCollectSkin('${player}')">
+            return `<button onclick="thinkerCollectSkin('${player}')"
+                        ${collectSkinCount >= 2 ? "disabled" : ""}>
                         ${player}
                     </button>`;
         }).join(" ");
@@ -855,6 +860,9 @@ function displaythinkerOptions(gameData) {
             </div>
             <div>
                 <strong>Collect Skin:</strong> ${collectSkinButtons}
+                <span style="font-size: 12px; color: gray;">
+                    (${2 - collectSkinCount} remaining)
+                </span>
             </div>
         `;
     } else {
@@ -863,6 +871,7 @@ function displaythinkerOptions(gameData) {
         document.getElementById("thinkerOptions").innerHTML = "";
     }
 }
+
 
 
 
@@ -1402,22 +1411,34 @@ function forceReturnToWaitingRoom() {
 
 
 function thinkerCollectSkin(selectedPlayer) {
-    // 1) Push a message to chat so everyone sees what's happening
-    db.ref("games/" + gameCode + "/chat").push(
-        `Thinker is collecting skin from "${selectedPlayer}" ...`
-    );
+    db.ref("games/" + gameCode).once("value", snapshot => {
+        let gameData = snapshot.val();
+        if (!gameData) return;
 
-    // 2) Record the selectedPlayer in collectSkins, so we apply points at round end or final pick
-    db.ref("games/" + gameCode + "/collectSkins").once("value", snapshot => {
-        let collectSkins = snapshot.val() || [];
+        let collectSkins = gameData.collectSkins || [];
         if (!Array.isArray(collectSkins)) collectSkins = [];
+
+        if (collectSkins.length >= 2) {
+            alert("You have already collected skin twice this round!");
+            return;
+        }
+
+        // ✅ Add selected player to collectSkins
         collectSkins.push(selectedPlayer);
 
-        db.ref("games/" + gameCode).update({
+        db.ref(`games/${gameCode}`).update({
             collectSkins: collectSkins
+        }).then(() => {
+            displaythinkerOptions(gameData); // ✅ Refresh UI after updating Firebase
         });
+
+        // ✅ Push a message to chat
+        db.ref(`games/${gameCode}/chat`).push(
+            `Thinker is collecting skin from "${selectedPlayer}" ...`
+        );
     });
 }
+
 
 function checkAndReassignHost(gameData) {
     if (!gameData.players) return;
