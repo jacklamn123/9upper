@@ -1,0 +1,802 @@
+[
+    {
+        "term": "Gobbledegook (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook."
+    },
+    {
+        "term": "Zzyzx (desert, unique, remote)",
+        "definition": "Definition for Zzyzx."
+    },
+    {
+        "term": "Faff (time, activity, unnecessary)",
+        "definition": "Definition for Faff."
+    },
+    {
+        "term": "Dullsville (boring, atmosphere, lifeless)",
+        "definition": "Definition for Dullsville."
+    },
+    {
+        "term": "Nowheresville (isolated, unknown, distant)",
+        "definition": "Definition for Nowheresville."
+    },
+    {
+        "term": "Flibbertigibbet (talk, energy, person)",
+        "definition": "Definition for Flibbertigibbet."
+    },
+    {
+        "term": "Peculiar Knob (landscape, Australia, nature)",
+        "definition": "Definition for Peculiar Knob."
+    },
+    {
+        "term": "Curmudgeon (grumpy, attitude, stubborn)",
+        "definition": "Definition for Curmudgeon."
+    },
+    {
+        "term": "Why, Arizona (place, road, USA)",
+        "definition": "Definition for Why, Arizona."
+    },
+    {
+        "term": "Chinwag (chat, informal, casual)",
+        "definition": "Definition for Chinwag."
+    },
+    {
+        "term": "Bumfuzzle (confused, unclear, reaction)",
+        "definition": "Definition for Bumfuzzle."
+    },
+    {
+        "term": "Snollygoster (person, behavior, decision)",
+        "definition": "Definition for Snollygoster."
+    },
+    {
+        "term": "Wagga Wagga (Australia, history, birds)",
+        "definition": "Definition for Wagga Wagga."
+    },
+    {
+        "term": "Lollygag (waste, idle, action)",
+        "definition": "Definition for Lollygag."
+    },
+    {
+        "term": "Llanfairpwllgwyngyll (Wales)",
+        "definition": "Definition for Llanfairpwllgwyngyll."
+    },
+    {
+        "term": "Discombobulate (reaction, situation, effect)",
+        "definition": "Definition for Discombobulate."
+    },
+    {
+        "term": "Bonkers (mind, extreme, odd)",
+        "definition": "Definition for Bonkers."
+    },
+    {
+        "term": "Taradiddle (story, false, exaggerate)",
+        "definition": "Definition for Taradiddle."
+    },
+    {
+        "term": "Absquatulate (leave, quick, movement)",
+        "definition": "Definition for Absquatulate."
+    },
+    {
+        "term": "Gadzooks (expression, emotion, reaction)",
+        "definition": "Definition for Gadzooks."
+    },
+    {
+        "term": "Widdershins (direction, movement, belief)",
+        "definition": "Definition for Widdershins."
+    },
+    {
+        "term": "Collywobbles (stomach, feeling, nerves)",
+        "definition": "Definition for Collywobbles."
+    },
+    {
+        "term": "Cockamamie (idea, unrealistic, silly)",
+        "definition": "Definition for Cockamamie."
+    },
+    {
+        "term": "Rigmarole (process, effort, complex)",
+        "definition": "Definition for Rigmarole."
+    },
+    {
+        "term": "Kerfuffle (small, issue, attention)",
+        "definition": "Definition for Kerfuffle."
+    },
+    {
+        "term": "Hobnob (social, interaction, group)",
+        "definition": "Definition for Hobnob."
+    },
+    {
+        "term": "Sesquipedalian (words, length, habit)",
+        "definition": "Definition for Sesquipedalian."
+    },
+    {
+        "term": "Nefarious (actions, intent, negative)",
+        "definition": "Definition for Nefarious."
+    },
+    {
+        "term": "Sycophant (favor, power, fake)",
+        "definition": "Definition for Sycophant."
+    },
+    {
+        "term": "Persnickety (detail, attitude, behavior)",
+        "definition": "Definition for Persnickety."
+    },
+    {
+        "term": "Lugubrious (tone, mood, feeling)",
+        "definition": "Definition for Lugubrious."
+    },
+    {
+        "term": "Blatherskite (speech, nonsense, talk)",
+        "definition": "Definition for Blatherskite."
+    },
+    {
+        "term": "Cantankerous (behavior, mood, difficult)",
+        "definition": "Definition for Cantankerous."
+    },
+    {
+        "term": "Higgledy-piggledy (mess, mix, state)",
+        "definition": "Definition for Higgledy-piggledy."
+    },
+    {
+        "term": "Gobbledygook (text, meaning, unclear)",
+        "definition": "Definition for Gobbledygook."
+    },
+    {
+        "term": "Mumpsimus (habit, mindset, refusal)",
+        "definition": "Definition for Mumpsimus."
+    },
+    {
+        "term": "Defenestration (window, act, event)",
+        "definition": "Definition for Defenestration."
+    },
+    {
+        "term": "Cattywampus (alignment, incorrect, angle)",
+        "definition": "Definition for Cattywampus."
+    },
+    {
+        "term": "Ephemeral (time, fleeting, short)",
+        "definition": "Definition for Ephemeral."
+    },
+    {
+        "term": "Gormless (clueless, slow, mind)",
+        "definition": "Definition for Gormless."
+    },
+    {
+        "term": "Lackadaisical (lazy, attitude, effort)",
+        "definition": "Definition for Lackadaisical."
+    },
+    {
+        "term": "Nonplussed (confused, unsure, reaction)",
+        "definition": "Definition for Nonplussed."
+    },
+    {
+        "term": "Pernicious (harm, subtle, effect)",
+        "definition": "Definition for Pernicious."
+    },
+    {
+        "term": "Ubiquitous (everywhere, presence, seen)",
+        "definition": "Definition for Ubiquitous."
+    },
+    {
+        "term": "Gobbledegook 45 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 45."
+    },
+    {
+        "term": "Gobbledegook 46 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 46."
+    },
+    {
+        "term": "Gobbledegook 47 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 47."
+    },
+    {
+        "term": "Gobbledegook 48 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 48."
+    },
+    {
+        "term": "Gobbledegook 49 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 49."
+    },
+    {
+        "term": "Gobbledegook 50 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 50."
+    },
+    {
+        "term": "Gobbledegook 51 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 51."
+    },
+    {
+        "term": "Gobbledegook 52 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 52."
+    },
+    {
+        "term": "Gobbledegook 53 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 53."
+    },
+    {
+        "term": "Gobbledegook 54 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 54."
+    },
+    {
+        "term": "Gobbledegook 55 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 55."
+    },
+    {
+        "term": "Gobbledegook 56 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 56."
+    },
+    {
+        "term": "Gobbledegook 57 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 57."
+    },
+    {
+        "term": "Gobbledegook 58 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 58."
+    },
+    {
+        "term": "Gobbledegook 59 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 59."
+    },
+    {
+        "term": "Gobbledegook 60 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 60."
+    },
+    {
+        "term": "Gobbledegook 61 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 61."
+    },
+    {
+        "term": "Gobbledegook 62 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 62."
+    },
+    {
+        "term": "Gobbledegook 63 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 63."
+    },
+    {
+        "term": "Gobbledegook 64 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 64."
+    },
+    {
+        "term": "Gobbledegook 65 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 65."
+    },
+    {
+        "term": "Gobbledegook 66 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 66."
+    },
+    {
+        "term": "Gobbledegook 67 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 67."
+    },
+    {
+        "term": "Gobbledegook 68 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 68."
+    },
+    {
+        "term": "Gobbledegook 69 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 69."
+    },
+    {
+        "term": "Gobbledegook 70 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 70."
+    },
+    {
+        "term": "Gobbledegook 71 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 71."
+    },
+    {
+        "term": "Gobbledegook 72 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 72."
+    },
+    {
+        "term": "Gobbledegook 73 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 73."
+    },
+    {
+        "term": "Gobbledegook 74 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 74."
+    },
+    {
+        "term": "Gobbledegook 75 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 75."
+    },
+    {
+        "term": "Gobbledegook 76 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 76."
+    },
+    {
+        "term": "Gobbledegook 77 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 77."
+    },
+    {
+        "term": "Gobbledegook 78 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 78."
+    },
+    {
+        "term": "Gobbledegook 79 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 79."
+    },
+    {
+        "term": "Gobbledegook 80 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 80."
+    },
+    {
+        "term": "Gobbledegook 81 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 81."
+    },
+    {
+        "term": "Gobbledegook 82 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 82."
+    },
+    {
+        "term": "Gobbledegook 83 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 83."
+    },
+    {
+        "term": "Gobbledegook 84 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 84."
+    },
+    {
+        "term": "Gobbledegook 85 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 85."
+    },
+    {
+        "term": "Gobbledegook 86 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 86."
+    },
+    {
+        "term": "Gobbledegook 87 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 87."
+    },
+    {
+        "term": "Gobbledegook 88 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 88."
+    },
+    {
+        "term": "Gobbledegook 89 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 89."
+    },
+    {
+        "term": "Gobbledegook 90 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 90."
+    },
+    {
+        "term": "Gobbledegook 91 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 91."
+    },
+    {
+        "term": "Gobbledegook 92 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 92."
+    },
+    {
+        "term": "Gobbledegook 93 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 93."
+    },
+    {
+        "term": "Gobbledegook 94 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 94."
+    },
+    {
+        "term": "Gobbledegook 95 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 95."
+    },
+    {
+        "term": "Gobbledegook 96 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 96."
+    },
+    {
+        "term": "Gobbledegook 97 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 97."
+    },
+    {
+        "term": "Gobbledegook 98 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 98."
+    },
+    {
+        "term": "Gobbledegook 99 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 99."
+    },
+    {
+        "term": "Gobbledegook 100 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 100."
+    },
+    {
+        "term": "Gobbledegook 101 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 101."
+    },
+    {
+        "term": "Gobbledegook 102 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 102."
+    },
+    {
+        "term": "Gobbledegook 103 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 103."
+    },
+    {
+        "term": "Gobbledegook 104 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 104."
+    },
+    {
+        "term": "Gobbledegook 105 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 105."
+    },
+    {
+        "term": "Gobbledegook 106 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 106."
+    },
+    {
+        "term": "Gobbledegook 107 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 107."
+    },
+    {
+        "term": "Gobbledegook 108 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 108."
+    },
+    {
+        "term": "Gobbledegook 109 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 109."
+    },
+    {
+        "term": "Gobbledegook 110 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 110."
+    },
+    {
+        "term": "Gobbledegook 111 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 111."
+    },
+    {
+        "term": "Gobbledegook 112 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 112."
+    },
+    {
+        "term": "Gobbledegook 113 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 113."
+    },
+    {
+        "term": "Gobbledegook 114 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 114."
+    },
+    {
+        "term": "Gobbledegook 115 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 115."
+    },
+    {
+        "term": "Gobbledegook 116 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 116."
+    },
+    {
+        "term": "Gobbledegook 117 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 117."
+    },
+    {
+        "term": "Gobbledegook 118 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 118."
+    },
+    {
+        "term": "Gobbledegook 119 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 119."
+    },
+    {
+        "term": "Gobbledegook 120 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 120."
+    },
+    {
+        "term": "Gobbledegook 121 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 121."
+    },
+    {
+        "term": "Gobbledegook 122 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 122."
+    },
+    {
+        "term": "Gobbledegook 123 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 123."
+    },
+    {
+        "term": "Gobbledegook 124 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 124."
+    },
+    {
+        "term": "Gobbledegook 125 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 125."
+    },
+    {
+        "term": "Gobbledegook 126 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 126."
+    },
+    {
+        "term": "Gobbledegook 127 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 127."
+    },
+    {
+        "term": "Gobbledegook 128 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 128."
+    },
+    {
+        "term": "Gobbledegook 129 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 129."
+    },
+    {
+        "term": "Gobbledegook 130 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 130."
+    },
+    {
+        "term": "Gobbledegook 131 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 131."
+    },
+    {
+        "term": "Gobbledegook 132 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 132."
+    },
+    {
+        "term": "Gobbledegook 133 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 133."
+    },
+    {
+        "term": "Gobbledegook 134 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 134."
+    },
+    {
+        "term": "Gobbledegook 135 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 135."
+    },
+    {
+        "term": "Gobbledegook 136 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 136."
+    },
+    {
+        "term": "Gobbledegook 137 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 137."
+    },
+    {
+        "term": "Gobbledegook 138 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 138."
+    },
+    {
+        "term": "Gobbledegook 139 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 139."
+    },
+    {
+        "term": "Gobbledegook 140 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 140."
+    },
+    {
+        "term": "Gobbledegook 141 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 141."
+    },
+    {
+        "term": "Gobbledegook 142 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 142."
+    },
+    {
+        "term": "Gobbledegook 143 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 143."
+    },
+    {
+        "term": "Gobbledegook 144 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 144."
+    },
+    {
+        "term": "Gobbledegook 145 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 145."
+    },
+    {
+        "term": "Gobbledegook 146 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 146."
+    },
+    {
+        "term": "Gobbledegook 147 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 147."
+    },
+    {
+        "term": "Gobbledegook 148 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 148."
+    },
+    {
+        "term": "Gobbledegook 149 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 149."
+    },
+    {
+        "term": "Gobbledegook 150 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 150."
+    },
+    {
+        "term": "Gobbledegook 151 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 151."
+    },
+    {
+        "term": "Gobbledegook 152 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 152."
+    },
+    {
+        "term": "Gobbledegook 153 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 153."
+    },
+    {
+        "term": "Gobbledegook 154 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 154."
+    },
+    {
+        "term": "Gobbledegook 155 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 155."
+    },
+    {
+        "term": "Gobbledegook 156 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 156."
+    },
+    {
+        "term": "Gobbledegook 157 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 157."
+    },
+    {
+        "term": "Gobbledegook 158 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 158."
+    },
+    {
+        "term": "Gobbledegook 159 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 159."
+    },
+    {
+        "term": "Gobbledegook 160 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 160."
+    },
+    {
+        "term": "Gobbledegook 161 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 161."
+    },
+    {
+        "term": "Gobbledegook 162 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 162."
+    },
+    {
+        "term": "Gobbledegook 163 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 163."
+    },
+    {
+        "term": "Gobbledegook 164 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 164."
+    },
+    {
+        "term": "Gobbledegook 165 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 165."
+    },
+    {
+        "term": "Gobbledegook 166 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 166."
+    },
+    {
+        "term": "Gobbledegook 167 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 167."
+    },
+    {
+        "term": "Gobbledegook 168 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 168."
+    },
+    {
+        "term": "Gobbledegook 169 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 169."
+    },
+    {
+        "term": "Gobbledegook 170 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 170."
+    },
+    {
+        "term": "Gobbledegook 171 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 171."
+    },
+    {
+        "term": "Gobbledegook 172 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 172."
+    },
+    {
+        "term": "Gobbledegook 173 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 173."
+    },
+    {
+        "term": "Gobbledegook 174 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 174."
+    },
+    {
+        "term": "Gobbledegook 175 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 175."
+    },
+    {
+        "term": "Gobbledegook 176 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 176."
+    },
+    {
+        "term": "Gobbledegook 177 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 177."
+    },
+    {
+        "term": "Gobbledegook 178 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 178."
+    },
+    {
+        "term": "Gobbledegook 179 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 179."
+    },
+    {
+        "term": "Gobbledegook 180 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 180."
+    },
+    {
+        "term": "Gobbledegook 181 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 181."
+    },
+    {
+        "term": "Gobbledegook 182 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 182."
+    },
+    {
+        "term": "Gobbledegook 183 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 183."
+    },
+    {
+        "term": "Gobbledegook 184 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 184."
+    },
+    {
+        "term": "Gobbledegook 185 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 185."
+    },
+    {
+        "term": "Gobbledegook 186 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 186."
+    },
+    {
+        "term": "Gobbledegook 187 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 187."
+    },
+    {
+        "term": "Gobbledegook 188 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 188."
+    },
+    {
+        "term": "Gobbledegook 189 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 189."
+    },
+    {
+        "term": "Gobbledegook 190 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 190."
+    },
+    {
+        "term": "Gobbledegook 191 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 191."
+    },
+    {
+        "term": "Gobbledegook 192 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 192."
+    },
+    {
+        "term": "Gobbledegook 193 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 193."
+    },
+    {
+        "term": "Gobbledegook 194 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 194."
+    },
+    {
+        "term": "Gobbledegook 195 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 195."
+    },
+    {
+        "term": "Gobbledegook 196 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 196."
+    },
+    {
+        "term": "Gobbledegook 197 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 197."
+    },
+    {
+        "term": "Gobbledegook 198 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 198."
+    },
+    {
+        "term": "Gobbledegook 199 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 199."
+    },
+    {
+        "term": "Gobbledegook 200 (speech, writing, confusing)",
+        "definition": "Definition for Gobbledegook 200."
+    }
+]
