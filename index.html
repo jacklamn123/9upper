@@ -533,27 +533,30 @@ function listenForUpdates() {
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
         }
 
-        // ✅ Sync Game Settings (Only for Host)
-        if (gameData.host === playerName) {
-            document.getElementById("gameSettings").classList.remove("hidden");
-            document.getElementById("startGameButton").classList.remove("hidden");
+       // ✅ Immediately update UI if the host has changed
+if (gameData.host === playerName) {
+    console.log(`🎉 You are now the host: ${playerName}`);
+    
+    // ✅ Ensure UI updates correctly for the new host
+    document.getElementById("gameSettings").classList.remove("hidden");
+    document.getElementById("startGameButton").classList.remove("hidden");
 
-            document.getElementById("timeSlider").value = gameData.roundTime || 60;
-            document.getElementById("timeValue").innerText = gameData.roundTime || 60;
+    document.getElementById("timeSlider").value = gameData.roundTime || 60;
+    document.getElementById("timeValue").innerText = gameData.roundTime || 60;
 
-            document.getElementById("roundsSlider").value = gameData.totalRounds || 5;
-            document.getElementById("roundsValue").innerText = gameData.totalRounds || 5;
+    document.getElementById("roundsSlider").value = gameData.totalRounds || 5;
+    document.getElementById("roundsValue").innerText = gameData.totalRounds || 5;
 
-            document.getElementById("timeSlider").oninput = function () {
-                db.ref("games/" + gameCode).update({ roundTime: this.value });
-            };
-            document.getElementById("roundsSlider").oninput = function () {
-                db.ref("games/" + gameCode).update({ totalRounds: this.value });
-            };
-        } else {
-            document.getElementById("gameSettings").classList.add("hidden");
-            document.getElementById("startGameButton").classList.add("hidden");
-        }
+    document.getElementById("timeSlider").oninput = function () {
+        db.ref("games/" + gameCode).update({ roundTime: this.value });
+    };
+    document.getElementById("roundsSlider").oninput = function () {
+        db.ref("games/" + gameCode).update({ totalRounds: this.value });
+    };
+} else {
+    document.getElementById("gameSettings").classList.add("hidden");
+    document.getElementById("startGameButton").classList.add("hidden");
+}
 
         // ✅ Show "Return to Waiting Room" for the host during gameplay
         if (gameData.host === playerName && gameData.status === "playing") {
@@ -1378,7 +1381,12 @@ function checkAndReassignHost(gameData) {
     // ✅ Only the newHost's own client writes to the DB
     if (playerName === newHost) {
         const oldHost = gameData.host || "unknown";
-        db.ref(`games/${gameCode}`).update({ host: newHost });
+        db.ref(`games/${gameCode}`).update({ host: newHost }).then(() => {
+            console.log(`✅ Host successfully reassigned to: ${newHost}`);
+            
+            // ✅ Ensure UI updates immediately for the new host
+            listenForUpdates();
+        });
 
         // ✅ Inform players in chat
         db.ref(`games/${gameCode}/chat`).push(
@@ -1386,6 +1394,7 @@ function checkAndReassignHost(gameData) {
         );
     }
 }
+
 
 function toggleGameRules() {
     var rulesBox = document.getElementById("gameRulesBox");
