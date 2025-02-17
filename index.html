@@ -196,22 +196,60 @@ function countActivePlayers() {
     });
 }
 
-// ✅ Function to Clean Up Inactive Players
+function cleanUpAllInactiveGames() {
+    console.log("🔄 Running cleanUpAllInactiveGames...");
+
+    db.ref("games").once("value", snapshot => {
+        const now = Date.now();
+        let removedGames = 0;
+
+        snapshot.forEach(gameSnapshot => {
+            const gameCode = gameSnapshot.key;
+            const gameData = gameSnapshot.val();
+
+            // ✅ Conditions for Removal
+            const hasNoPlayers = !gameData.players || Object.keys(gameData.players).length === 0;
+            const lastUpdated = gameData.lastUpdated || 0;
+            const isInactiveForLong = now - lastUpdated > 60 * 60 * 1000; // 1 hour inactivity
+
+            if (hasNoPlayers || isInactiveForLong) {
+                // ✅ Delete the game and its players
+                db.ref(`games/${gameCode}`).remove().then(() => {
+                    console.log(`✅ Removed inactive game: ${gameCode} and its players.`);
+                });
+
+                removedGames++;
+            }
+        });
+
+        console.log(`🚀 Total inactive games removed: ${removedGames}`);
+    });
+}
+
+
 function cleanUpInactivePlayers() {
+    console.log("🔄 Running cleanUpInactivePlayers...");
+
     db.ref("activePlayers").once("value", snapshot => {
         const now = Date.now();
+
         snapshot.forEach(playerSnapshot => {
             const playerData = playerSnapshot.val();
-            if (now - playerData.timestamp > 5 * 60 * 1000) { // 5 minutes inactivity
-                db.ref("activePlayers/" + playerSnapshot.key).remove();
-                console.log(`Removed inactive player: ${playerSnapshot.key}`);
+            if (!playerData || now - playerData.timestamp > 5 * 60 * 1000) { // 5 minutes inactivity
+                db.ref(`activePlayers/${playerSnapshot.key}`).remove().then(() => {
+                    console.log(`✅ Removed inactive player: ${playerSnapshot.key}`);
+                });
             }
         });
     });
 }
 
-// ✅ Run cleanup every 5 minutes
-setInterval(cleanUpInactivePlayers, 5 * 60 * 1000);
+
+setInterval(() => {
+    cleanUpAllInactiveGames();
+    cleanUpInactivePlayers();
+}, 10 * 60 * 1000); // Runs every 10 minutes
+
 
 // ✅ Optional: Add a button to manually check active players
 document.body.insertAdjacentHTML("beforeend", `<button onclick="countActivePlayers()">Check Active Players</button>`);
