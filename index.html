@@ -605,26 +605,25 @@ function listenForUpdates() {
             document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
             document.getElementById("thinkerPanel").classList.add("hidden");
 
-            // ✅ Show correct definition for REALUPPER for 10 seconds ONLY ONCE per round
+// ✅ REALUPPER Definition Box Handling
 const definitionBox = document.getElementById("correctDefinitionBox");
 const definitionText = document.getElementById("correctDefinition");
 
 if (gameData.roles[playerName] === "REALUPPER") {
-    if (!definitionShownThisRound) {
+    if (!definitionShownThisRound && gameData.correctDefinition) {  
         // ✅ Show the definition immediately
         definitionText.innerText = gameData.correctDefinition;
         definitionBox.classList.remove("hidden");
 
         // ✅ Schedule hiding after 10 seconds
         setTimeout(() => {
-            // Ensure it is still the same round before hiding
-            if (lastKnownRound === gameData.currentRound) {
+            if (lastKnownRound === gameData.currentRound) { 
                 definitionBox.classList.add("hidden");
                 definitionText.innerText = "";
             }
         }, 10000); // 10 seconds
 
-        // ✅ Set this AFTER timeout is scheduled to ensure it runs only once
+        // ✅ Mark it as shown ONLY if the correct definition exists
         definitionShownThisRound = true;
     }
 } else {
@@ -632,6 +631,7 @@ if (gameData.roles[playerName] === "REALUPPER") {
     definitionBox.classList.add("hidden");
     definitionText.innerText = "";
 }
+
 
             // ✅ Display thinker options
             displaythinkerOptions(gameData);
