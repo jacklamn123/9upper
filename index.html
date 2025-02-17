@@ -367,15 +367,14 @@ function joinGameFromLobby(gameCode) {
                 return;
             }
 
-            // ✅ Allow the player to join
-            document.getElementById("gameCodeDisplay").innerText = gameCode;
+            // ✅ Hide Lobby and Show Game UI
             document.getElementById("setupArea").classList.add("hidden");
-            document.getElementById("lobbyArea").classList.add("hidden");
+            document.getElementById("lobbyArea").classList.add("hidden"); // ✅ Hide lobby when entering the game
             document.getElementById("gameArea").classList.remove("hidden");
 
-            // ✅ Add Player to Game in Firebase
+            // ✅ Add Player to Game in Firebase, then listen for updates
             db.ref("games/" + gameCode + "/players/" + playerName).set(true).then(() => {
-                listenForUpdates();
+                listenForUpdates(); // ✅ Ensure updates trigger after joining
             });
 
         } else {
@@ -383,6 +382,7 @@ function joinGameFromLobby(gameCode) {
         }
     });
 }
+
 
 
         function filterGames() {
@@ -407,19 +407,22 @@ function createGame() {
         players: {},
         host: playerName,
         chat: {},
-        totalRounds: totalRounds,  // ✅ Store total rounds
-        roundTime: roundTime       // ✅ Store time per round
+        totalRounds: totalRounds,
+        roundTime: roundTime
     }).then(() => {
         document.getElementById("gameCodeDisplay").innerText = gameCode;
         document.getElementById("setupArea").classList.add("hidden");
+        document.getElementById("lobbyArea").classList.add("hidden"); // ✅ Hide lobby when creating a game
         document.getElementById("gameArea").classList.remove("hidden");
+
         db.ref("games/" + gameCode + "/players/" + playerName).set(true);
         listenForUpdates();
     });
 }
 
 
- function joinGame() {
+
+function joinGame() {
     gameCode = document.getElementById("gameCodeInput").value.toUpperCase();
     if (!gameCode) {
         alert("Please enter a valid game code!");
@@ -433,14 +436,15 @@ function createGame() {
             // ✅ Check if the game is currently playing
             if (gameData.status === "playing") {
                 alert("Game is currently in progress. Please wait for the next round.");
-                return; // Stop the function here
+                return;
             }
 
-            // ✅ Allow the player to join
-            document.getElementById("gameCodeDisplay").innerText = gameCode;
+            // ✅ Hide lobby and show game area
             document.getElementById("setupArea").classList.add("hidden");
+            document.getElementById("lobbyArea").classList.add("hidden"); // ✅ Hide lobby when joining manually
             document.getElementById("gameArea").classList.remove("hidden");
 
+            // ✅ Add player to Firebase and listen for updates
             db.ref("games/" + gameCode + "/players/" + playerName).set(true);
             listenForUpdates();
         } else {
@@ -448,6 +452,7 @@ function createGame() {
         }
     });
 }
+
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
