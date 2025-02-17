@@ -1411,31 +1411,20 @@ function forceReturnToWaitingRoom() {
 
 
 function thinkerCollectSkin(selectedPlayer) {
-    db.ref("games/" + gameCode).once("value", snapshot => {
-        let gameData = snapshot.val();
-        if (!gameData) return;
+    // 1) Push a message to chat so everyone sees what's happening
+    db.ref("games/" + gameCode + "/chat").push(
+        Thinker is collecting skin from "${selectedPlayer}" ...
+    );
 
-        let collectSkins = gameData.collectSkins || [];
+    // 2) Record the selectedPlayer in collectSkins, so we apply points at round end or final pick
+    db.ref("games/" + gameCode + "/collectSkins").once("value", snapshot => {
+        let collectSkins = snapshot.val() || [];
         if (!Array.isArray(collectSkins)) collectSkins = [];
-
-        if (collectSkins.length >= 2) {
-            alert("You have already collected skin twice this round!");
-            return;
-        }
-
-        // ✅ Add selected player to collectSkins
         collectSkins.push(selectedPlayer);
 
-        db.ref(`games/${gameCode}`).update({
+        db.ref("games/" + gameCode).update({
             collectSkins: collectSkins
-        }).then(() => {
-            displaythinkerOptions(gameData); // ✅ Refresh UI after updating Firebase
         });
-
-        // ✅ Push a message to chat
-        db.ref(`games/${gameCode}/chat`).push(
-            `Thinker is collecting skin from "${selectedPlayer}" ...`
-        );
     });
 }
 
