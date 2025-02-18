@@ -1,202 +1,207 @@
 [
-    {
-        "term": "Ubiquitous (everywhere, presence, seen)",
-        "definition": "Present, appearing, or found everywhere."
-    },
-    {
-        "term": "Limerence (obsession, affection, longing)",
-        "definition": "A state of intense romantic attraction and infatuation."
-    },
-    {
-        "term": "Serendipity (luck, unexpected, fortune)",
-        "definition": "The occurrence of events by chance in a happy or beneficial way."
-    },
-    {
-        "term": "Petrichor (rain, earth, smell)",
-        "definition": "The pleasant smell that accompanies the first rain after a dry spell."
-    },
-    {
-        "term": "Ephemeral (short, fleeting, moment)",
-        "definition": "Lasting for a very short time."
-    },
-    {
-        "term": "Sesquipedalian (long, words, verbose)",
-        "definition": "A person who uses long and complex words unnecessarily."
-    },
-    {
-        "term": "Nefarious (evil, criminal, villainous)",
-        "definition": "Wicked, criminal, or villainous in nature."
-    },
-    {
-        "term": "Sycophant (flattery, power, insincere)",
-        "definition": "A person who flatters those in power for personal gain."
-    },
-    {
-        "term": "Persnickety (fussy, picky, details)",
-        "definition": "A term describing someone who is overly fussy or difficult to please."
-    },
-    {
-        "term": "Lugubrious (sad, exaggerated, dramatic)",
-        "definition": "Excessively mournful or dramatic in an exaggerated way."
-    },
-    {
-        "term": "Blatherskite (talk, nonsense, foolish)",
-        "definition": "A person who talks nonsense or speaks foolishly without substance."
-    },
-    {
-        "term": "Cantankerous (grumpy, stubborn, angry)",
-        "definition": "Bad-tempered, argumentative, and uncooperative."
-    },
-    {
-        "term": "Defenestration (window, throw, fall)",
-        "definition": "The act of throwing someone or something out of a window."
-    },
-    {
-        "term": "Flummoxed (confused, baffled, uncertain)",
-        "definition": "Bewildered or perplexed."
-    },
-    {
-        "term": "Pellucid (clear, transparent, easy)",
-        "definition": "Transparently clear in meaning, expression, or appearance."
-    },
-    {
-        "term": "Zephyr (breeze, wind, gentle)",
-        "definition": "A soft, gentle breeze."
-    },
-    {
-        "term": "Sonder (realization, life, strangers)",
-        "definition": "The profound feeling of realizing that everyone has a complex life."
-    },
-    {
-        "term": "Tarantism (dance, uncontrollable, impulse)",
-        "definition": "A historical condition involving an uncontrollable urge to dance."
-    },
-    {
-        "term": "Apophenia (patterns, connections, false)",
-        "definition": "The tendency to perceive meaningful connections between unrelated things."
-    },
-    {
-        "term": "Pareidolia (faces, illusion, clouds)",
-        "definition": "The tendency to see patterns, especially faces, in random objects."
-    },
-    {
-        "term": "Cacophony (noise, loud, chaos)",
-        "definition": "A harsh, discordant mixture of sounds."
-    },
-    {
-        "term": "Somnolent (sleepy, drowsy, tired)",
-        "definition": "Feeling sleepy or drowsy."
-    },
-    {
-        "term": "Mellifluous (smooth, sweet, pleasant)",
-        "definition": "A sound that is pleasingly smooth and musical to hear."
-    },
-    {
-        "term": "Quixotic (idealistic, impractical, romantic)",
-        "definition": "Exceedingly idealistic; unrealistic and impractical."
-    },
-    {
-        "term": "Hiraeth (homesick, nostalgia, longing)",
-        "definition": "A deep longing for a home you cannot return to."
-    },
-    {
-        "term": "Deliquesce (melt, dissolve, disappear)",
-        "definition": "To become liquid by absorbing moisture from the air."
-    },
-    {
-        "term": "Obfuscate (confuse, obscure, unclear)",
-        "definition": "To deliberately make something difficult to understand."
-    },
-    {
-        "term": "Callipygian (curvy, attractive, shape)",
-        "definition": "Having well-shaped buttocks."
-    },
-    {
-        "term": "Bibliopole (books, seller, trade)",
-        "definition": "A person who buys and sells books, especially rare ones."
-    },
-    {
-        "term": "Lethologica (word, forget, name)",
-        "definition": "The inability to remember the right word."
-    },
-    {
-        "term": "Aposiopesis (pause, sudden, speech)",
-        "definition": "A sudden breaking off in speech."
-    },
-    {
-        "term": "Erudite (knowledge, scholar, learning)",
-        "definition": "Having or showing great knowledge or learning."
-    },
-    {
-        "term": "Obsequious (flatter, submissive, eager)",
-        "definition": "Overly submissive and eager to please."
-    },
-    {
-        "term": "Quagmire (swamp, difficult, stuck)",
-        "definition": "A soft, boggy area of land; a difficult or precarious situation."
-    },
-    {
-        "term": "Laconic (short, concise, words)",
-        "definition": "Using very few words in speech or writing."
-    },
-    {
-        "term": "Ineffable (indescribable, beyond, words)",
-        "definition": "Too great or extreme to be expressed in words."
-    },
-    {
-        "term": "Xenophile (foreign, love, culture)",
-        "definition": "A person who is attracted to foreign people, cultures, or customs."
-    },
-    {
-        "term": "Acrimony (bitterness, anger, conflict)",
-        "definition": "Bitterness or ill feeling."
-    },
-    {
-        "term": "Cacography (bad, writing, spelling)",
-        "definition": "Bad handwriting or spelling."
-    },
-    {
-        "term": "Susurrus (whisper, rustle, sound)",
-        "definition": "A soft murmuring or rustling sound."
-    },
-    {
-        "term": "Lachrymose (tearful, crying, sorrow)",
-        "definition": "Tearful or given to weeping."
-    },
-    {
-        "term": "Zeugma (wordplay, grammar, sentence)",
-        "definition": "A figure of speech where a word applies to multiple parts of the sentence."
-    },
-    {
-        "term": "Hobnob (socialize, mingle, high-class)",
-        "definition": "To mix socially, especially with those of higher status."
-    },
-    {
-        "term": "Gobbledegook (jargon, confusing, official)",
-        "definition": "Language that is meaningless or hard to understand; jargon."
-    },
-    {
-        "term": "Absquatulate (leave, flee, sudden)",
-        "definition": "To leave abruptly or flee suddenly."
-    },
-    {
-        "term": "Schadenfreude (misfortune, enjoy, others)",
-        "definition": "Pleasure derived from the misfortunes of others."
-    },
-    {
-        "term": "Discombobulated (confused, chaotic, disoriented)",
-        "definition": "Confused or disconcerted; disoriented."
-    },
-    {
-        "term": "Onomatopoeia (sound, imitate, word)",
-        "definition": "A word that phonetically imitates a sound, like 'buzz' or 'sizzle'."
-    },
-    {
-        "term": "Verisimilitude (real, appearance, true)",
-        "definition": "The appearance of being true or real."
-    },
-    {
-        "term": "Panglossian (optimistic, unrealistic, naive)",
-        "definition": "Excessively or blindly optimistic."
-    }
+    {"term": "扶他那裡 (文化, 詞彙)", "definition": "表面上看起來像地點指示詞，但實際上是日語 'ふたなり' (Futanari) 的音譯，指的是同時擁有男性與女性生理特徵的角色類型。"},
+    {"term": "瑪麗蘇 (文化, 角色類型)", "definition": "看起來像是人名，但實際上指的是一種過度完美、毫無缺陷的小說或影視角色，通常缺乏真實感。"},
+    {"term": "工具人 (文化, 網絡語言)", "definition": "原意指實際工具，但在網絡語境中，指的是被利用卻沒有得到回報的人。"},
+    {"term": "白學 (文化, 戲劇性戀愛)", "definition": "看似是一門學問，實際上源自《白色相簿2》，用來形容複雜、虐心的戀愛糾葛。"},
+    {"term": "骨科 (文化, 戀愛關係)", "definition": "字面意思是醫學專業，但在網絡語境中，暗示 '兄妹或姐弟戀' 的情境，因為親密關係可能會 '需要去骨科'。"},
+    {"term": "百合 (文化, 角色類型)", "definition": "原意是花的名稱，但在動漫、小說中指女性之間的戀愛關係。"},
+    {"term": "哲♂學 (文化, 迷因)", "definition": "表面上是哲學，但實際上在某些網絡圈子裡暗指特定類型的影片（成人向、肌肉、特殊劇情）。"},
+    {"term": "黑深殘 (文化, 作品風格)", "definition": "表面上看起來像形容詞的組合，但實際上是 'Dark & Deep & Edge' 的音譯，指帶有黑暗、沉重、殘酷風格的作品。"},
+    {"term": "噴射戰士 (文化, 遊戲名稱)", "definition": "原指任天堂的遊戲《Splatoon》，但因其特定的語境與詞義，某些網絡圈子會用它來暗示某種特殊情境。"},
+    {"term": "阿庫婭 (文化, 角色象徵)", "definition": "看似普通的名字，但在某些圈子裡用來形容 '笨蛋' 或 '沒用的人'，因為《為美好世界獻上祝福！》中的阿庫婭女神常被這樣評價。"},
+    {"term": "偽娘 (文化, 角色類型)", "definition": "乍看之下像是某種生物類別，但實際上指外表與舉止像女性，但生理上是男性的角色。"},
+    {"term": "男の娘 (文化, 角色類型)", "definition": "日語詞彙，看起來像普通 '男孩' 的描述，但實際上指的是 '打扮成女性但依舊是男性的角色'，帶有萌屬性。"},
+    {"term": "伊布拉欣 (文化, 外來詞)", "definition": "表面上是阿拉伯常見人名，但在某些圈內語境中，與 '異端 (Ibura)' 產生聯繫，被用來形容奇特或另類的東西。"},
+    {"term": "日本主義 (文化, 影響)", "definition": "看似是日本愛國概念，但實際上指的是19世紀末西方對日本文化（如浮世繪、美學、設計）的迷戀與模仿。"},
+    {"term": "媚俗藝術 (藝術, 風格)", "definition": "從字面上看像是一種藝術理論，實際上指的是過於花俏、誇張甚至被認為低俗的藝術風格。"},
+    {"term": "矯飾主義 (藝術, 風格)", "definition": "表面上看似某種修辭技巧，但實際上是文藝復興後期的藝術風格，特徵為細長人物和戲劇化構圖。"},
+    {"term": "曼陀羅 (文化, 象徵)", "definition": "看起來像一種植物名稱，但實際上是印度教和佛教中的幾何圖形，象徵宇宙與冥想的力量。"},
+    {"term": "混合媒材 (藝術, 風格)", "definition": "看似是科技或工業術語，但實際上指的是在單一藝術作品中融合多種材料或技法的藝術形式。"},
+    {"term": "單色畫 (藝術, 風格)", "definition": "乍一看是普通繪畫類別，但實際上是一種高度藝術化的技法，專注於單一色調的變化與層次。"},
+    {"term": "螺鈿 (工藝, 光澤)", "definition": "一種在漆器或木器表面鑲嵌貝殼薄片的裝飾技法，廣泛應用於中國、日本和朝鮮的傳統工藝品中，展現精緻閃耀的視覺效果。"},
+    {"term": "乾漆像 (雕塑, 堆疊)", "definition": "以漆樹汁液與布纖維層層堆疊製成的佛像或雕塑，常見於唐代佛教藝術中，具有輕盈且堅固的特性。"},
+    {"term": "鎏金 (金屬, 殘影)", "definition": "在金屬器物表面塗上金汞合金後加熱，使水銀揮發、留下金層的技法，廣泛應用於青銅器、佛像和宮廷飾品。"},
+    {"term": "白描 (線條, 簡約)", "definition": "中國傳統繪畫技法，使用細膩的線條描繪物體輪廓，無需著色，以流暢筆法表現人物、山水和花鳥等主題。"},
+    {"term": "泥金書 (書寫, 閃爍)", "definition": "使用金粉或金箔書寫的書法作品，常見於佛教經文或宮廷御筆書法，具有極高的裝飾價值。"},
+    {"term": "拓片 (印記, 時間)", "definition": "利用濕紙和墨汁拓印石碑或銘文，使其紋理和字跡得以完整保存，是研究古代書法與歷史的重要工具。"},
+    {"term": "卡羅林小寫體 (字母, 演變)", "definition": "一種歐洲中世紀流行的拉丁字母書寫體，由查理曼大帝時期推廣，影響後來的現代小寫字母形態。"},
+    {"term": "素描禪 (極簡, 思考)", "definition": "一種融合東方禪宗與西方素描技法的藝術流派，通過極簡的筆觸和留白表現寧靜與內省。"},
+    {"term": "羌族沙畫 (祭祀, 流逝)", "definition": "羌族民間的一種祭祀藝術，以彩色沙粒創作的符號圖案，代表神靈庇佑與自然崇拜，作品完成後通常被風或水沖散，象徵輪迴。"},
+    {"term": "纏花 (絲線, 祝福)", "definition": "用細絲線纏繞鐵絲或竹篾製成各種花卉形狀，常用於傳統婚嫁頭飾，特別流行於廣東和閩南地區。"},
+    {"term": "髹漆 (漆器, 層次)", "definition": "指在木器或竹器表面反覆塗抹生漆，使其光滑堅固並形成防水保護層，唐宋時期的髹漆技藝達到頂峰。"},
+    {"term": "俄羅斯聖像畫 (信仰, 肖像)", "definition": "東正教教堂內常見的宗教畫作，通常以蛋彩顏料在木板上繪製，並以金箔裝飾，描繪聖徒與耶穌基督。"},
+    {"term": "戲曲水袖 (表演, 流動)", "definition": "中國戲曲中一種獨特的表演技巧，演員通過甩動長長的袖子表達情緒，如憤怒、悲傷或嬌羞，京劇和崑曲最為常見。"},
+    {"term": "水粉漆畫 (裝飾, 鄉村)", "definition": "一種起源於17世紀歐洲的鄉村裝飾畫技法，使用水粉顏料在家具或牆壁上繪製簡單而鮮豔的圖案，具有強烈的鄉村風格。"},
+    {"term": "岩彩畫 (礦物, 耐久)", "definition": "日本傳統繪畫技法，使用礦物顏料和動物膠製成的顏料，色彩鮮艷耐久，常見於屏風畫和佛教壁畫。"},
+    {"term": "馬賽克拼貼 (碎片, 重組)", "definition": "使用彩色玻璃、瓷磚或石頭拼貼成圖案的藝術形式，廣泛應用於拜占庭教堂、清真寺與現代公共建築裝飾。"},
+    {"term": "錯視畫 (視覺, 偽裝)", "definition": "一種利用視覺錯覺讓平面畫作看起來具有立體效果的技法，巴洛克時期的天頂畫常見此技法，現代街頭3D畫亦廣泛應用。"},
+    {"term": "藍染 (植物, 漸變)", "definition": "使用靛藍植物染料進行染色的傳統技法，中國、日本、印度和西非地區均有不同形式的藍染工藝。"},
+    {"term": "玻璃浮雕 (透明, 立體)", "definition": "在玻璃表面雕刻或蝕刻圖案，使其呈現出浮雕效果，廣泛應用於教堂彩繪玻璃窗和現代建築裝飾。"},
+    {"term": "朱墨雙鈎 (書法, 層次)", "definition": "中國書法與繪畫技法，先用紅色描摹線條，再以墨色填補細節，形成層次分明的效果，常見於古籍摹本與工筆畫。"},
+    {"term": "金銀平脫 (工藝, 鑲嵌)", "definition": "日本傳統漆器工藝，將金銀薄片鑲嵌在漆面上，再用透明漆層保護，形成細膩且具金屬光澤的紋樣。"},
+    {"term": "織錦畫 (紋理, 編織)", "definition": "以絲線編織而成的藝術作品，利用不同顏色的經緯線交織出圖案，廣泛應用於宮廷裝飾與宗教藝術。"},
+    {"term": "唐卡 (信仰, 色彩)", "definition": "藏傳佛教中的卷軸繪畫，使用礦物顏料與金粉描繪佛像，色彩鮮明且極具宗教象徵意義。"},
+    {"term": "錯金銀 (金屬, 鑲嵌)", "definition": "中國青銅器裝飾技法，將金或銀鑲嵌於銅器表面，形成細緻的紋飾，漢代墓葬中常見。"},
+    {"term": "雕版印刷 (傳播, 木刻)", "definition": "一種古老的印刷技術，透過雕刻木板製作印刷版，再塗墨印刷，為早期書籍與經文的重要製作方式。"},
+    {"term": "刺繡陰影 (光影, 針線)", "definition": "一種高級刺繡技法，利用不同密度與顏色的針法來創造光影效果，使作品呈現立體感。"},
+    {"term": "摺扇畫 (折疊, 書畫)", "definition": "中國文人書畫的特殊載體，在可折疊的扇面上繪製山水、書法或人物畫，既具實用功能，又可作為收藏品。"},
+    {"term": "百衲被 (拼接, 記憶)", "definition": "由多塊布料拼接而成的被子，起源於民間習俗，每塊布料代表一段故事或家庭記憶。"},
+    {"term": "泥塑窗花 (民俗, 剪影)", "definition": "中國北方民間藝術，結合泥塑與窗花剪紙技法，將塑形與剪影相融合，表現節慶與生活場景。"},
+    {"term": "羽毛畫 (輕盈, 疊加)", "definition": "利用天然鳥羽拼貼創作畫作，因材質輕盈且色彩自然過渡，成品具有獨特的視覺效果。"},
+    {"term": "玻璃琺瑯 (熔融, 光澤)", "definition": "在玻璃表面燒製彩色琺瑯圖案，形成半透明的裝飾層，廣泛應用於鐘錶與宮廷飾品。"},
+    {"term": "髮絲雕刻 (細微, 人體)", "definition": "使用極細的雕刻刀在人的頭髮上刻畫文字或圖案，為極限微雕藝術的代表技法之一。"},
+    {"term": "漢畫像磚 (歷史, 壁畫)", "definition": "漢代墓葬中以磚塊雕刻的畫像，表現當時的生活場景、神話故事與禮儀制度，為研究漢文化的重要文物。"},
+    {"term": "三彩陶 (燒製, 流動)", "definition": "唐代陶器的經典樣式，使用黃色、綠色和白色釉料燒製而成，釉色隨高溫流動，形成獨特的斑斕效果。"},
+    {"term": "宣德爐 (鑄造, 祭祀)", "definition": "明代宣德年間特製的銅香爐，以合金精煉，色澤溫潤，形制古樸，常用於宮廷祭祀或文人案頭。"},
+    {"term": "浮世繪 (世俗, 刻印)", "definition": "日本江戶時代流行的版畫風格，描繪市井人物、風景與美人，線條流暢且色彩豐富。"},
+    {"term": "版畫拓彩 (層疊, 顏料)", "definition": "在版畫印刷後手工上色，透過多層渲染增加作品的視覺層次，常見於19世紀的藝術復興運動。"},
+    {"term": "彩陶舞蹈紋 (運動, 陶器)", "definition": "新石器時代彩陶上的舞蹈圖案，表現遠古人類的祭祀或娛樂活動，為中國最早的舞蹈藝術記錄。"},
+    {"term": "礦物顏料 (自然, 細粉)", "definition": "使用天然礦石研磨而成的顏料，色彩鮮豔且耐久，廣泛應用於壁畫、油畫與傳統彩繪藝術。"},
+    {"term": "刺繡書法 (絲線, 文字)", "definition": "用刺繡技法來繡出書法字體，結合書法的結構美與繡線的質感，形成獨特的藝術表現方式。"},
+    {"term": "彩繪玻璃 (透光, 宗教)", "definition": "西方教堂中常見的裝飾藝術，將彩色玻璃拼接成圖案，光線穿過時呈現神聖氛圍。"},
+    {"term": "廟宇壁畫 (神話, 記敘)", "definition": "佛教、道教或民間信仰場所中的壁畫，描繪神話故事、歷史傳說或宗教儀式，以增強信仰氛圍。"},
+    {"term": "泥塑神像 (祭祀, 形態)", "definition": "中國民間寺廟中的塑像，以泥土為原料雕塑神祇形象，通常經過彩繪與金箔裝飾。"},
+    {"term": "千層紙雕 (剪裁, 疊加)", "definition": "將多層紙張剪裁、堆疊，以產生立體視覺效果，常用於裝飾畫與立體書設計。"},
+    {"term": "竹胎漆器 (層疊, 曲線)", "definition": "以竹篾為骨架，塗抹多層生漆製成的器物，漆面光滑細膩，輕盈且堅固，廣泛應用於茶具與文房器物。"},
+    {"term": "水盂 (圓潤, 液體)", "definition": "文房用品之一，小型器皿，專門用於儲存書法或繪畫所需的清水，形態多變，材質多樣。"},
+    {"term": "銀花絲 (線條, 編織)", "definition": "一種傳統金銀飾品工藝，透過極細的金銀絲纏繞成各種圖案，手工製作，工藝極為細緻。"},
+    {"term": "茶百戲 (水紋, 變化)", "definition": "唐代流行的一種泡茶技藝，茶湯表面會出現不同圖案，類似於現代拉花藝術，但以水波與泡沫形成。"},
+    {"term": "折扇畫 (摺疊, 風流)", "definition": "在折扇的扇面上繪製山水、書法或人物畫，既具實用功能，又是一種文化與審美的象徵。"},
+    {"term": "錦灰堆 (拼貼, 錯覺)", "definition": "中國傳統繪畫技法，以書畫殘片、印章、拓片等元素堆疊組合，模仿亂紙堆的效果，卻又充滿層次與細節。"},
+    {"term": "風箏鳳尾 (升騰, 擺動)", "definition": "風箏的一種特殊結構，尾部長且柔軟，迎風時能產生擺動，使風箏更易於平衡與操控。"},
+    {"term": "緙絲 (交錯, 浮雕)", "definition": "中國傳統絲織工藝，通過不同顏色的絲線交錯編織，形成立體浮雕般的圖案，色彩豐富且質感獨特。"},
+    {"term": "明式圈椅 (圓弧, 坐姿)", "definition": "中國明代家具代表之一，椅背與扶手形成圓弧形，造型簡約流暢，強調結構美感與舒適度。"},
+    {"term": "魚燈 (流動, 節慶)", "definition": "中國傳統節慶燈飾之一，燈體呈魚形，內置燭光或燈泡，隨風擺動時呈現游動效果。"},
+    {"term": "藕粉團 (透明, 柔軟)", "definition": "以蓮藕粉製成的傳統甜點，質地Q彈，色澤透明，口感細膩，常見於江南地區。"},
+    {"term": "冰裂紋釉 (龜裂, 反光)", "definition": "瓷器釉面的一種裝飾效果，因高溫燒製過程中釉層產生自然開裂紋路，形態各異，極具觀賞性。"},
+    {"term": "十二木卡姆 (旋律, 記憶)", "definition": "維吾爾族傳統音樂體系，由十二組大型套曲組成，每一組都有獨特的旋律與節奏，被譽為新疆音樂的瑰寶。"},
+    {"term": "銅響環 (節奏, 叮噹)", "definition": "一種傳統樂器配件，小型金屬環，當舞者或樂手搖動時會發出清脆響聲，增強節奏感。"},
+    {"term": "賽琉璃 (閃耀, 變幻)", "definition": "一種源自中亞的琉璃玻璃工藝，透過金屬氧化物調整顏色，使玻璃呈現出奇幻變幻的視覺效果。"},
+    {"term": "皮影骨架 (影子, 操控)", "definition": "傳統皮影戲中角色的內部骨架，透過操控竹竿或線索，使角色靈活表演，投影於幕布上。"},
+    {"term": "留青竹刻 (陰影, 刻畫)", "definition": "在竹子表面刻出淺層紋樣，僅剔除部分表皮，使天然竹青與刻紋形成鮮明對比，展現細膩畫面。"},
+    {"term": "草蟲畫 (細節, 生命)", "definition": "中國花鳥畫的一個分支，專門描繪昆蟲與小型生物，如螳螂、蜻蜓、蟋蟀等，強調細節與動感。"},
+    {"term": "錦衣衛飛魚服 (紋樣, 權力)", "definition": "明代特務機構錦衣衛的官服，胸前繡有飛魚紋樣，代表權力與身份，僅供特定官員穿著。"},
+    {"term": "靈芝雲紋 (符號, 吉祥)", "definition": "中國古代裝飾紋樣，融合靈芝與雲氣元素，象徵長壽與祥瑞，常見於瓷器、服飾與建築裝飾。"},
+    {"term": "搖元宵 (翻滾, 粉層)", "definition": "製作元宵的傳統技法，透過將糯米粉反覆搖晃包覆內餡，形成圓潤且均勻的湯圓形態。"},
+    {"term": "龍門石窟飛天 (飄逸, 雕刻)", "definition": "中國龍門石窟雕塑中最具代表性的形象之一，展現飛天仙女輕盈飄逸的姿態，充滿動感與靈性。"},
+    {"term": "夜光杯 (透亮, 飲宴)", "definition": "一種以和田玉或螢石雕刻而成的酒杯，在昏暗環境下能透出微光，歷史上為皇室珍品。"},
+    {"term": "竹籤書 (層層, 捲動)", "definition": "早期中國書籍的形式，將文字書寫在竹籤上，捆綁成冊，可捲動閱讀，為書籍裝訂技術的起源之一。"},
+    {"term": "纏足鞋 (極端, 儀式)", "definition": "中國封建時期女性纏足後穿著的小型鞋子，造型細長，象徵當時審美觀念與社會規範。"},
+    {"term": "貝葉經 (葉片, 佛法)", "definition": "古印度與東南亞佛教經文的特殊載體，使用棕櫚葉片書寫，經過特殊處理以保存數百年。"},
+    {"term": "鬥茶 (競技, 風味)", "definition": "宋代流行的茶藝比賽，參賽者透過茶湯色澤、泡沫穩定度與風味進行較量，類似現代咖啡拉花比賽。"},
+    {"term": "燕尾脊 (建築, 平衡)", "definition": "中國傳統廟宇與祠堂屋脊的一種裝飾造型，兩端上翹呈燕尾形，具有美觀與防禦作用。"},
+    {"term": "雲梯術 (攀爬, 防禦)", "definition": "古代攻城戰術之一，利用長梯攀爬城牆，多見於中國冷兵器時代的戰爭記錄。"},
+    {"term": "古籍線裝 (絲線, 捲動)", "definition": "中國傳統書籍裝訂技術，使用絲線縫合書頁，使其能夠平攤展開並長期保存。"},
+    {"term": "風火雷 (驚變, 交錯)", "definition": "古代戰爭與占卜中常見的三要素，象徵自然界中難以控制的力量，在某些文化中具有吉凶意義。"},
+    {"term": "飛白書 (殘缺, 間隙)", "definition": "中國書法技法之一，透過筆鋒飛躍產生間隙，使筆畫部分呈現破裂感，形成獨特的視覺效果。"},
+    {"term": "金水法 (流轉, 提煉)", "definition": "古代鍊金術與陶瓷釉燒技術之一，透過多層化學反應形成特定的色彩變化，應用於瓷器與金屬製品。"},
+    {"term": "震雷碑 (回音, 強震)", "definition": "中國古代特殊碑石設計，當人拍擊時會產生類似雷鳴的回音，常見於道觀或風水陣法。"},
+    {"term": "千層鏡 (折射, 無限)", "definition": "一種光學裝置，透過鏡面與燈光排列創造出無限延伸的視覺效果，常見於舞台與魔術。"},
+    {"term": "蹺工術 (輕盈, 平衡)", "definition": "古代建築技術，利用特定的榫卯結構來支撐重量，使得大型建築具有強大的抗震能力。"},
+    {"term": "魚燈陣 (水紋, 路徑)", "definition": "古代民俗燈會中的特殊陣列設計，燈影隨風擺動，形成類似魚群游動的視覺錯覺。"},
+    {"term": "潛鋒筆 (隱匿, 留白)", "definition": "中國書法技法之一，透過筆鋒微微隱藏在筆畫之中，使字體內斂且充滿韻味。"},
+    {"term": "七寶燒 (釉光, 熔融)", "definition": "日本傳統琺瑯工藝，透過多層金屬與釉彩燒製形成閃耀光澤，常應用於裝飾品與器皿。"},
+    {"term": "破風板 (氣流, 邊界)", "definition": "古代與現代建築中的結構設計，用於調節氣流與保護屋簷，使建築免受強風影響。"},
+    {"term": "蒸餾琴 (共鳴, 震盪)", "definition": "一種源於古代科學與音樂實驗的裝置，利用蒸氣震動弦線產生聲音，與傳統琴類不同。"},
+    {"term": "留青竹刻 (陰影, 刻畫)", "definition": "在竹子表面刻出淺層紋樣，僅剔除部分表皮，使天然竹青與刻紋形成鮮明對比，展現細膩畫面。"},
+    {"term": "月影窗 (光線, 轉換)", "definition": "中國古代建築中的窗戶設計，透過不同層次的窗櫺形成月影變化，隨日照角度產生不同光影效果。"},
+    {"term": "鎏銀法 (殘影, 轉換)", "definition": "古代金屬裝飾技法之一，透過高溫燒製，使銀層滲入銅或其他金屬，形成獨特的漸變紋理。"},
+    {"term": "風簷鼓 (共鳴, 風流)", "definition": "古代建築上的特殊裝置，利用風力驅動小型鼓面，產生細微的共鳴聲，象徵吉祥之意。"},
+    {"term": "煙波術 (迷霧, 流動)", "definition": "中國古代水墨畫技法之一，透過濕筆渲染產生煙霧般的漸層效果，營造迷霧感。"},
+    {"term": "龍鱗裝 (疊加, 保護)", "definition": "一種中國古代鎧甲製作技法，使用小塊金屬片層層疊加，類似魚鱗排列，使盔甲既堅固又靈活。"},
+    {"term": "聲影器 (震動, 折射)", "definition": "一種古代裝置，透過聲音共振來改變光影投射的形態，應用於儀式與祭祀場景。"},
+    {"term": "影書法 (流動, 錯視)", "definition": "書法與光影藝術的結合，透過特殊筆觸讓字跡在不同角度下呈現不同的視覺效果。"},
+    {"term": "空紋染 (浮動, 層次)", "definition": "一種古代染織技法，透過不同深度的染料浸染，讓布料上呈現出多層次的顏色變化。"},
+    {"term": "立砂影 (細微, 軌跡)", "definition": "古代風水裝置，利用沙子的自然流動軌跡來推測風向或記錄環境變化。"},
+    {"term": "碧落盤 (旋轉, 平衡)", "definition": "一種與天象學相關的古代儀器，透過圓盤旋轉計算天體運行軌跡，常見於道教與占星術中。"},
+    {"term": "沉香鏤 (雕刻, 流香)", "definition": "古代高級香具技術，透過精雕細琢使香氣緩慢釋放，常用於宮廷與宗教儀式。"},
+    {"term": "露光紗 (輕盈, 變幻)", "definition": "傳統紡織工藝，使用極細絲線編織，使紗布在光照下呈現如晨露般的閃爍效果。"},
+    {"term": "魚躍燈 (循環, 影動)", "definition": "古代燈具設計之一，透過內部油燈加熱氣流推動紙魚旋轉，形成動態投影效果。"},
+    {"term": "飛霞劍 (光影, 速度)", "definition": "中國古代兵器之一，因劍身特殊的拋光技術，揮動時能產生類似光影殘像的視覺效果。"},
+    {"term": "青螺帳 (流動, 隔離)", "definition": "一種古代宮廷與士人住所中使用的裝飾性帳幔，半透明且帶有特殊紋理，使內外模糊不清。"},
+    {"term": "影橋 (平衡, 虛實)", "definition": "古代園林與寺廟中的結構，橋面以特定角度設計，使水面倒影與實體橋樑重合，產生視覺錯覺。"},
+    {"term": "沉木語 (殘響, 記憶)", "definition": "指古代樂器或雕刻中使用過的沉水木，其紋理與共鳴特性使其能保留聲音震動的痕跡。"},
+    {"term": "無聲鼓 (回響, 時間)", "definition": "一種象徵性的儀式器物，形似鼓但內部填充特殊材質，敲擊時產生極低頻震動，被認為可傳遞訊息。"},
+    {"term": "風影塵 (移動, 痕跡)", "definition": "古代占卜術語之一，指風吹過後留下的細微痕跡，據說可用來推測未來或隱藏的動態。"},
+    {"term": "眠砂 (停滯, 轉變)", "definition": "古代傳說中，特定地區的細沙在夜晚會發出微光，被認為能影響夢境與思維。"},
+    {"term": "流墨鏡 (映照, 消失)", "definition": "一種特殊的金屬鏡，表面氧化層在水中會產生變化，讓倒影呈現不同的影像。"},
+    {"term": "折風案 (旋轉, 構造)", "definition": "中國古代某些高級書案的設計，可透過旋轉桌面改變方向，適應不同光線與氣流環境。"},
+    {"term": "碎金步 (斷續, 規律)", "definition": "古代宮廷舞蹈中的一種步法，強調輕盈且斷續的移動，類似金屑撒落的效果。"},
+    {"term": "黑木雲 (沉靜, 擴散)", "definition": "某些古代家具或器物上的特殊裝飾，使用特定處理方式使木質表面呈現霧化效果，似雲霧繚繞。"},
+    {"term": "鏡伏圖 (投影, 隱喻)", "definition": "一種古代書畫技法，畫作僅在特定光線角度下才能顯現完整圖像，常用於隱藏宗教或哲學概念。"},
+    {"term": "雷音螺 (震盪, 振幅)", "definition": "古代信仰中的器物，據說在特定條件下可發出極低頻共鳴，被認為具有驅邪或召喚的功能。"},
+    {"term": "鶴羽燭 (殘留, 遷移)", "definition": "一種使用特定動物羽毛與蠟製作的燭台，燃燒時火焰顏色變化，使光影變化不定。"},
+    {"term": "虛舟 (漂浮, 失重)", "definition": "古籍記載中某種難以解釋的交通方式，據說能無聲無息地穿行於水面或霧氣之上。"},
+    {"term": "霜降文 (冷卻, 形成)", "definition": "古代器物上的紋理，因溫差變化而自然生成，類似霜降後的結晶，常見於青銅器與瓷器。"},
+    {"term": "引泉繩 (流動, 交錯)", "definition": "古代水利與庭園設計中的一種技術，利用隱藏管道與繩索引導水流，使水源看似無跡可尋。"},
+    {"term": "晦時漏 (循環, 間隙)", "definition": "一種特殊的計時器械，利用水滴或沙流的間隙，來計算夜間某段不易察覺的時間流逝。"},
+    {"term": "雲墟 (漂泊, 消散)", "definition": "道家典籍中描述的一種境界，象徵無定形的世界觀，也可指某些古代建築的特殊結構，使其在霧氣中若隱若現。"},
+    {"term": "連珠尺 (計算, 間隔)", "definition": "古代某些測量工具的設計，利用多層結構來計算細微的間距變化，應用於天文或建築學。"},
+    {"term": "鳴鵲輪 (轉換, 交接)", "definition": "某些古代儀式中的樂器或裝置，利用轉動方式發出清脆聲音，象徵時節或生命的轉換。"},
+    {"term": "浮光席 (透明, 漂移)", "definition": "傳說中某些使用特殊植物編織的席子，在陽光下能產生透明或浮動視覺效果，類似水波流動。"},
+    {"term": "火映碑 (炙熱, 映射)", "definition": "一種特殊的碑文技法，透過金屬與特定礦物的組合，使文字在火光下能呈現不同層次的明暗對比。"},
+    {"term": "隱刀紋 (觸感, 影響)", "definition": "某些武器或器物上的特殊紋理，僅在光線或手指觸摸時才能顯現，可能影響其操控方式。"},
+    {"term": "蘭庭息 (靜止, 延續)", "definition": "指某些古典建築中的靜謐空間，通過特定的建築設計，使聲音與氣流在此處停滯片刻。"},
+    {"term": "赤衡 (平穩, 交點)", "definition": "古代天文與測量術語，指某些天體或地面結構中的特殊平衡點，易於產生共振。"},
+    {"term": "羽塵階 (漂浮, 痕跡)", "definition": "某些古建築中使用的階梯設計，表面處理方式使落塵緩慢飄移，形成柔和的灰塵紋理。"},
+    {"term": "黯燈書 (微光, 滲透)", "definition": "古代某些書籍的特殊裝訂方式，內頁夾帶特定蠟層，在微光環境下會反射光線，使文字更加可讀。"},
+    {"term": "折裂頻率 (間隙, 變奏)", "definition": "聲音工程中的特殊處理技法，使聲音訊號在特定頻率區間內產生不規則裂變，應用於電子音樂與聲音錯覺領域。"},
+    {"term": "無像投影 (折射, 暗示)", "definition": "一種新型投影技術，當視角不同時畫面完全消失，僅在特定光線條件下顯現影像。"},
+    {"term": "空氣結幕 (流動, 組織)", "definition": "一種未來建築設計，透過強力氣流與光學效應，創造無形的空間隔斷，應用於智能家居與展示場域。"},
+    {"term": "盲點演算 (錯誤, 檢索)", "definition": "一種 AI 計算模式，專門用來尋找數據中的隱藏規律，廣泛應用於行為模式分析與錯誤檢測。"},
+    {"term": "幽影層次 (隱藏, 交錯)", "definition": "一種用於數字藝術與 3D 設計的技巧，通過透明度與錯位排列，使影像產生層次感但不完全顯露。"},
+    {"term": "冷雲效應 (凝結, 延遲)", "definition": "雲端數據傳輸技術中的特殊現象，數據在延遲過程中產生時間錯置，被應用於資料加密與同步技術。"},
+    {"term": "無重曲線 (變形, 引力)", "definition": "一種建築與工業設計風格，通過數位建模使曲面結構呈現仿無重狀態，形成流動感極強的視覺效果。"},
+    {"term": "記憶斷裂 (消失, 殘響)", "definition": "指 AI 與機械學習模型在數據訓練中出現的遺失記憶點，可能影響系統決策，類似人類記憶的遺忘機制。"},
+    {"term": "逆向靜默 (時間, 變換)", "definition": "指某些音樂或影像作品中的倒敘處理技術，使聲音或畫面從靜止狀態反向回溯至開始。"},
+    {"term": "回路錯位 (循環, 偏差)", "definition": "一種電子電路設計缺陷，導致信號循環時出現細微的偏移，產生獨特的錯覺現象。"},
+    {"term": "折反邊界 (折射, 干涉)", "definition": "科學與設計領域中的概念，描述當光或聲音通過非線性結構時所產生的雙向折射干擾。"},
+    {"term": "半透音域 (共鳴, 滲透)", "definition": "一種音響設計技術，使某些頻段的聲音不完全被吸收或反射，營造如空間消失般的聽覺體驗。"},
+    {"term": "流變動態 (變換, 自適應)", "definition": "AI 與 UI 設計中的技術，使系統介面根據使用者行為變化而自動調整排列與樣式。"},
+    {"term": "息影擴散 (殘影, 變形)", "definition": "一種攝影與影像處理技術，透過 AI 計算延遲，讓運動中的物件產生自然的殘影擴散效果。"},
+    {"term": "動態紋理 (滲透, 擴展)", "definition": "一種智慧材質技術，使表面圖案能根據環境光與溫度產生變化，應用於時尚與建築設計。"},
+    {"term": "零點暗示 (聚焦, 向量)", "definition": "心理學與影像設計中的技巧，透過微妙的視覺元素來誘導觀看者的注意力，但不直接呈現焦點。"},
+    {"term": "錯拍時差 (同步, 變速)", "definition": "音樂製作中用來製造時間錯覺的節奏技法，讓旋律在聽覺上產生輕微的時間錯置感。"},
+    {"term": "遺失連結 (碎片, 間隙)", "definition": "指網絡或數據存取中，由於錯誤或遺漏導致的無法解析區域，被用來描述虛擬空間的未知領域。"},
+    {"term": "模組溢位 (空間, 擴展)", "definition": "建築與 UI 設計中的概念，指當模組化設計超出預期邊界時的空間增長現象。"},
+    {"term": "像素塵埃 (破碎, 轉換)", "definition": "指在 3D 渲染或數位影像中，因錯誤或故意設計導致的像素碎裂效果，類似消失中的塵埃。"},
+    {"term": "偏軌記憶 (曲折, 引導)", "definition": "描述 AI 或自動駕駛系統中的學習偏誤，導致系統在決策時產生出乎意料的軌跡變化。"},
+    {"term": "折躍維度 (翻轉, 交錯)", "definition": "科幻與數據視覺化領域的概念，描述多維度資料在視覺化呈現時的交錯與折疊現象。"},
+    {"term": "次序干涉 (對立, 糾纏)", "definition": "時間與邏輯推理領域的概念，描述當不同資訊鏈條交錯時產生的非線性影響。"},
+    {"term": "無限視差 (多重, 錯位)", "definition": "指某些 3D 影像技術或錯視藝術中的特殊手法，使畫面在不同視角下無法確定其具體結構。"},
+    {"term": "動態透鏡 (變形, 延展)", "definition": "指光學與擴增實境技術中的概念，使視覺焦點能隨環境變動調整，提供更真實的沉浸體驗。"},
+    {"term": "沉默編碼 (隱藏, 解密)", "definition": "一種新型數據隱寫術，透過細微的音頻或圖像變化來傳遞加密訊息。"},
+    {"term": "偏域折影 (扭曲, 逆向)", "definition": "影像與音頻技術中的特效，透過非線性算法，使畫面或聲音呈現折疊與錯置的視覺或聽覺效果。"},
+    {"term": "布哈拉汗國 (邊界, 遷移)", "definition": "16 世紀至 19 世紀存在於中亞的政權，為伊斯蘭文化中心之一，最終被俄羅斯帝國吞併。"},
+    {"term": "大理石船 (靜止, 層層)", "definition": "位於北京頤和園的一艘石造觀賞船，清朝慈禧太后用海軍資金修建，象徵帝國的衰敗。"},
+    {"term": "北魏孝文改制 (更變, 交錯)", "definition": "北魏皇帝孝文帝的漢化改革，推行漢族文化與習俗，最終促成鮮卑族與漢族的融合。"},
+    {"term": "圭爾公園 (折線, 聚合)", "definition": "由建築師高第設計的西班牙巴塞隆納景點，以有機曲線與馬賽克裝飾聞名。"},
+    {"term": "波將金村 (景象, 覆蓋)", "definition": "傳說中俄羅斯官員波將金為迎合女皇，搭建假村莊誇大治理成果，象徵政治欺騙手段。"},
+    {"term": "克里米亞會議 (交界, 落定)", "definition": "二戰後美英蘇三國領袖於雅爾達召開的會議，決定戰後歐洲的分配與冷戰格局的開端。"},
+    {"term": "多哥帝國 (消融, 殘響)", "definition": "18 世紀西非沿海的強權之一，因歐洲殖民勢力與內部衝突最終瓦解，現今僅存部分遺跡。"},
+    {"term": "安條克圍城戰 (循環, 轉折)", "definition": "第一次十字軍東征中關鍵戰役之一，十字軍在長時間圍困下，最終因內部叛變而成功攻入。"},
+    {"term": "斯特雷薩協定 (線索, 破裂)", "definition": "1935 年義大利、法國與英國簽訂的協議，試圖制衡德國擴張，但最終因義大利背叛而失敗。"},
+    {"term": "皮埃爾堡戰役 (覆蓋, 碎裂)", "definition": "大北方戰爭中的決定性戰役，瑞典軍隊在惡劣的冬季條件下被俄羅斯軍隊擊潰，改變了歐洲權力格局。"},
+    {"term": "長崎出島 (交匯, 片段)", "definition": "日本江戶時代唯一允許與西方貿易的窗口，荷蘭商人被限制於人工島內進行有限交流。"},
+    {"term": "聖瑪麗斷崖 (離開, 碎屑)", "definition": "愛爾蘭大飢荒期間，大量移民從此地離開歐洲前往美洲，象徵愛爾蘭歷史上的巨大人口流失。"},
+    {"term": "松鶴樓 (回聲, 縈繞)", "definition": "中國蘇州的歷史悠久的名樓，曾是文人墨客聚集之地，見證了幾百年的文化更迭。"},
+    {"term": "阿克拉城堡 (沉積, 鎖鏈)", "definition": "西非加納的奴隸貿易據點，成千上萬的奴隸從這裡被送往美洲，留下殖民歷史的傷痕。"},
+    {"term": "馬丘比丘 (雲霧, 階層)", "definition": "印加帝國的失落之城，位於秘魯安地斯山脈，至今仍是考古學研究的熱門遺址。"},
+    {"term": "瑪麗一世 (回歸, 對立)", "definition": "英格蘭的天主教女王，因大量處決新教徒而被稱為『血腥瑪麗』，統治期間充滿宗教衝突。"},
+    {"term": "烏爾城牆 (框架, 侵蝕)", "definition": "美索不達米亞文明的古城遺址，曾為強盛的烏爾第三王朝之都，如今僅存部分殘牆。"},
+    {"term": "納瓦拉王國 (交錯, 銜接)", "definition": "位於庇里牛斯山脈的中世紀小王國，在法國與西班牙的勢力夾擊下最終被吞併。"},
+    {"term": "撒馬爾罕 (曲折, 漸層)", "definition": "中亞古城，曾是絲綢之路上的文化與商業重鎮，擁有壯觀的藍色清真寺與學術機構。"},
+    {"term": "昆士蘭分離運動 (邊線, 短暫)", "definition": "19 世紀澳大利亞昆士蘭州一度試圖脫離新南威爾斯獨立，但最終未能成功，成為地方自治權爭議的案例。"},
+    {"term": "奧斯曼末日戰役 (交替, 結點)", "definition": "指 1922 年希土戰爭最後決戰，標誌著奧斯曼帝國的最終滅亡與土耳其共和國的誕生。"},
+    {"term": "紅色高棉 (極端, 淨空)", "definition": "柬埔寨的極端共產政權，執政期間發動大規模種族滅絕，導致數百萬人死亡。"},
+    {"term": "巴比倫之囚 (移動, 階層)", "definition": "指猶太人被新巴比倫帝國國王尼布甲尼撒二世強行遷往巴比倫的事件，對猶太歷史影響深遠。"},
+    {"term": "札幌冬奧 (聚合, 展示)", "definition": "1972 年日本札幌舉辦的冬季奧運會，標誌著亞洲國家在全球體育舞台上的崛起。"}
 ]
+
+
+
+
+
+
+
+
