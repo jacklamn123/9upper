@@ -1,104 +1,84 @@
 [
     {
-        "term": "Snollygoster",
-        "hints": ["politics", "unprincipled", "shrewd"],
+        "term": "Snollygoster (politics, unprincipled, shrewd)",
         "definition": "A shrewd, unprincipled person, especially a politician."
     },
     {
-        "term": "Borborygmus",
-        "hints": ["stomach", "sound", "digestion"],
+        "term": "Borborygmus (stomach, sound, digestion)",
         "definition": "The rumbling sound made by the movement of gas in the intestines."
     },
     {
-        "term": "Petrichor",
-        "hints": ["rain", "smell", "earth"],
+        "term": "Petrichor (rain, smell, earth)",
         "definition": "The pleasant, earthy smell produced when rain falls on dry soil."
     },
     {
-        "term": "Callipygian",
-        "hints": ["body", "beauty", "anatomy"],
+        "term": "Callipygian (body, beauty, anatomy)",
         "definition": "Having well-shaped or beautifully proportioned buttocks."
     },
     {
-        "term": "Defenestration",
-        "hints": ["action", "window", "history"],
+        "term": "Defenestration (action, window, history)",
         "definition": "The act of throwing someone or something out of a window."
     },
     {
-        "term": "Epeolatry",
-        "hints": ["worship", "words", "obsession"],
+        "term": "Epeolatry (worship, words, obsession)",
         "definition": "The worship of words."
     },
     {
-        "term": "Floccinaucinihilipilification",
-        "hints": ["value", "trivial", "estimation"],
+        "term": "Floccinaucinihilipilification (value, trivial, estimation)",
         "definition": "The act of estimating something as worthless."
     },
     {
-        "term": "Hippopotomonstrosesquippedaliophobia",
-        "hints": ["fear", "words", "ironic"],
+        "term": "Hippopotomonstrosesquippedaliophobia (fear, words, ironic)",
         "definition": "The fear of long words."
     },
     {
-        "term": "Limerence",
-        "hints": ["emotion", "love", "obsession"],
+        "term": "Limerence (emotion, love, obsession)",
         "definition": "The state of being infatuated or obsessed with another person."
     },
     {
-        "term": "Nudiustertian",
-        "hints": ["time", "day", "obsolete"],
+        "term": "Nudiustertian (time, day, obsolete)",
         "definition": "Relating to the day before yesterday."
     },
     {
-        "term": "Obelus",
-        "hints": ["symbol", "mathematics", "division"],
+        "term": "Obelus (symbol, mathematics, division)",
         "definition": "The symbol (÷) used to represent division in mathematics."
     },
     {
-        "term": "Pareidolia",
-        "hints": ["perception", "faces", "illusion"],
+        "term": "Pareidolia (perception, faces, illusion)",
         "definition": "The tendency to perceive a specific, often meaningful image in a random or ambiguous visual pattern, such as seeing faces in clouds."
     },
     {
-        "term": "Quidnunc",
-        "hints": ["gossip", "curiosity", "person"],
+        "term": "Quidnunc (gossip, curiosity, person)",
         "definition": "A person who is eager to know the latest news and gossip."
     },
     {
-        "term": "Sesquipedalian",
-        "hints": ["words", "long", "style"],
+        "term": "Sesquipedalian (words, long, style)",
         "definition": "Given to using long words or characterized by long words."
     },
     {
-        "term": "Tmesis",
-        "hints": ["language", "insertion", "grammar"],
+        "term": "Tmesis (language, insertion, grammar)",
         "definition": "The insertion of a word into another word, such as 'abso-bloody-lutely'."
     },
     {
-        "term": "Ultracrepidarian",
-        "hints": ["opinion", "knowledge", "criticism"],
+        "term": "Ultracrepidarian (opinion, knowledge, criticism)",
         "definition": "A person who expresses opinions on matters outside their knowledge or expertise."
     },
     {
-        "term": "Vexillology",
-        "hints": ["study", "flags", "design"],
+        "term": "Vexillology (study, flags, design)",
         "definition": "The study of flags, their history, and symbolism."
     },
     {
-        "term": "Widdershins",
-        "hints": ["direction", "movement", "counterclockwise"],
+        "term": "Widdershins (direction, movement, counterclockwise)",
         "definition": "Moving in a direction opposite to the usual, especially counterclockwise."
     },
     {
-        "term": "Xenization",
-        "hints": ["travel", "stranger", "experience"],
+        "term": "Xenization (travel, stranger, experience)",
         "definition": "The act of traveling as a stranger or the experience of being a foreigner."
     },
     {
-        "term": "Yarborough",
-        "hints": ["cards", "game", "bridge"],
+        "term": "Yarborough (cards, game, bridge)",
         "definition": "In bridge or whist, a hand of cards containing no card higher than a nine."
-    },
+    }
 
 
     {
