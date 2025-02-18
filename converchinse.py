@@ -1,9 +1,13 @@
 import json
 import re
 
+# File paths (Update if needed)
+input_file = "chinese_terms.json"
+output_file = "formatted_chinese_terms.json"
+
 # Load JSON file
-with open('chinese_terms.json', 'r', encoding='utf-8') as f:
-    data = json.load(f)  # Properly read and parse JSON
+with open(input_file, "r", encoding="utf-8") as f:
+    data = json.load(f)
 
 # Function to parse term and attributes
 def reformat_json(data):
@@ -20,7 +24,7 @@ def reformat_json(data):
 
         formatted_entry = {
             "term": term,
-            "hints": attributes_list,  # Renamed "attributes" to "hints"
+            "hints": attributes_list,
             "definition": entry["definition"]
         }
         formatted_data.append(formatted_entry)
@@ -31,11 +35,8 @@ def reformat_json(data):
 formatted_json = reformat_json(data)
 
 # Convert to JSON string and save to file
-output_json = json.dumps(formatted_json, ensure_ascii=False, indent=4)
+with open(output_file, "w", encoding="utf-8") as f:
+    json.dump(formatted_json, f, ensure_ascii=False, indent=4)
 
-# Save to a new JSON file
-with open('formatted_chinese_terms.json', 'w', encoding='utf-8') as f:
-    f.write(output_json)
-
-# Print formatted JSON
-print(output_json)
+# Print confirmation message
+print(f"Formatted JSON saved to {output_file}")
