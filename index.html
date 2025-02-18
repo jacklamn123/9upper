@@ -504,12 +504,18 @@ function joinGame() {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 let lastKnownRound = 0;
-let definitionShownThisRound = false; // ✅ Track if definition has been shown this round
+let definitionShownThisRound = false;
+let selectedTermsFile = "9upper_terms.json"; // ✅ Default to English terms
 
 function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
+
+        // ✅ Ensure the correct terms file is used
+        if (gameData.termsFile) {
+            selectedTermsFile = gameData.termsFile; 
+        }
 
         // ✅ Ensure host reassignment happens when needed
         if (!gameData.host || !gameData.players || !gameData.players[gameData.host]) {
@@ -545,11 +551,18 @@ function listenForUpdates() {
             document.getElementById("roundsSlider").value = gameData.totalRounds || 5;
             document.getElementById("roundsValue").innerText = gameData.totalRounds || 5;
 
+            document.getElementById("languageToggle").value = gameData.termsFile === "chinese_terms.json" ? "chinese" : "english";
+
             document.getElementById("timeSlider").oninput = function () {
                 db.ref("games/" + gameCode).update({ roundTime: this.value });
             };
             document.getElementById("roundsSlider").oninput = function () {
                 db.ref("games/" + gameCode).update({ totalRounds: this.value });
+            };
+
+            document.getElementById("languageToggle").onchange = function () {
+                let newTermsFile = this.value === "chinese" ? "chinese_terms.json" : "9upper_terms.json";
+                db.ref("games/" + gameCode).update({ termsFile: newTermsFile });
             };
         } else {
             document.getElementById("gameSettings").classList.add("hidden");
@@ -568,44 +581,38 @@ function listenForUpdates() {
             updateScoreboard(gameData.scores);
         }
 
-      
+        // ✅ Chatbox Auto-Scrolling
+        if (gameData.chat) {
+            const chatBox = document.querySelector(".chatbox");
 
-// ✅ Chatbox Auto-Scrolling (Auto-scrolls on new messages & when sending messages)
-if (gameData.chat) {
-    const chatBox = document.querySelector(".chatbox");
+            // Detect if user is already at the bottom before updating
+            const isAtBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 1;
+            const previousScrollHeight = chatBox.scrollHeight;
 
-    // ✅ Detect if user is already at the bottom before updating
-    const isAtBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 1;
+            // Update chat content
+            chatBox.innerHTML = Object.values(gameData.chat)
+                .map(msg => `<p>${msg}</p>`).join("");
 
-    // ✅ Store previous scroll height before updating chat
-    const previousScrollHeight = chatBox.scrollHeight;
+            // Detect if a new message was added
+            const hasNewMessage = chatBox.scrollHeight > previousScrollHeight;
 
-    // ✅ Update chat content
-    chatBox.innerHTML = Object.values(gameData.chat)
-        .map(msg => `<p>${msg}</p>`).join("");
-
-    // ✅ Detect if a new message was added (scrollHeight increased)
-    const hasNewMessage = chatBox.scrollHeight > previousScrollHeight;
-
-    // ✅ Auto-scroll logic:
-    if (isAtBottom || hasNewMessage) {
-        setTimeout(() => chatBox.scrollTop = chatBox.scrollHeight, 100);
-    }
-}
-
-// ✅ Detect when the player sends a message and force auto-scroll
-const chatInput = document.querySelector(".chatbox input");
-if (chatInput) {
-    chatInput.addEventListener("keypress", function (event) {
-        if (event.key === "Enter") {
-            setTimeout(() => {
-                document.querySelector(".chatbox").scrollTop = document.querySelector(".chatbox").scrollHeight;
-            }, 100);
+            // Auto-scroll logic:
+            if (isAtBottom || hasNewMessage) {
+                setTimeout(() => chatBox.scrollTop = chatBox.scrollHeight, 100);
+            }
         }
-    });
-}
 
-
+        // ✅ Detect when the player sends a message and force auto-scroll
+        const chatInput = document.querySelector(".chatbox input");
+        if (chatInput) {
+            chatInput.addEventListener("keypress", function (event) {
+                if (event.key === "Enter") {
+                    setTimeout(() => {
+                        document.querySelector(".chatbox").scrollTop = document.querySelector(".chatbox").scrollHeight;
+                    }, 100);
+                }
+            });
+        }
 
         // ✅ Game State: Playing
         if (gameData.status === "playing") {
@@ -620,7 +627,7 @@ if (chatInput) {
             // ✅ Detect new round
             if (gameData.currentRound !== lastKnownRound) {
                 lastKnownRound = gameData.currentRound;
-                definitionShownThisRound = false; // ✅ Reset definition visibility tracking
+                definitionShownThisRound = false;
 
                 if (gameData.host === playerName) {
                     startCountdown(
@@ -634,34 +641,6 @@ if (chatInput) {
 
             document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
             document.getElementById("thinkerPanel").classList.add("hidden");
-
-// ✅ REALUPPER Definition Box Handling
-const definitionBox = document.getElementById("correctDefinitionBox");
-const definitionText = document.getElementById("correctDefinition");
-
-if (gameData.roles[playerName] === "REALUPPER") {
-    if (!definitionShownThisRound && gameData.correctDefinition) {  
-        // ✅ Show the definition immediately
-        definitionText.innerText = gameData.correctDefinition;
-        definitionBox.classList.remove("hidden");
-
-        // ✅ Schedule hiding after 10 seconds
-        setTimeout(() => {
-            if (lastKnownRound === gameData.currentRound) { 
-                definitionBox.classList.add("hidden");
-                definitionText.innerText = "";
-            }
-        }, 10000); // 10 seconds
-
-        // ✅ Mark it as shown ONLY if the correct definition exists
-        definitionShownThisRound = true;
-    }
-} else {
-    // Always hide for non-REALUPPER players
-    definitionBox.classList.add("hidden");
-    definitionText.innerText = "";
-}
-
 
             // ✅ Display thinker options
             displaythinkerOptions(gameData);
@@ -677,6 +656,7 @@ if (gameData.roles[playerName] === "REALUPPER") {
         }
     });
 }
+
 
 
 
@@ -792,7 +772,7 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
                         endRound(round, totalRounds);
                     } else {
                         const nextRound = (gameData.currentRound || 0) + 1;
-                        fetch("9upper_terms.json")
+                        fetch(termsFile)
                             .then(response => response.json())
                             .then(terms => {
                                 startNewRound(
@@ -945,7 +925,7 @@ function thinkerSelectPlayer(selectedPlayer) {
                 if (round >= totalRounds) {
                     endRound(round, totalRounds);
                 } else {
-                    fetch("9upper_terms.json")
+                    fetch(termsFile)
                         .then(response => response.json())
                         .then(terms => {
                             startNewRound(terms, round + 1, totalRounds, gameData.roundTime);
@@ -973,7 +953,7 @@ function startGame() {
         var totalRounds = gameData.totalRounds;
         var roundTime = gameData.roundTime;
 
-        fetch("9upper_terms.json")
+        fetch(termsFile)
             .then(response => response.json())
             .then(terms => {
                 db.ref("games/" + gameCode + "/players").once("value", playerSnapshot => {
@@ -1188,7 +1168,7 @@ function endRound(round, totalRounds) {
             // Mark the game as finished
             db.ref(`games/${gameCode}`).update({ status: "finished" });
         } else {
-            fetch("9upper_terms.json")
+            fetch(termsFile)
                 .then(response => response.json())
                 .then(terms => {
                     // ✅ Only reset round settings **after** messages are sent
@@ -1472,6 +1452,11 @@ function toggleGameRules() {
 }
 
 
+function updateLanguageSelection() {
+    var selectedLanguage = document.getElementById("languageToggle").value;
+    termsFile = selectedLanguage === "chinese" ? "chinese_terms.json" : "9upper_terms.json";
+    console.log("✅ Terms file set to:", termsFile);
+}
 
 
     </script>
@@ -1575,6 +1560,12 @@ function toggleGameRules() {
             <!-- ✅ Game Settings (Visible for Host Only) -->
             <div id="gameSettings" class="hidden">
                 <h3>Game Settings</h3>
+<!-- ✅ Language Selection Dropdown -->
+<label for="languageToggle"><strong>Term Language:</strong></label>
+<select id="languageToggle" onchange="updateLanguageSelection()">
+    <option value="english">English</option>
+    <option value="chinese">Chinese</option>
+</select>
                 <label for="roundsSlider">Rounds: <span id="roundsValue">5</span></label>
                 <input type="range" id="roundsSlider" min="5" max="20" step="5" value="5" oninput="updateRounds()">
                 <br>
