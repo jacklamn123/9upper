@@ -792,7 +792,7 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
                         endRound(round, totalRounds);
                     } else {
                         const nextRound = (gameData.currentRound || 0) + 1;
-                        fetch("9upper_terms.json")
+                        fetch("chinese_terms.json")
                             .then(response => response.json())
                             .then(terms => {
                                 startNewRound(
@@ -945,7 +945,7 @@ function thinkerSelectPlayer(selectedPlayer) {
                 if (round >= totalRounds) {
                     endRound(round, totalRounds);
                 } else {
-                    fetch("9upper_terms.json")
+                    fetch("chinese_terms.json")
                         .then(response => response.json())
                         .then(terms => {
                             startNewRound(terms, round + 1, totalRounds, gameData.roundTime);
@@ -973,7 +973,7 @@ function startGame() {
         var totalRounds = gameData.totalRounds;
         var roundTime = gameData.roundTime;
 
-        fetch("9upper_terms.json")
+        fetch("chinese_terms.json")
             .then(response => response.json())
             .then(terms => {
                 db.ref("games/" + gameCode + "/players").once("value", playerSnapshot => {
@@ -1188,7 +1188,7 @@ function endRound(round, totalRounds) {
             // Mark the game as finished
             db.ref(`games/${gameCode}`).update({ status: "finished" });
         } else {
-            fetch("9upper_terms.json")
+            fetch("chinese_terms.json")
                 .then(response => response.json())
                 .then(terms => {
                     // ✅ Only reset round settings **after** messages are sent
