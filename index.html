@@ -504,99 +504,108 @@ function joinGame() {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 let lastKnownRound = 0;
-let definitionShownThisRound = false;
-let selectedTermsFile = "9upper_terms.json"; // ✅ Default to English terms
+let definitionShownThisRound = false; // ✅ Track if definition has been shown this round
 
 function listenForUpdates() {
     db.ref("games/" + gameCode).on("value", snapshot => {
         var gameData = snapshot.val();
         if (!gameData) return;
 
-        // ✅ Ensure `selectedTermsFile` updates correctly
-        selectedTermsFile = gameData.termsFile || "9upper_terms.json";
+        // ✅ Ensure host reassignment happens when needed
+        if (!gameData.host || !gameData.players || !gameData.players[gameData.host]) {
+            checkAndReassignHost(gameData);
+        }
 
-        console.log("✅ Using terms file:", selectedTermsFile);
+        console.log("DEBUG: Current host is:", gameData.host);
 
-        // ✅ Move players to the waiting room if needed
+        // ✅ If game is in "waiting" state, move all players to waiting room
         if (gameData.status === "waiting") {
+            console.log("Game is in waiting state. Moving everyone to the waiting room...");
             document.getElementById("gameScreen").classList.add("hidden");
             document.getElementById("waitingRoom").classList.remove("hidden");
             document.getElementById("lobbyArea").style.display = "none";
         }
 
-        // ✅ Update Player List
+        // ✅ Update Player List in Waiting Room
         if (gameData.players) {
             var playerList = Object.keys(gameData.players)
                 .map(name => `<li>${name}</li>`).join("");
             document.getElementById("playerList").innerHTML = `<ul>${playerList}</ul>`;
         }
 
-        // ✅ If host, show game settings
+        // ✅ Immediately update UI if the host has changed
         if (gameData.host === playerName) {
+            console.log(`🎉 You are now the host: ${playerName}`);
             document.getElementById("gameSettings").classList.remove("hidden");
             document.getElementById("startGameButton").classList.remove("hidden");
 
             document.getElementById("timeSlider").value = gameData.roundTime || 60;
             document.getElementById("timeValue").innerText = gameData.roundTime || 60;
+
             document.getElementById("roundsSlider").value = gameData.totalRounds || 5;
             document.getElementById("roundsValue").innerText = gameData.totalRounds || 5;
-            document.getElementById("languageToggle").value = 
-                selectedTermsFile === "chinese_terms.json" ? "chinese" : "english";
 
-            // ✅ Event Listeners to update Firebase settings
             document.getElementById("timeSlider").oninput = function () {
                 db.ref("games/" + gameCode).update({ roundTime: this.value });
             };
             document.getElementById("roundsSlider").oninput = function () {
                 db.ref("games/" + gameCode).update({ totalRounds: this.value });
             };
-            document.getElementById("languageToggle").onchange = function () {
-                let newTermsFile = this.value === "chinese" ? "chinese_terms.json" : "9upper_terms.json";
-                db.ref("games/" + gameCode).update({ termsFile: newTermsFile });
-            };
         } else {
             document.getElementById("gameSettings").classList.add("hidden");
             document.getElementById("startGameButton").classList.add("hidden");
         }
 
-        // ✅ Show "Return to Waiting Room" button if host
-        document.getElementById("forceReturnToWaitingRoom").classList.toggle(
-            "hidden",
-            !(gameData.host === playerName && gameData.status === "playing")
-        );
+        // ✅ Show "Return to Waiting Room" for the host during gameplay
+        if (gameData.host === playerName && gameData.status === "playing") {
+            document.getElementById("forceReturnToWaitingRoom").classList.remove("hidden");
+        } else {
+            document.getElementById("forceReturnToWaitingRoom").classList.add("hidden");
+        }
 
         // ✅ Auto-Update Scoreboard
         if (gameData.scores) {
             updateScoreboard(gameData.scores);
         }
 
-        // ✅ Chatbox Auto-Scrolling
-        if (gameData.chat) {
-            const chatBox = document.querySelector(".chatbox");
-            const isAtBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 1;
-            const previousScrollHeight = chatBox.scrollHeight;
+      
 
-            // ✅ Update chat content
-            chatBox.innerHTML = Object.values(gameData.chat)
-                .map(msg => `<p>${msg}</p>`).join("");
+// ✅ Chatbox Auto-Scrolling (Auto-scrolls on new messages & when sending messages)
+if (gameData.chat) {
+    const chatBox = document.querySelector(".chatbox");
 
-            // ✅ Auto-scroll logic:
-            if (isAtBottom || chatBox.scrollHeight > previousScrollHeight) {
-                setTimeout(() => chatBox.scrollTop = chatBox.scrollHeight, 100);
-            }
+    // ✅ Detect if user is already at the bottom before updating
+    const isAtBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 1;
+
+    // ✅ Store previous scroll height before updating chat
+    const previousScrollHeight = chatBox.scrollHeight;
+
+    // ✅ Update chat content
+    chatBox.innerHTML = Object.values(gameData.chat)
+        .map(msg => `<p>${msg}</p>`).join("");
+
+    // ✅ Detect if a new message was added (scrollHeight increased)
+    const hasNewMessage = chatBox.scrollHeight > previousScrollHeight;
+
+    // ✅ Auto-scroll logic:
+    if (isAtBottom || hasNewMessage) {
+        setTimeout(() => chatBox.scrollTop = chatBox.scrollHeight, 100);
+    }
+}
+
+// ✅ Detect when the player sends a message and force auto-scroll
+const chatInput = document.querySelector(".chatbox input");
+if (chatInput) {
+    chatInput.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+            setTimeout(() => {
+                document.querySelector(".chatbox").scrollTop = document.querySelector(".chatbox").scrollHeight;
+            }, 100);
         }
+    });
+}
 
-        // ✅ Auto-scroll when player sends message
-        const chatInput = document.querySelector(".chatbox input");
-        if (chatInput) {
-            chatInput.addEventListener("keypress", function (event) {
-                if (event.key === "Enter") {
-                    setTimeout(() => {
-                        document.querySelector(".chatbox").scrollTop = document.querySelector(".chatbox").scrollHeight;
-                    }, 100);
-                }
-            });
-        }
+
 
         // ✅ Game State: Playing
         if (gameData.status === "playing") {
@@ -611,7 +620,7 @@ function listenForUpdates() {
             // ✅ Detect new round
             if (gameData.currentRound !== lastKnownRound) {
                 lastKnownRound = gameData.currentRound;
-                definitionShownThisRound = false;
+                definitionShownThisRound = false; // ✅ Reset definition visibility tracking
 
                 if (gameData.host === playerName) {
                     startCountdown(
@@ -625,6 +634,34 @@ function listenForUpdates() {
 
             document.getElementById("timeLeftDisplay").innerText = gameData.timeLeft + " seconds";
             document.getElementById("thinkerPanel").classList.add("hidden");
+
+// ✅ REALUPPER Definition Box Handling
+const definitionBox = document.getElementById("correctDefinitionBox");
+const definitionText = document.getElementById("correctDefinition");
+
+if (gameData.roles[playerName] === "REALUPPER") {
+    if (!definitionShownThisRound && gameData.correctDefinition) {  
+        // ✅ Show the definition immediately
+        definitionText.innerText = gameData.correctDefinition;
+        definitionBox.classList.remove("hidden");
+
+        // ✅ Schedule hiding after 10 seconds
+        setTimeout(() => {
+            if (lastKnownRound === gameData.currentRound) { 
+                definitionBox.classList.add("hidden");
+                definitionText.innerText = "";
+            }
+        }, 10000); // 10 seconds
+
+        // ✅ Mark it as shown ONLY if the correct definition exists
+        definitionShownThisRound = true;
+    }
+} else {
+    // Always hide for non-REALUPPER players
+    definitionBox.classList.add("hidden");
+    definitionText.innerText = "";
+}
+
 
             // ✅ Display thinker options
             displaythinkerOptions(gameData);
@@ -647,8 +684,6 @@ function listenForUpdates() {
 
 
 
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////LISTENFORUPDATE////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
 
@@ -662,10 +697,11 @@ function listenForUpdates() {
 
 
 
-var roundTimer; // ✅ Global timer variable
+        var roundTimer; // ✅ Global timer variable
+
 
 function startCountdown(timeLeft, round, totalRounds, roundTime) {
-    // ✅ Ensure valid timeLeft
+    // Safeguard against invalid timeLeft
     if (isNaN(timeLeft) || timeLeft === undefined) {
         console.error("Error: timeLeft is NaN or undefined, resetting to 60");
         timeLeft = 60;
@@ -673,88 +709,113 @@ function startCountdown(timeLeft, round, totalRounds, roundTime) {
 
     clearInterval(roundTimer);
 
-    // ✅ Start a new interval timer
+    // Start a new interval timer for this round
     roundTimer = setInterval(() => {
         if (timeLeft <= 0) {
+            // Time’s up—stop the timer
             clearInterval(roundTimer);
 
-            // ✅ Set timeLeft = 0 in Firebase
+            // 1) Set timeLeft = 0 in the database
             db.ref(`games/${gameCode}`).update({ timeLeft: 0 }).then(() => {
+                // 2) Fetch the latest game data to see if the thinker picked a winner
                 db.ref(`games/${gameCode}`).once("value", snapshot => {
                     const gameData = snapshot.val();
                     if (!gameData) return;
 
                     const winner = gameData.winner || null;
                     const roles = gameData.roles || {};
-                    const collectSkins = Array.isArray(gameData.collectSkins) ? gameData.collectSkins : [];
+                    const collectSkins = Array.isArray(gameData.collectSkins) 
+                        ? gameData.collectSkins 
+                        : [];
                     const scores = gameData.scores || {};
 
                     const thinker = Object.keys(roles).find(p => roles[p] === "thinker");
                     const realUpper = Object.keys(roles).find(p => roles[p] === "REALUPPER");
 
-                    console.log("DEBUG Partial Scoring:", { winner, thinker, realUpper, collectSkins });
+                    console.log("DEBUG partial scoring:", {
+  winner, 
+  thinker,
+  realUpper,
+  collectSkins
+});
 
-                    // ✅ Apply partial scoring if no winner
+
+                    // 3) If there's no winner yet, apply partial scoring for Collect Skin
                     if (!winner && thinker && realUpper && collectSkins.length > 0) {
                         const collectSkinMessages = [];
 
                         collectSkins.forEach(target => {
                             if (target === realUpper) {
-                                // Thinker incorrectly collected from REALUPPER
+                                // The thinker collected from REALUPPER by mistake
                                 scores[thinker] = (scores[thinker] || 0) - 1;
-                                collectSkinMessages.push(`Thinker tried to collect from REALUPPER (${target}) ⇒ Thinker -1`);
+                                collectSkinMessages.push(
+                                    `Thinker tried to collect from REALUPPER (${target}) ⇒ Thinker -1`
+                                );
                             } else {
-                                // Thinker correctly collected from a 9UPPER
+                                // Target is presumably a 9UPPER
                                 scores[thinker] = (scores[thinker] || 0) + 1;
                                 scores[target] = (scores[target] || 0) - 1;
-                                collectSkinMessages.push(`Thinker collected skin from 9UPPER (${target}) ⇒ Thinker +1, ${target} -1`);
+                                collectSkinMessages.push(
+                                    `Thinker collected skin from 9UPPER (${target}) ⇒ Thinker +1, ${target} -1`
+                                );
                             }
                         });
 
-                        // ✅ Push Collect Skin results to chat
+                        // Push all the Collect Skin results to the chat
                         collectSkinMessages.forEach(msg => {
                             db.ref(`games/${gameCode}/chat`).push(msg);
                         });
 
-                        // ✅ Final "Time's up!" message
-                        db.ref(`games/${gameCode}/chat`).push(`Time's up! Thinker did not pick anyone. REALUPPER was "${realUpper}".`);
+                        // Final “time’s up” reveal
+                        db.ref(`games/${gameCode}/chat`).push(
+                            `Time's up! Thinker did not pick anyone. REALUPPER was "${realUpper}".`
+                        );
 
-                        // ✅ Update Firebase
-                        db.ref(`games/${gameCode}`).update({ scores: scores, collectSkins: [] }).then(() => {
+                        // Update the DB with partial scoring and reset collectSkins
+                        db.ref(`games/${gameCode}`).update({
+                            scores: scores,
+                            collectSkins: []
+                        }).then(() => {
+                            // Update local scoreboard
                             updateScoreboard(scores);
                         });
-                    } else if (!winner && thinker && realUpper) {
-                        db.ref(`games/${gameCode}/chat`).push(`Time's up! No pick made. REALUPPER was "${realUpper}".`);
+                    } 
+                    else if (!winner && thinker && realUpper) {
+                        // No Collect Skin attempts, but no winner picked either
+                        db.ref(`games/${gameCode}/chat`).push(
+                            `Time's up! No pick made. REALUPPER was "${realUpper}".`
+                        );
                     }
 
-                    // ✅ Move to the next round or end the game
+                    // 4) Move to next round or end the game if it's the final round
                     if (round >= totalRounds) {
                         endRound(round, totalRounds);
                     } else {
                         const nextRound = (gameData.currentRound || 0) + 1;
-
-                        // ✅ Fetch terms file dynamically
-                        fetch(selectedTermsFile)
+                        fetch("9upper_terms.json")
                             .then(response => response.json())
                             .then(terms => {
-                                startNewRound(terms, nextRound, totalRounds, roundTime);
-                            })
-                            .catch(error => console.error("Error fetching terms file:", error));
+                                startNewRound(
+                                    terms, 
+                                    nextRound, 
+                                    totalRounds, 
+                                    roundTime
+                                );
+                            });
                     }
                 });
             });
 
         } else {
-            // ✅ Decrement time and update Firebase
+            // Decrement time and update DB
             timeLeft--;
             db.ref(`games/${gameCode}`).update({ timeLeft });
 
-            // ✅ Update UI countdown
+            // Show updated time in the UI
             document.getElementById("timeLeftDisplay").innerText = `${timeLeft} seconds`;
         }
     }, 1000);
 }
-
 
 
 
@@ -828,9 +889,6 @@ function thinkerSelectPlayer(selectedPlayer) {
         var gameData = snapshot.val();
         if (!gameData) return;
 
-        // ✅ Ensure we fetch the correct terms file from Firebase
-        selectedTermsFile = gameData.termsFile || "9upper_terms.json";
-
         var scores = gameData.scores || {};
         var roles = gameData.roles || {};
         var thinker = Object.keys(roles).find(p => roles[p] === "thinker");
@@ -887,18 +945,16 @@ function thinkerSelectPlayer(selectedPlayer) {
                 if (round >= totalRounds) {
                     endRound(round, totalRounds);
                 } else {
-                    fetch(selectedTermsFile)  // ✅ Using `selectedTermsFile` here
+                    fetch("9upper_terms.json")
                         .then(response => response.json())
                         .then(terms => {
                             startNewRound(terms, round + 1, totalRounds, gameData.roundTime);
-                        })
-                        .catch(error => console.error("❌ Error loading terms file:", error));
+                        });
                 }
             });
         });
     });
 }
-
 
 
 
@@ -916,15 +972,12 @@ function startGame() {
 
         var totalRounds = gameData.totalRounds;
         var roundTime = gameData.roundTime;
-        selectedTermsFile = gameData.termsFile || "9upper_terms.json"; // ✅ Default to English if not set
 
-        console.log(`🚀 Fetching terms from: ${selectedTermsFile}`);
-
-        fetch(selectedTermsFile)
+        fetch("9upper_terms.json")
             .then(response => response.json())
             .then(terms => {
                 db.ref("games/" + gameCode + "/players").once("value", playerSnapshot => {
-                    var players = Object.keys(playerSnapshot.val() || {}); // ✅ Ensure players exist
+                    var players = Object.keys(playerSnapshot.val());
                     if (players.length < 3) {
                         alert("At least 3 players are needed to start the game!");
                         return;
@@ -944,9 +997,8 @@ function startGame() {
 
                     // ✅ Initialize scores for all players
                     var initialScores = {};
-                    players.forEach(p => initialScores[p] = 0);
+                    players.forEach(p => initialScores[p] = 0); 
 
-                    // ✅ Update Firebase with game settings
                     db.ref("games/" + gameCode).update({
                         status: "playing",
                         term: randomTerm,
@@ -955,21 +1007,20 @@ function startGame() {
                         currentRound: 1,
                         totalRounds: totalRounds,
                         roundTime: roundTime,
-                        scores: initialScores,
-                        termsFile: selectedTermsFile // ✅ Save selected language file in Firebase
-                    }).then(() => {
-                        console.log("✅ Game started successfully");
-                        startNewRound(terms, 1, totalRounds, roundTime);
-                    }).catch(error => console.error("❌ Error starting game:", error));
+                        scores: initialScores // ✅ Store initial scores in Firebase
+                    });
+
+                    // // ✅ Send a chat message announcing the thinker
+                    // db.ref("games/" + gameCode + "/chat").push(
+                    //     `Round 1, player ${thinker} is the thinker.`
+                    // );
+                    
+                    startNewRound(terms, 1, totalRounds, roundTime);
                 });
             })
-            .catch(error => {
-                console.error("❌ Error loading terms file:", error);
-                alert("Error loading terms file. Please try again.");
-            });
+            .catch(error => console.error("Error loading terms:", error));
     });
 }
-
 
         var roundTimer;
 
@@ -1078,9 +1129,6 @@ function endRound(round, totalRounds) {
         var gameData = snapshot.val();
         if (!gameData) return;
 
-        // ✅ Ensure we fetch the correct terms file from Firebase
-        selectedTermsFile = gameData.termsFile || "9upper_terms.json";
-
         // 1) Copy the old round data before resetting it
         var oldRoles = { ...gameData.roles };
         var oldCollectSkins = Array.isArray(gameData.collectSkins) ? [...gameData.collectSkins] : [];
@@ -1140,7 +1188,7 @@ function endRound(round, totalRounds) {
             // Mark the game as finished
             db.ref(`games/${gameCode}`).update({ status: "finished" });
         } else {
-            fetch(selectedTermsFile)  // ✅ Using `selectedTermsFile` here
+            fetch("9upper_terms.json")
                 .then(response => response.json())
                 .then(terms => {
                     // ✅ Only reset round settings **after** messages are sent
@@ -1153,12 +1201,10 @@ function endRound(round, totalRounds) {
                     }).then(() => {
                         startNewRound(terms, round + 1, totalRounds, roundTime);
                     });
-                })
-                .catch(error => console.error("❌ Error loading terms file:", error));
+                });
         }
     });
 }
-
 
 
 
@@ -1425,15 +1471,6 @@ function toggleGameRules() {
     }
 }
 
-function updateLanguageSelection() {
-    let selectedLanguage = document.getElementById("languageToggle").value;
-    selectedTermsFile = selectedLanguage === "chinese" ? "chinese_terms.json" : "9upper_terms.json";
-
-    // ✅ Save the selected language to Firebase so all players get the same terms file
-    db.ref("games/" + gameCode).update({ termsFile: selectedTermsFile });
-
-    console.log("✅ Language set to:", selectedTermsFile);
-}
 
 
 
@@ -1538,12 +1575,6 @@ function updateLanguageSelection() {
             <!-- ✅ Game Settings (Visible for Host Only) -->
             <div id="gameSettings" class="hidden">
                 <h3>Game Settings</h3>
-<!-- ✅ Language Selection Dropdown -->
-<label for="languageToggle"><strong>Term Language:</strong></label>
-<select id="languageToggle" onchange="updateLanguageSelection()">
-    <option value="english">English</option>
-    <option value="chinese">Chinese</option>
-</select>
                 <label for="roundsSlider">Rounds: <span id="roundsValue">5</span></label>
                 <input type="range" id="roundsSlider" min="5" max="20" step="5" value="5" oninput="updateRounds()">
                 <br>
